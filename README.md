@@ -3,11 +3,14 @@ A module that can upload pictures to the image bed in `Typora`.
 
 Currently only supports **linux** system.
 
+It supports **windows** system, but it has not been tested yet. 
+
 # Features
 
 Support the automatic upload of pictures of the following image bed:
 
 - sm.ms
+- imgchr.com
 
 Currently only `sm.ms` image bed is supported, and other image beds will be considered in the future.
 
@@ -25,20 +28,24 @@ Usage Options:
 
 ```shell
 usage: timg [-h] [-v]
-            [--login LOGIN LOGIN | --image-path IMAGE_PATH | --images-path IMAGES_PATH [IMAGES_PATH ...]]
+           [--choose-site {sm,chr} | --login LOGIN LOGIN | --image-path IMAGE_PATH | --images-path IMAGES_PATH [IMAGES_PATH ...]]
+
+A module that can upload pictures to the image bed in Typora.
 
 optional arguments:
   -h, --help            show this help message and exit
   -v, --version         show program's version number and exit
+  --choose-site {sm,chr}, -c {sm,chr}
+                        Choose the image bed you want to use.
   --login LOGIN LOGIN, -l LOGIN LOGIN
-                        Save the user authentication token after successful login. You
-                        must enter the username and password after `-l` or `--login`,
-                        such as "timg -l username password"
+                        Save the user authentication token after successful login. You must
+                        enter the username and password after `-l` or `--login`, such as
+                        "timg -l username password".
   --image-path IMAGE_PATH, -p IMAGE_PATH
                         Upload only one picture.
   --images-path IMAGES_PATH [IMAGES_PATH ...], -ps IMAGES_PATH [IMAGES_PATH ...]
-                        Upload multiple pictures, the maximum is 10 pictures. Use spaces
-                        to separate each image path.
+                        Upload multiple pictures, the maximum is 10 pictures. Use spaces to
+                        separate each image path.
 ```
 
 Configure in `Typora`:
