@@ -5,7 +5,7 @@ Currently only supports **linux** system.
 
 # Features
 
-Support the automatic upload of pictures of the following pictures:
+Support the automatic upload of pictures of the following image bed:
 
 - sm.ms
 
