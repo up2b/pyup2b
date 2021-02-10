@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-08 15:43:32
-# @Modified: 2021-02-10 14:53:07
+# @Modified: 2021-02-10 17:12:34
 
 import os
 import sys
@@ -15,7 +15,7 @@ from typing import Union
 
 from timg.timglib import timg_api
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 IMAGE_BEDS = {
     "sm": timg_api.SM,
