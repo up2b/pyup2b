@@ -1,0 +1,8 @@
+test.py
+*.pyc
+*.png
+*.jpg
+*.jpeg
+record.saz
+test.json
+note.md

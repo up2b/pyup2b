@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: setup.py
 # @Created: 2021-02-08 15:27:43
-# @Modified: 2021-02-08 22:43:11
+# @Modified: 2021-02-10 08:22:28
 
 import timg
 
@@ -27,5 +27,6 @@ with open("README.md", "r", "utf-8") as f:
         },
         install_requires=[
             "requests",
+            "requests-toolbelt",
         ],
     )

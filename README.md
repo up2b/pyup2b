@@ -1,7 +1,7 @@
 # timg
-A module that can upload pictures to the image bed in Typora.
+A module that can upload pictures to the image bed in `Typora`.
 
-Currently only supports linux system.
+Currently only supports **linux** system.
 
 # Features
 
@@ -9,11 +9,11 @@ Support the automatic upload of pictures of the following pictures:
 
 - sm.ms
 
-Currently only sm.ms image bed is supported, and other image beds will be considered in the future.
+Currently only `sm.ms` image bed is supported, and other image beds will be considered in the future.
 
 # How to use
 
->  **Typora must be installed!**
+>  **`Typora` must be installed!**
 
 Install the module:
 
@@ -41,10 +41,10 @@ optional arguments:
                         to separate each image path.
 ```
 
-Configure in typora:
+Configure in `Typora`:
 
 ![1612796753](https://i.loli.net/2021/02/08/MvPFe3U8WXgKtNb.png)
 
 # End
 
-Now, when you add a picture to typora, it will be automatically uploaded to the picture bed.
+Now, when you add a picture to `Typora`, it will be automatically uploaded to the picture bed.
