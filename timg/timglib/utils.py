@@ -4,7 +4,7 @@
 # @Email: thepoy@163.com
 # @File Name: utils.py
 # @Created:  2021-02-09 15:17:32
-# @Modified: 2021-02-10 10:04:33
+# @Modified: 2021-02-13 13:17:29
 
 import os
 import sys
@@ -31,7 +31,7 @@ class Login:
 
         if not instance.auth_info:
             print(
-                "Error: You have not logged in yet, please use the `-l` or `--login` parameter to log in first."
-            )
+                "Error: You have not logged in yet, please use the `-l` or `--login` parameter to log in first.\nCurrent image bed is : `%s`."
+                % instance.key)
             sys.exit(0)
         return partial(self, instance)
