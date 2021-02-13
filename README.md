@@ -1,4 +1,4 @@
-[简体中文](https://github.com/thep0y/timg/blob/main/README.md)
+[简体中文](https://github.com/thep0y/timg/blob/main/README.zh_CN.md)
 
 # timg
 
