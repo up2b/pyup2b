@@ -1,4 +1,7 @@
+[English](https://github.com/thep0y/timg)
+
 # timg
+
 一个能够自动将 `Typora`中的图片上传到图床的包。
 
 理论上支持linux、macOS和windows，但是macOS上没有进行测试。

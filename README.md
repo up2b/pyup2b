@@ -1,4 +1,7 @@
+[简体中文](https://github.com/thep0y/timg/blob/main/README.md)
+
 # timg
+
 A package that can upload pictures to the image bed in `Typora`.
 
 It supports **windows**, **linux** and **macOS** system, but it has not been tested on **macOS** yet. 
