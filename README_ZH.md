@@ -3,7 +3,7 @@
 
 理论上支持linux、macOS和windows，但是macOS上没有进行测试。
 
-![Peek 2021-02-13 13-10](../../../../../../../home/thepoy/Pictures/Peek 2021-02-13 13-10.gif)
+![Peek 2021-02-13 13-10](https://gitee.com/thepoy/image-bed/raw/master/md/1613193111461.gif)
 
 # 特点
 
