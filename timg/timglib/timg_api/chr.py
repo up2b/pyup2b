@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: chr.py
 # @Created: 2021-02-13 09:04:37
-# @Modified: 2021-02-13 09:32:02
+# @Modified: 2021-02-14 17:21:14
 
 import sys
 import os
@@ -33,6 +33,8 @@ class Chr(Base):
         self.max_size = 10
 
         self.headers = {
+            "Accept":
+            "application/json",
             "User-Agent":
             "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0"
         }
@@ -42,6 +44,7 @@ class Chr(Base):
         if self.auth_info:
             self.cookie = self.auth_info["cookie"]
             self.token = self.auth_info["token"]
+            self.headers["Cookie"] = self.cookie
 
     def login(self, username: str, password: str):
         url = self._url("login")
@@ -67,7 +70,7 @@ class Chr(Base):
                 "; ")[0]
 
             # If there is no KEEPLOGIN field in the cookie,
-            # pictures will be uploaded uploaded as a tourist
+            # pictures will be uploaded as a tourist
             # self.cookie = cookie
 
             auth_info = {
@@ -141,7 +144,6 @@ class Chr(Base):
             return resp.json()["image"]["image"]["url"]
         except KeyError:
             if resp.json()["error"]["message"] == '请求被拒绝 (auth_token)':
-                print(resp.json())
                 print(
                     "Warning: `auth_token` has expired, "
                     "the program will try to update `auth_token` automatically."
@@ -167,12 +169,47 @@ class Chr(Base):
             print(i)
 
     @Login
-    def delete_image(self, *args):
-        pass
+    def delete_image(self, img_id: str):
+        url = self._url("json")
+        data = {
+            "auth_token": self.token,
+            "action": "delete",
+            "single": "true",
+            "delete": "image",
+            "deleting[id]": img_id,
+        }
+        resp = requests.post(url, headers=self.headers, data=data)
+        if resp.status_code == 400:
+            if resp.json()["error"]["message"] == '请求被拒绝 (auth_token)':
+                print(
+                    "Warning: `auth_token` has expired, "
+                    "the program will try to update `auth_token` automatically."
+                )
+                self._update_auth_token()
+                return self.delete_image(img_id)
+        return resp.json()
 
     @Login
-    def delete_images(self, *args):
-        pass
+    def delete_images(self, imgs_id: List[str]):
+        url = self._url("json")
+        data = {
+            "auth_token": self.token,
+            "action": "delete",
+            "from": "list",
+            "multiple": "true",
+            "delete": "images",
+            "deleting[ids][]": imgs_id,
+        }
+        resp = requests.post(url, headers=self.headers, data=data)
+        if resp.status_code == 400:
+            if resp.json()["error"]["message"] == '请求被拒绝 (auth_token)':
+                print(
+                    "Warning: `auth_token` has expired, "
+                    "the program will try to update `auth_token` automatically."
+                )
+                self._update_auth_token()
+                return self.delete_images(imgs_id)
+        return resp.json()
 
     def _url(self, key: str) -> str:
         return self.base_url + key

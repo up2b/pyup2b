@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: gitee.py
 # @Created: 2021-02-13 09:10:05
-# @Modified: 2021-02-13 13:07:00
+# @Modified: 2021-02-13 20:32:34
 
 import os
 import time
@@ -47,6 +47,7 @@ class Gitee(Base):
 
     @Login
     def upload_image(self, image_path: str) -> str:
+        # TODO: 上传图片时放到当前目录下？md/2021/02/13/filename
         filename = f"{int(time.time() * 1000)}{os.path.splitext(image_path)[-1]}"
         with open(image_path, "rb") as fb:
             url = self.base_url + filename

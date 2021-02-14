@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-08 15:43:32
-# @Modified: 2021-02-13 13:52:19
+# @Modified: 2021-02-14 17:26:27
 
 import os
 import sys
@@ -20,7 +20,7 @@ from timg.timglib.timg_api.gitee import Gitee
 from timg.timglib.timg_api.github import Github
 from timg.timglib.constants import SM_MS, IMAGE_CHR, GITEE, GITHUB
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 IMAGE_BEDS = {
     SM_MS: SM,
@@ -38,11 +38,13 @@ def _BuildParser():
                         action='version',
                         version=__version__)
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-c",
-                       "--choose-site",
-                       choices=(SM_MS, IMAGE_CHR, GITEE, GITHUB),
-                       help="choose the image bed you want to use and exit",
-                       type=str)
+    group.add_argument(
+        "-c",
+        "--choose-site",
+        # choices=(SM_MS, IMAGE_CHR, GITEE, GITHUB),
+        choices=IMAGE_BEDS.keys(),
+        help="choose the image bed you want to use and exit",
+        type=str)
     group.add_argument(
         "-l",
         "--login",
@@ -105,11 +107,7 @@ def main() -> int:
             )
             return 1
 
-        # If you choose a professional picture bed, log in with your account password
         ib.login(*args.login)
-
-        # TODO: If you choose gitee or github, you need to fill in the username, token, repository name, and image bed folder name
-        # ib.login(args.login[0], args.login[1], args.login[2], args.login[3])
 
         return 0
 

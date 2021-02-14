@@ -52,7 +52,7 @@ optional arguments:
                         upload multiple pictures, the maximum is 10 pictures, use
                         spaces to separate each image path.
 ```
-####  Choose image bed
+####  1 Choose image bed
 
 When using for the first time, you must first select a image bed. The available image bed list is after the `-c` parameter of **Options**:
 
@@ -64,9 +64,9 @@ When using for the first time, you must first select a image bed. The available 
 ```shell
 timg -c github
 ```
-#### Save authentication information
+#### 2 Save authentication information
 
-**General image bed**
+**General image bed:**
 
 The general picture bed refers to the website that only provides the function of saving images, so **git site** is not included.
 
@@ -75,7 +75,7 @@ When using the general image bed, use `-l` or `--login` to configure authenticat
 ```shell
 timg -l username password
 ```
-**Git site**
+**Git site:**
 
 Including gitee and github.
 
@@ -95,7 +95,7 @@ For example, I want to save the image in the `md` folder in the `image-bed` repo
 timg -lg access_token username image-bed md
 ```
 
-#### Write the command in typora
+#### 3 Write the command in typora
 
 Then fill in the command as shown in the figure below.
 Configure in `Typora`:

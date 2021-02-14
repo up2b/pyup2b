@@ -4,16 +4,17 @@
 # @Email: thepoy@aliyun.com
 # @File Name: sm.py
 # @Created: 2021-02-13 09:04:07
-# @Modified: 2021-02-13 09:30:15
+# @Modified: 2021-02-14 15:42:17
 
 import requests
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from timg.timglib.timg_api import Base
 from timg.timglib.utils import Login, check_image_exists
 from timg.timglib import errors
 from timg.timglib.constants import SM_MS
+from timg.timglib.custom_types import DeletedResponse
 
 
 class SM(Base):
@@ -47,11 +48,11 @@ class SM(Base):
         resp = requests.post(url, data=data).json()
         return resp["data"]["token"]
 
-    def _get_user_profile(self):
+    def _get_user_profile(self) -> Dict[str, str]:
         url = self._url("profile")
         resp = requests.post(url, headers=self.headers).json()
         if resp["success"]:
-            print(resp["data"])
+            return resp["data"]
         else:
             if self._login_expired(resp):
                 self._auto_login()
@@ -93,14 +94,46 @@ class SM(Base):
 
         for i in images_url:
             print(i)
+        return images_url
 
     @Login
-    def delete_image(self, *args):
-        pass
+    def history(self) -> Dict[str, Any]:
+        """
+        Temporary History - IP Based Temporary Upload History
+        """
+        url = self._url("history")
+        resp = requests.get(url, headers=self.headers)
+        return resp.json()
 
     @Login
-    def delete_images(self, *args):
-        pass
+    def clear(self) -> Dict[str, Any]:
+        """
+        Clear Temporary History - Clear IP Based Temporary Upload History
+        """
+        url = self._url("clear")
+        resp = requests.get(url, headers=self.headers)
+        return resp.json()
+
+    @Login
+    def upload_history(self) -> dict:
+        url = self._url("upload_history")
+        resp = requests.get(url, headers=self.headers)
+        return resp.json()
+
+    @Login
+    def delete_image(self, hash: str) -> DeletedResponse:
+        url = self._url("delete") + "/" + hash
+        resp = requests.get(url, headers=self.headers)
+        return resp.json()
+
+    @Login
+    def delete_images(self, hash_list: List[str]) -> dict:
+        result = {}
+        for hash in hash_list:
+            r = self.delete_image(hash)
+            if not r["success"]:
+                result[hash] = {"message": r["message"], "code": r["code"]}
+        return result
 
     def _url(self, key: str) -> str:
         return self.base_url + key

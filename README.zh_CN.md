@@ -55,16 +55,16 @@ optional arguments:
                         spaces to separate each image path.
 ```
 
-#### 选择图床
+#### 1 选择图床
 
 第一次使用时，必须先选择图床（可选图床列表在`timg -h`里的`-c`参数后面——`[sm,chr,gitee,github]`）：
 
 ```shell
 timg -c sm
 ```
-#### 保存认证信息
+#### 2 保存认证信息
 
-**普通图床**
+**普通图床：**
 
 git仓库本身并不算是图床，所以git仓库之外的图床都是普通图床。
 
@@ -73,7 +73,7 @@ git仓库本身并不算是图床，所以git仓库之外的图床都是普通�
 ```shell
 timg -l username password
 ```
-**git仓库**
+**git仓库：**
 
 此包所指的git仓库包括`gitee`和`github`，分别针对中国和非中国用户。
 
@@ -92,7 +92,7 @@ timg -l username password
 timg -lg access_token username image-bed md
 ```
 
-#### 在 typora 内填写命令
+#### 3 在 typora 内填写命令
 
 
 然后才能将`timg`命令填到`Typora`里，下面这张图就是自动上传的：
