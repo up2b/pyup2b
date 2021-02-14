@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: gitee.py
 # @Created: 2021-02-13 09:10:05
-# @Modified: 2021-02-13 20:32:34
+# @Modified: 2021-02-14 20:43:12
 
 import os
 import time
@@ -26,7 +26,8 @@ class Gitee(Base):
         else:
             super().__init__(GITEE, conf_file)
 
-        self.max_size = 50
+        # self.max_size = 50
+        self.max_size = 1
 
         self.headers = {"Content-Type": "application/json;charset=UTF-8"}
 

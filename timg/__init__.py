@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-08 15:43:32
-# @Modified: 2021-02-14 17:26:27
+# @Modified: 2021-02-14 20:47:15
 
 import os
 import sys
@@ -20,7 +20,7 @@ from timg.timglib.timg_api.gitee import Gitee
 from timg.timglib.timg_api.github import Github
 from timg.timglib.constants import SM_MS, IMAGE_CHR, GITEE, GITHUB
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 IMAGE_BEDS = {
     SM_MS: SM,
@@ -96,6 +96,13 @@ def main() -> int:
 
     if args.choose_site:
         choose_image_bed(args.choose_site)
+        # TODO: add Allow automatic compression parameter -- `-aac` to enable automatically compress the image size of 1M to 1M or less
+        # if args.choose_site == GITEE:
+        #     print(
+        #         "Warning: resources larger than 1M on `gitee` cannot be publicly accessed. "
+        #         "Please manually compress the image size to 1M or less, "
+        #         "or use the `-aac` parameter to enable the automatic compression function."
+        #     )
         return 0
 
     ib = _read_image_bed()
