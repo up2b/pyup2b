@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-08 15:43:32
-# @Modified: 2021-02-14 20:47:15
+# @Modified: 2021-02-15 18:51:16
 
 import os
 import sys
@@ -20,7 +20,7 @@ from timg.timglib.timg_api.gitee import Gitee
 from timg.timglib.timg_api.github import Github
 from timg.timglib.constants import SM_MS, IMAGE_CHR, GITEE, GITHUB
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 IMAGE_BEDS = {
     SM_MS: SM,
@@ -37,14 +37,15 @@ def _BuildParser():
                         '--version',
                         action='version',
                         version=__version__)
+    parser.add_argument('-aac',
+                        action='store_true',
+                        help="allow automatic image compression")
     group = parser.add_mutually_exclusive_group()
-    group.add_argument(
-        "-c",
-        "--choose-site",
-        # choices=(SM_MS, IMAGE_CHR, GITEE, GITHUB),
-        choices=IMAGE_BEDS.keys(),
-        help="choose the image bed you want to use and exit",
-        type=str)
+    group.add_argument("-c",
+                       "--choose-site",
+                       choices=IMAGE_BEDS.keys(),
+                       help="choose the image bed you want to use and exit",
+                       type=str)
     group.add_argument(
         "-l",
         "--login",
@@ -77,11 +78,11 @@ def _BuildParser():
     return parser
 
 
-def _read_image_bed() -> Union[SM, Chr]:
+def _read_image_bed(auto_compress: bool) -> Union[SM, Chr]:
     try:
         with open(CONF_FILE) as f:
             conf = json.loads(f.read())
-            return IMAGE_BEDS[conf["image_bed"]]()
+            return IMAGE_BEDS[conf["image_bed"]](auto_compress=auto_compress)
     except FileNotFoundError:
         print(
             "Error: The configuration file is not found, "
@@ -96,16 +97,15 @@ def main() -> int:
 
     if args.choose_site:
         choose_image_bed(args.choose_site)
-        # TODO: add Allow automatic compression parameter -- `-aac` to enable automatically compress the image size of 1M to 1M or less
-        # if args.choose_site == GITEE:
-        #     print(
-        #         "Warning: resources larger than 1M on `gitee` cannot be publicly accessed. "
-        #         "Please manually compress the image size to 1M or less, "
-        #         "or use the `-aac` parameter to enable the automatic compression function."
-        #     )
+        if args.choose_site == GITEE:
+            print(
+                "Warning: resources bigger than 1M on `gitee` cannot be publicly accessed. "
+                "Please manually compress the image size to 1M or less, "
+                "or use the `-aac` parameter to enable the automatic compression function."
+            )
         return 0
 
-    ib = _read_image_bed()
+    ib = _read_image_bed(args.aac)
 
     if args.login:
         if isinstance(ib, Gitee) or isinstance(ib, Github):

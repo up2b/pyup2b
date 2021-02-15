@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: chr.py
 # @Created: 2021-02-13 09:04:37
-# @Modified: 2021-02-14 17:21:14
+# @Modified: 2021-02-15 19:06:33
 
 import sys
 import os
@@ -19,18 +19,20 @@ from requests_toolbelt import MultipartEncoder
 
 from timg.timglib.timg_api import Base
 from timg.timglib.utils import Login, check_image_exists
-from timg.timglib import errors
 from timg.timglib.constants import IMAGE_CHR
 
 
 class Chr(Base):
-    def __init__(self, conf_file: Optional[str] = None):
+    def __init__(self,
+                 conf_file: Optional[str] = None,
+                 auto_compress: bool = False):
         if not conf_file:
             super().__init__(IMAGE_CHR)
         else:
             super().__init__(IMAGE_CHR, conf_file)
         self.base_url: str = "https://imgchr.com/"
-        self.max_size = 10
+        self.max_size = 10 * 1024 * 1024
+        self.auto_compress: bool = auto_compress
 
         self.headers = {
             "Accept":
@@ -111,6 +113,7 @@ class Chr(Base):
 
     @Login
     def upload_image(self, image_path: str) -> str:
+        image_path = self._compress_image(image_path)
         url = self._url("json")
         headers = {
             "Accept": "application/json",
@@ -119,7 +122,12 @@ class Chr(Base):
             "Cookie": self.cookie,
         }
 
-        filename = os.path.basename(image_path)
+        filename_with_suffix = os.path.basename(image_path)
+        filename_without_suffix, suffix = os.path.splitext(
+            filename_with_suffix)
+        if suffix.lower() == '.apng':
+            suffix = ".png"
+        filename = filename_without_suffix + suffix
 
         mime_type = mimetypes.guess_type(image_path)[0]
 
@@ -157,9 +165,7 @@ class Chr(Base):
     def upload_images(self, images_path: List[str]):
         check_image_exists(images_path)
 
-        exceeded, _img = self._exceed_max_size(*images_path)
-        if exceeded:
-            raise errors.OverSizeError(_img)
+        self._check_images_valid(images_path)
 
         images_url = []
         for img in images_path:
@@ -167,6 +173,8 @@ class Chr(Base):
 
         for i in images_url:
             print(i)
+
+        self._clear_cache()
 
     @Login
     def delete_image(self, img_id: str):

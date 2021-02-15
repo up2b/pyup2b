@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: errors.py
 # @Created: 2021-02-08 17:04:25
-# @Modified: 2021-02-10 14:24:27
+# @Modified: 2021-02-15 18:09:06
 
 
 class UploadFailed(Exception):
@@ -16,4 +16,8 @@ class OverSizeError(Exception):
 
 
 class NotLogin(Exception):
+    pass
+
+
+class UnsupportedType(Exception):
     pass

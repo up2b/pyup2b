@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: github.py
 # @Created: 2021-02-13 09:10:14
-# @Modified: 2021-02-13 12:40:55
+# @Modified: 2021-02-15 19:43:58
 
 import os
 import time
@@ -15,18 +15,20 @@ from base64 import b64encode
 
 from timg.timglib.timg_api import Base
 from timg.timglib.constants import GITHUB
-from timg.timglib.errors import OverSizeError
 from timg.timglib.utils import Login, check_image_exists
 
 
 class Github(Base):
-    def __init__(self, conf_file: Optional[str] = None):
+    def __init__(self,
+                 conf_file: Optional[str] = None,
+                 auto_compress: bool = False):
         if not conf_file:
             super().__init__(GITHUB)
         else:
             super().__init__(GITHUB, conf_file)
 
-        self.max_size = 50
+        self.max_size = 50 * 1024 * 1024
+        self.auto_compress: bool = auto_compress
 
         if self.auth_info:
             self.token: str = self.auth_info["token"]
@@ -50,9 +52,14 @@ class Github(Base):
 
     @Login
     def upload_image(self, image_path: str) -> str:
-        filename = f"{int(time.time() * 1000)}{os.path.splitext(image_path)[-1]}"
+        image_path = self._compress_image(image_path)
+        suffix = os.path.splitext(image_path)[-1]
+        if suffix.lower() == '.apng':
+            suffix = ".png"
+        filename = f"{int(time.time() * 1000)}{suffix}"
         with open(image_path, "rb") as fb:
             url = self.base_url + filename
+            print(url)
             data = {
                 "content": b64encode(fb.read()).decode("utf-8"),
                 "message": "typora - " + filename,
@@ -61,15 +68,14 @@ class Github(Base):
             if resp.status_code == 201:
                 return resp.json()["content"]["download_url"]
             else:
+                print(resp.status_code)
                 print(resp.json())
 
     @Login
     def upload_images(self, images_path: List[str]):
         check_image_exists(images_path)
 
-        exceeded, _img = self._exceed_max_size(*images_path)
-        if exceeded:
-            raise OverSizeError(_img)
+        self._check_images_valid(images_path)
 
         images_url = []
         for img in images_path:

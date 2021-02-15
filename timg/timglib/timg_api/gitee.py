@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: gitee.py
 # @Created: 2021-02-13 09:10:05
-# @Modified: 2021-02-14 20:43:12
+# @Modified: 2021-02-15 19:43:03
 
 import os
 import time
@@ -15,19 +15,20 @@ from base64 import b64encode
 
 from timg.timglib.timg_api import Base
 from timg.timglib.constants import GITEE
-from timg.timglib.errors import OverSizeError
 from timg.timglib.utils import Login, check_image_exists
 
 
 class Gitee(Base):
-    def __init__(self, conf_file: Optional[str] = None):
+    def __init__(self,
+                 conf_file: Optional[str] = None,
+                 auto_compress: bool = False):
         if not conf_file:
             super().__init__(GITEE)
         else:
             super().__init__(GITEE, conf_file)
 
-        # self.max_size = 50
-        self.max_size = 1
+        self.max_size = 1 * 1024 * 1024
+        self.auto_compress: bool = auto_compress
 
         self.headers = {"Content-Type": "application/json;charset=UTF-8"}
 
@@ -48,8 +49,11 @@ class Gitee(Base):
 
     @Login
     def upload_image(self, image_path: str) -> str:
-        # TODO: 上传图片时放到当前目录下？md/2021/02/13/filename
-        filename = f"{int(time.time() * 1000)}{os.path.splitext(image_path)[-1]}"
+        image_path = self._compress_image(image_path)
+        suffix = os.path.splitext(image_path)[-1]
+        if suffix.lower() == '.apng':
+            suffix = ".png"
+        filename = f"{int(time.time() * 1000)}{suffix}"
         with open(image_path, "rb") as fb:
             url = self.base_url + filename
             data = {
@@ -67,9 +71,7 @@ class Gitee(Base):
     def upload_images(self, images_path: List[str]):
         check_image_exists(images_path)
 
-        exceeded, _img = self._exceed_max_size(*images_path)
-        if exceeded:
-            raise OverSizeError(_img)
+        self._check_images_valid(images_path)
 
         images_url = []
         for img in images_path:
@@ -77,6 +79,8 @@ class Gitee(Base):
 
         for i in images_url:
             print(i)
+
+        self._clear_cache()
 
     @Login
     def get_all_images_in_image_bed(self) -> Dict[str, str]:

@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: sm.py
 # @Created: 2021-02-13 09:04:07
-# @Modified: 2021-02-14 15:42:17
+# @Modified: 2021-02-15 18:33:41
 
 import requests
 
@@ -18,13 +18,16 @@ from timg.timglib.custom_types import DeletedResponse
 
 
 class SM(Base):
-    def __init__(self, conf_file: Optional[str] = None):
+    def __init__(self,
+                 conf_file: Optional[str] = None,
+                 auto_compress: bool = False):
         if not conf_file:
             super().__init__(SM_MS)
         else:
             super().__init__(SM_MS, conf_file)
         self.base_url = "https://sm.ms/api/v2/"
-        self.max_size = 5
+        self.max_size = 5 * 1024 * 1024
+        self.auto_compress: bool = auto_compress
 
         if self.auth_info:
             self.token: str = self.auth_info["token"]
@@ -84,9 +87,7 @@ class SM(Base):
 
         check_image_exists(images_path)
 
-        exceeded, _img = self._exceed_max_size(*images_path)
-        if exceeded:
-            raise errors.OverSizeError(_img)
+        self._check_images_valid(images_path)
 
         images_url = []
         for img in images_path:
