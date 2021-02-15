@@ -8,7 +8,7 @@
 
 理论上支持linux、macOS和windows，但是macOS上没有进行测试。
 
-![Peek 2021-02-13 13-10](https://gitee.com/thepoy/image-bed/raw/master/md/1613193111461.gif)
+![Peek 2021-02-13 13-10](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1613400034436.png)
 
 # 特点
 

@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: sm.py
 # @Created: 2021-02-13 09:04:07
-# @Modified: 2021-02-15 18:33:41
+# @Modified: 2021-02-15 23:01:46
 
 import requests
 
@@ -95,6 +95,9 @@ class SM(Base):
 
         for i in images_url:
             print(i)
+
+        self._clear_cache()
+
         return images_url
 
     @Login

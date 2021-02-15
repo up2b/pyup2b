@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: github.py
 # @Created: 2021-02-13 09:10:14
-# @Modified: 2021-02-15 19:43:58
+# @Modified: 2021-02-15 22:52:48
 
 import os
 import time
@@ -27,7 +27,7 @@ class Github(Base):
         else:
             super().__init__(GITHUB, conf_file)
 
-        self.max_size = 50 * 1024 * 1024
+        self.max_size = 20 * 1024 * 1024
         self.auto_compress: bool = auto_compress
 
         if self.auth_info:
@@ -59,7 +59,6 @@ class Github(Base):
         filename = f"{int(time.time() * 1000)}{suffix}"
         with open(image_path, "rb") as fb:
             url = self.base_url + filename
-            print(url)
             data = {
                 "content": b64encode(fb.read()).decode("utf-8"),
                 "message": "typora - " + filename,
@@ -83,6 +82,8 @@ class Github(Base):
 
         for url in images_url:
             print(self.cdn_url(url))
+
+        self._clear_cache()
 
     @Login
     def get_all_images_in_image_bed(self) -> Dict[str, str]:

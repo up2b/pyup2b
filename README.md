@@ -8,7 +8,7 @@ A package that can upload pictures to the image bed in `Typora`.
 
 It supports **windows**, **linux** and **macOS** system, but it has not been tested on **macOS** yet. 
 
-![Peek 2021-02-13 13-10](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1613195327228.gif)
+![Peek 2021-02-13 13-10](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1613401533109.png)
 
 # Features
 
