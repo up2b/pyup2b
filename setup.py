@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: setup.py
 # @Created: 2021-02-08 15:27:43
-# @Modified: 2021-02-13 20:24:04
+# @Modified: 2021-02-15 20:06:01
 
 import codecs
 import timg
@@ -34,5 +34,6 @@ with codecs.open("README.md", "r", "utf-8") as fd:
         install_requires=[
             "requests",
             "requests-toolbelt",
+            "pillow",
         ],
     )
