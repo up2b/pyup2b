@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-08 15:43:32
-# @Modified: 2021-02-15 22:53:38
+# @Modified: 2021-02-19 11:07:52
 
 import os
 import sys
@@ -20,7 +20,7 @@ from timg.timglib.timg_api.gitee import Gitee
 from timg.timglib.timg_api.github import Github
 from timg.timglib.constants import SM_MS, IMAGE_CHR, GITEE, GITHUB
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 
 IMAGE_BEDS = {
     SM_MS: SM,
