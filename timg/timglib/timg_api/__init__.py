@@ -30,7 +30,6 @@ if not IS_WINDOWS:
 else:
     TYPORA_APPDATA_PATH = os.path.join(
         os.environ['APPDATA'],
-        ".config",
         "Typora",
     )
 

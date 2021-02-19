@@ -104,7 +104,11 @@ timg -lg access_token username image-bed md
 
 Then fill in the command as shown in the figure below.
 
-There is a parameter `-aac` in the command as an optional parameter, which is used to enable the automatic compression function. If this parameter is not added, the image will not be automatically compressed when uploading. An error will be reported if the size of the image bed exceeds the limit. Adding this parameter will automatically compress images that exceed the limit size to the limit image size or below, ensuring that images can be uploaded smoothly. 
+There is a parameter `-aac` in the command as an optional parameter, which is used to enable the automatic compression function. 
+
+If this parameter is not added, the image will not be automatically compressed when uploading. If the image size exceeds the limit of the image bed, an exception will be thrown during upload.
+
+Adding this parameter will automatically compress images that exceed the limit size to the limit image size or below, ensuring that images can be uploaded smoothly. 
 
 Turn on automatic compression:
 

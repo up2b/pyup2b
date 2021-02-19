@@ -35,7 +35,7 @@ pip install typora-upload-image
 
 安装后，会多出一条`timg`命令：
 
-```shell
+```
 usage: timg [-h] [-v] [-aac]
             [-c {sm,chr,gitee,github} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
 

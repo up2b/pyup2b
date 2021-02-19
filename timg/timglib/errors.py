@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: errors.py
 # @Created: 2021-02-08 17:04:25
-# @Modified: 2021-02-15 18:09:06
+# @Modified: 2021-02-17 15:55:12
 
 
 class UploadFailed(Exception):
@@ -19,5 +19,5 @@ class NotLogin(Exception):
     pass
 
 
-class UnsupportedType(Exception):
+class UnsupportedType(TypeError):
     pass
