@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: chr.py
 # @Created: 2021-02-13 09:04:37
-# @Modified: 2021-02-15 19:06:33
+# @Modified: 2021-02-20 19:03:03
 
 import sys
 import os
@@ -219,5 +219,8 @@ class Chr(Base):
                 return self.delete_images(imgs_id)
         return resp.json()
 
-    def _url(self, key: str) -> str:
-        return self.base_url + key
+    def _url(self, path: str) -> str:
+        return self.base_url + path
+
+    def __str__(self):
+        return "imgchr.com"

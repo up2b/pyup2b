@@ -37,7 +37,7 @@ pip install typora-upload-image
 
 ```
 usage: timg [-h] [-v] [-aac]
-            [-c {sm,chr,gitee,github} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
+            [-c {0: 'sm.ms', 1: 'imgchr.com', 2: 'gitee.com', 3: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
 
 A package that can upload pictures to the image bed in Typora.
 
@@ -45,27 +45,39 @@ optional arguments:
   -h, --help            show this help message and exit
   -v, --version         show program's version number and exit
   -aac                  allow automatic image compression
-  -c {sm,chr,gitee,github}, --choose-site {sm,chr,gitee,github}
+  -c {0: 'sm.ms', 1: 'imgchr.com', 2: 'gitee.com', 3: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgchr.com', 2: 'gitee.com', 3: 'github.com'}
                         choose the image bed you want to use and exit
   -l USERNAME PASSWORD, --login USERNAME PASSWORD
-                        save the user authentication token after successful login. You
-                        must enter the username and password after `-l` or `--login`
+                        save the user authentication token after successful login. You must enter the username
+                        and password after `-l` or `--login`
   -lg ACCESS_TOKEN USERNAME REPO FOLDER, --login-git ACCESS_TOKEN USERNAME REPO FOLDER
-                        save the authentication information of the git website, such as
-                        gitee, github
+                        save the authentication information of the git website, such as gitee, github
   -p IMAGE_PATH, --image-path IMAGE_PATH
                         upload only one picture
   -ps IMAGE_PATH [IMAGE_PATH ...], --images-path IMAGE_PATH [IMAGE_PATH ...]
-                        upload multiple pictures, the maximum is 10 pictures, use spaces
-                        to separate each image path.
+                        upload multiple pictures, the maximum is 10 pictures, use spaces to separate each
+                        image path.
+
 ```
 
 #### 1 选择图床
 
-第一次使用时，必须先选择图床（可选图床列表在`timg -h`里的`-c`参数后面——`[sm,chr,gitee,github]`）：
+第一次使用时，必须先选择图床。
+
+`timg`的`-c`参数可选值为：
+
+- 0
+  - sm.ms
+- 1
+  - imgchr.com
+- 2
+  - gitee.com
+- 3
+  - github.com
 
 ```shell
-timg -c sm
+# 如果你想选择sm.ms
+timg -c 0
 ```
 #### 2 保存认证信息
 

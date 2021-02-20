@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-08 15:43:32
-# @Modified: 2021-02-19 11:07:52
+# @Modified: 2021-02-20 21:58:36
 
 import os
 import sys
@@ -18,9 +18,10 @@ from timg.timglib.timg_api.sm import SM
 from timg.timglib.timg_api.chr import Chr
 from timg.timglib.timg_api.gitee import Gitee
 from timg.timglib.timg_api.github import Github
-from timg.timglib.constants import SM_MS, IMAGE_CHR, GITEE, GITHUB
+from timg.timglib.constants import (SM_MS, IMAGE_CHR, GITEE, GITHUB,
+                                    IMAGE_BEDS_CODE)
 
-__version__ = '0.0.9'
+__version__ = '0.1.1'
 
 IMAGE_BEDS = {
     SM_MS: SM,
@@ -43,7 +44,9 @@ def _BuildParser():
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-c",
                        "--choose-site",
-                       choices=IMAGE_BEDS.keys(),
+                       choices=[str(k) for k in IMAGE_BEDS.keys()],
+                       metavar={v: k
+                                for k, v in IMAGE_BEDS_CODE.items()},
                        help="choose the image bed you want to use and exit",
                        type=str)
     group.add_argument(
@@ -96,8 +99,8 @@ def main() -> int:
     args = _BuildParser().parse_args()
 
     if args.choose_site:
-        choose_image_bed(args.choose_site)
-        if args.choose_site == GITEE:
+        choose_image_bed(int(args.choose_site))
+        if args.choose_site == str(GITEE):
             print(
                 "Warning: resources bigger than 1M on `gitee` cannot be publicly accessed. "
                 "Please manually compress the image size to 1M or less, "

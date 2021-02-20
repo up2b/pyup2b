@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: github.py
 # @Created: 2021-02-13 09:10:14
-# @Modified: 2021-02-15 22:52:48
+# @Modified: 2021-02-20 21:23:35
 
 import os
 import time
@@ -12,7 +12,7 @@ import requests
 
 from typing import Optional, List, Dict
 from base64 import b64encode
-
+from requests.exceptions import ConnectionError
 from timg.timglib.timg_api import Base
 from timg.timglib.constants import GITHUB
 from timg.timglib.utils import Login, check_image_exists
@@ -63,7 +63,10 @@ class Github(Base):
                 "content": b64encode(fb.read()).decode("utf-8"),
                 "message": "typora - " + filename,
             }
-            resp = requests.put(url, headers=self.headers, json=data)
+            try:
+                resp = requests.put(url, headers=self.headers, json=data)
+            except ConnectionError as e:
+                return "Warning: %s upload failed, please try again: (%s)" % (image_path, e)
             if resp.status_code == 201:
                 return resp.json()["content"]["download_url"]
             else:
@@ -126,3 +129,6 @@ class Github(Base):
         path = url.split("/main/")[-1]
         return "https://cdn.jsdelivr.net/gh/%s/%s/%s" % (self.username,
                                                          self.repo, path)
+
+    def __str__(self):
+        return "github.com"

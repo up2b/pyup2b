@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: gitee.py
 # @Created: 2021-02-13 09:10:05
-# @Modified: 2021-02-15 19:43:03
+# @Modified: 2021-02-20 19:03:34
 
 import os
 import time
@@ -121,3 +121,6 @@ class Gitee(Base):
     def base_url(self) -> str:
         return "https://gitee.com/api/v5/repos/%s/%s/contents/%s/" % (
             self.username, self.repo, self.folder)
+
+    def __str__(self):
+        return "gitee.com"

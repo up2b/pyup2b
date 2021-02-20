@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-13 09:02:21
-# @Modified: 2021-02-15 18:53:44
+# @Modified: 2021-02-20 21:16:42
 
 import os
 import sys
@@ -18,6 +18,7 @@ from PIL import Image
 from timg.timglib import custom_types
 from timg.timglib.utils import Login
 from timg.timglib.errors import UnsupportedType, OverSizeError
+from timg.timglib.constants import IMAGE_BEDS_CODE
 
 IS_WINDOWS = sys.platform == "win32"
 
@@ -40,25 +41,29 @@ CONF_FILE = os.path.join(
 )
 
 
-def choose_image_bed(key: str, conf_file: str = CONF_FILE):
+def choose_image_bed(image_bed_code: int, conf_file: str = CONF_FILE):
+    if type(image_bed_code) != int:
+        raise TypeError("image bed code must be an integer, not %s" % str(type(image_bed_code)))
     try:
         with open(conf_file, "r+") as f:
             conf = json.loads(f.read())
             f.seek(0, 0)
-            conf["image_bed"] = key
+            conf["image_bed"] = image_bed_code
             f.write(json.dumps(conf))
             f.truncate()
     except FileNotFoundError:
         with open(conf_file, "w") as f:
-            f.write(json.dumps({"image_bed": key}))
+            f.write(json.dumps({"image_bed": image_bed_code}))
 
 
 class Base:
-    def __init__(self, key: str, conf_file: str = CONF_FILE):
+    def __init__(self, image_bed_code: int, conf_file: str = CONF_FILE):
+        if type(image_bed_code) != int:
+            raise TypeError("image bed code must be an integer")
         self.conf_file: str = conf_file
         self.max_size: int = 0
         self.auto_compress: bool = False
-        self.key: Optional[str] = key
+        self.image_bed_code: int = image_bed_code
         self.auth_info: Optional[
             custom_types.AuthInfo] = self._read_auth_info()
 
@@ -77,7 +82,7 @@ class Base:
         try:
             with open(self.conf_file) as f:
                 conf = json.loads(f.read())
-                return conf["auth_data"][self.key]
+                return conf["auth_data"][self.image_bed_code]
         except Exception:
             return None
 
@@ -86,10 +91,10 @@ class Base:
             with open(self.conf_file, "r+") as f:
                 conf = json.loads(f.read())
                 try:
-                    conf['auth_data'][self.key] = auth_info
+                    conf['auth_data'][self.image_bed_code] = auth_info
                 except KeyError:
-                    conf["auth_data"] = {}
-                    conf['auth_data'][self.key] = auth_info
+                    conf["auth_data"] = [None] * len(IMAGE_BEDS_CODE)
+                    conf['auth_data'][self.image_bed_code] = auth_info
                 f.seek(0, 0)
                 f.write(json.dumps(conf))
                 f.truncate()

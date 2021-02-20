@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: sm.py
 # @Created: 2021-02-13 09:04:07
-# @Modified: 2021-02-15 23:01:46
+# @Modified: 2021-02-20 18:56:26
 
 import requests
 
@@ -139,9 +139,12 @@ class SM(Base):
                 result[hash] = {"message": r["message"], "code": r["code"]}
         return result
 
-    def _url(self, key: str) -> str:
-        return self.base_url + key
+    def _url(self, path: str) -> str:
+        return self.base_url + path
 
     def _login_expired(self, resp: dict):
         return resp[
             "message"] == "Get user profile failed, invalid Authorization."
+
+    def __str__(self):
+        return "sm.ms"
