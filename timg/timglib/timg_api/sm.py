@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: sm.py
 # @Created: 2021-02-13 09:04:07
-# @Modified: 2021-02-20 18:56:26
+# @Modified: 2021-02-22 21:02:17
 
 import requests
 
@@ -79,7 +79,7 @@ class SM(Base):
                 raise errors.UploadFailed(resp["message"])
 
     @Login
-    def upload_images(self, images_path: List[str]):
+    def upload_images(self, images_path: List[str]) -> List[str]:
         if len(images_path) > 10:
             raise errors.OverLimitError(
                 "You can only upload up to 10 pictures, but you uploaded %d pictures."

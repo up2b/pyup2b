@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: github.py
 # @Created: 2021-02-13 09:10:14
-# @Modified: 2021-02-20 21:23:35
+# @Modified: 2021-02-23 11:25:50
 
 import os
 import time
@@ -66,7 +66,8 @@ class Github(Base):
             try:
                 resp = requests.put(url, headers=self.headers, json=data)
             except ConnectionError as e:
-                return "Warning: %s upload failed, please try again: (%s)" % (image_path, e)
+                return "Warning: %s upload failed, please try again: (%s)" % (
+                    image_path, e)
             if resp.status_code == 201:
                 return resp.json()["content"]["download_url"]
             else:
@@ -74,7 +75,7 @@ class Github(Base):
                 print(resp.json())
 
     @Login
-    def upload_images(self, images_path: List[str]):
+    def upload_images(self, images_path: List[str]) -> List[str]:
         check_image_exists(images_path)
 
         self._check_images_valid(images_path)
@@ -87,6 +88,7 @@ class Github(Base):
             print(self.cdn_url(url))
 
         self._clear_cache()
+        return images_url
 
     @Login
     def get_all_images_in_image_bed(self) -> Dict[str, str]:

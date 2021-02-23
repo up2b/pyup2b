@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: chr.py
 # @Created: 2021-02-13 09:04:37
-# @Modified: 2021-02-20 19:03:03
+# @Modified: 2021-02-22 21:02:26
 
 import sys
 import os
@@ -162,7 +162,7 @@ class Chr(Base):
                 print(resp.json())
 
     @Login
-    def upload_images(self, images_path: List[str]):
+    def upload_images(self, images_path: List[str]) -> List[str]:
         check_image_exists(images_path)
 
         self._check_images_valid(images_path)
@@ -175,6 +175,7 @@ class Chr(Base):
             print(i)
 
         self._clear_cache()
+        return images_url
 
     @Login
     def delete_image(self, img_id: str):

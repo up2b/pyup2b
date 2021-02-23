@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: gitee.py
 # @Created: 2021-02-13 09:10:05
-# @Modified: 2021-02-20 19:03:34
+# @Modified: 2021-02-22 21:02:23
 
 import os
 import time
@@ -68,7 +68,7 @@ class Gitee(Base):
                 print(resp.json())
 
     @Login
-    def upload_images(self, images_path: List[str]):
+    def upload_images(self, images_path: List[str]) -> List[str]:
         check_image_exists(images_path)
 
         self._check_images_valid(images_path)
@@ -81,6 +81,7 @@ class Gitee(Base):
             print(i)
 
         self._clear_cache()
+        return images_url
 
     @Login
     def get_all_images_in_image_bed(self) -> Dict[str, str]:
