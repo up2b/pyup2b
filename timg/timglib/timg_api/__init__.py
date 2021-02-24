@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-13 09:02:21
-# @Modified: 2021-02-20 21:16:42
+# @Modified: 2021-02-23 13:48:42
 
 import os
 import sys
@@ -43,7 +43,8 @@ CONF_FILE = os.path.join(
 
 def choose_image_bed(image_bed_code: int, conf_file: str = CONF_FILE):
     if type(image_bed_code) != int:
-        raise TypeError("image bed code must be an integer, not %s" % str(type(image_bed_code)))
+        raise TypeError("image bed code must be an integer, not %s" %
+                        str(type(image_bed_code)))
     try:
         with open(conf_file, "r+") as f:
             conf = json.loads(f.read())
@@ -68,6 +69,10 @@ class Base:
             custom_types.AuthInfo] = self._read_auth_info()
 
     def login(self, username: str, password: str):
+        pass
+
+    @Login
+    def get_all_images(self) -> List[str]:
         pass
 
     @Login

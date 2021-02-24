@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-08 15:43:32
-# @Modified: 2021-02-23 11:26:31
+# @Modified: 2021-02-24 08:43:58
 
 import os
 import sys
@@ -15,17 +15,17 @@ from typing import Union
 
 from timg.timglib.timg_api import CONF_FILE, choose_image_bed
 from timg.timglib.timg_api.sm import SM
-from timg.timglib.timg_api.chr import Chr
+from timg.timglib.timg_api.imgtu import Imgtu
 from timg.timglib.timg_api.gitee import Gitee
 from timg.timglib.timg_api.github import Github
-from timg.timglib.constants import (SM_MS, IMAGE_CHR, GITEE, GITHUB,
+from timg.timglib.constants import (SM_MS, IMGTU, GITEE, GITHUB,
                                     IMAGE_BEDS_CODE)
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 IMAGE_BEDS = {
     SM_MS: SM,
-    IMAGE_CHR: Chr,
+    IMGTU: Imgtu,
     GITEE: Gitee,
     GITHUB: Github,
 }
@@ -81,7 +81,7 @@ def _BuildParser():
     return parser
 
 
-def _read_image_bed(auto_compress: bool) -> Union[SM, Chr]:
+def _read_image_bed(auto_compress: bool) -> Union[SM, Imgtu, Gitee, Github]:
     try:
         with open(CONF_FILE) as f:
             conf = json.loads(f.read())

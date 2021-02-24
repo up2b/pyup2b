@@ -4,13 +4,13 @@
 # @Email: thepoy@aliyun.com
 # @File Name: github.py
 # @Created: 2021-02-13 09:10:14
-# @Modified: 2021-02-23 11:25:50
+# @Modified: 2021-02-24 15:31:15
 
 import os
 import time
 import requests
 
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Tuple
 from base64 import b64encode
 from requests.exceptions import ConnectionError
 from timg.timglib.timg_api import Base
@@ -84,11 +84,23 @@ class Github(Base):
         for img in images_path:
             images_url.append(self.upload_image(img))
 
+        cdn_urls = []
         for url in images_url:
-            print(self.cdn_url(url))
+            cdn_urls.append(self.cdn_url(url))
 
         self._clear_cache()
-        return images_url
+        return cdn_urls
+
+    @Login
+    def get_all_images(self):
+        images = []
+        for file in self.get_all_images_in_image_bed():
+            images.append({
+                "url": self.cdn_url(file["download_url"]),
+                "sha": file["sha"],
+                "delete_url": file["url"],
+            })
+        return images
 
     @Login
     def get_all_images_in_image_bed(self) -> Dict[str, str]:
@@ -98,29 +110,23 @@ class Github(Base):
     @Login
     def delete_image(self,
                      sha: str,
+                     url: str,
                      message: str = "Delete pictures that are no longer used"):
-        filename = ""
-        for file in self.get_all_images_in_image_bed():
-            if file["sha"] == sha:
-                filename = file["name"]
-                break
-        if not filename:
-            raise FileNotFoundError(
-                f"The picture corresponding to `sha`({sha}) was not found, this picture may have been deleted."
-            )
-
-        url = self.base_url + filename
         data = {"sha": sha, "message": message}
         resp = requests.delete(url, headers=self.headers, json=data)
-        return resp.json()
+        return resp.status_code == 200
 
     @Login
     def delete_images(
             self,
-            sha_list: List[str],
+            info: Tuple[str, str],
             message: str = "Delete pictures that are no longer used"):
-        for sha in sha_list:
-            self.delete_image(sha, message)
+        failed = []
+        for sha, url in info:
+            result = self.delete_image(sha, url, message)
+            if not result:
+                failed.append(sha)
+        return failed
 
     @property
     def base_url(self) -> str:

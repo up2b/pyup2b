@@ -4,13 +4,13 @@
 # @Email: thepoy@aliyun.com
 # @File Name: gitee.py
 # @Created: 2021-02-13 09:10:05
-# @Modified: 2021-02-22 21:02:23
+# @Modified: 2021-02-24 15:30:11
 
 import os
 import time
 import requests
 
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Tuple
 from base64 import b64encode
 
 from timg.timglib.timg_api import Base
@@ -92,31 +92,36 @@ class Gitee(Base):
         return resp.json()
 
     @Login
+    def get_all_images(self) -> List[Dict[str, str]]:
+        images = []
+        for file in self.get_all_images_in_image_bed():
+            images.append({
+                "sha": file["sha"],
+                "delete_url": file["url"],
+                "url": file["download_url"],
+            })
+        return images
+
+    @Login
     def delete_image(self,
                      sha: str,
+                     url: str,
                      message: str = "Delete pictures that are no longer used"):
-        filename = ""
-        for file in self.get_all_images_in_image_bed():
-            if file["sha"] == sha:
-                filename = file["name"]
-                break
-        if not filename:
-            raise FileNotFoundError(
-                f"The picture corresponding to `sha`({sha}) was not found, this picture may have been deleted."
-            )
-
-        url = self.base_url + filename
         data = {"access_token": self.token, "sha": sha, "message": message}
         resp = requests.delete(url, headers=self.headers, json=data)
-        return resp.json()
+        return resp.status_code == 200
 
     @Login
     def delete_images(
             self,
-            sha_list: List[str],
+            info: Tuple[str, str],
             message: str = "Delete pictures that are no longer used"):
-        for sha in sha_list:
-            self.delete_image(sha, message)
+        failed = []
+        for sha, url in info:
+            result = self.delete_image(sha, url, message)
+            if not result:
+                failed.append(sha)
+        return failed
 
     @property
     def base_url(self) -> str:

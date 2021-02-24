@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: sm.py
 # @Created: 2021-02-13 09:04:07
-# @Modified: 2021-02-22 21:02:17
+# @Modified: 2021-02-24 13:50:13
 
 import requests
 
@@ -81,7 +81,7 @@ class SM(Base):
     @Login
     def upload_images(self, images_path: List[str]) -> List[str]:
         if len(images_path) > 10:
-            raise errors.OverLimitError(
+            raise errors.OverSizeError(
                 "You can only upload up to 10 pictures, but you uploaded %d pictures."
                 % len(images_path))
 
@@ -125,19 +125,37 @@ class SM(Base):
         return resp.json()
 
     @Login
-    def delete_image(self, hash: str) -> DeletedResponse:
-        url = self._url("delete") + "/" + hash
-        resp = requests.get(url, headers=self.headers)
-        return resp.json()
+    def get_all_images(self) -> List[Dict[str, str]]:
+        images = []
+        for file in self.upload_history()["data"]:
+            images.append({
+                "url": file["url"],
+                "delete_url": file["delete"],
+                "width": file["width"],
+                "height": file["height"],
+            })
+
+        return images
 
     @Login
-    def delete_images(self, hash_list: List[str]) -> dict:
+    def delete_image(self, delete_url: str) -> DeletedResponse:
+        resp = requests.get(delete_url, headers=self.headers)
+        # TODO: sm.ms 删除图片后本应返回json，但实际返回的是html。而且删除链接不需要认证，任何人get都能删除图片
+        return resp.status_code == 200
+
+    @Login
+    def delete_images(self, urls: List[str]) -> dict:
         result = {}
-        for hash in hash_list:
-            r = self.delete_image(hash)
-            if not r["success"]:
-                result[hash] = {"message": r["message"], "code": r["code"]}
+        for url in urls:
+            r = self.delete_image(url)
+            # if not r["success"]:
+            #     result[hash] = {"message": r["message"], "code": r["code"]}
+            result[url] = r
         return result
+
+    @Login
+    def get_all_images_in_image_bed(self) -> List[str]:
+        pass
 
     def _url(self, path: str) -> str:
         return self.base_url + path

@@ -4,33 +4,35 @@
 # @Email: thepoy@aliyun.com
 # @File Name: chr.py
 # @Created: 2021-02-13 09:04:37
-# @Modified: 2021-02-22 21:02:26
+# @Modified: 2021-02-24 12:51:14
 
 import sys
 import os
 import re
 import time
+import json
 import mimetypes
 import requests
 
-from typing import List, Optional, Tuple
+from urllib import parse
+from typing import List, Optional, Tuple, Union
 
 from requests_toolbelt import MultipartEncoder
 
 from timg.timglib.timg_api import Base
 from timg.timglib.utils import Login, check_image_exists
-from timg.timglib.constants import IMAGE_CHR
+from timg.timglib.constants import IMGTU
 
 
-class Chr(Base):
+class Imgtu(Base):
     def __init__(self,
                  conf_file: Optional[str] = None,
                  auto_compress: bool = False):
         if not conf_file:
-            super().__init__(IMAGE_CHR)
+            super().__init__(IMGTU)
         else:
-            super().__init__(IMAGE_CHR, conf_file)
-        self.base_url: str = "https://imgchr.com/"
+            super().__init__(IMGTU, conf_file)
+        self.base_url: str = "https://imgtu.com/"
         self.max_size = 10 * 1024 * 1024
         self.auto_compress: bool = auto_compress
 
@@ -46,6 +48,7 @@ class Chr(Base):
         if self.auth_info:
             self.cookie = self.auth_info["cookie"]
             self.token = self.auth_info["token"]
+            self.username = self.auth_info["username"]
             self.headers["Cookie"] = self.cookie
 
     def login(self, username: str, password: str):
@@ -105,14 +108,14 @@ class Chr(Base):
             "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",
             "Cookie": self.cookie,
         }
-        resp = requests.get("https://imgchr.com", headers=headers)
+        resp = requests.get(self.base_url, headers=headers)
         auth_token = re.search(r'PF.obj.config.auth_token = "([a-f0-9]{40})"',
                                resp.text).group(1)
         self.auth_info["token"] = self.token = auth_token
         self._save_auth_info(self.auth_info)
 
     @Login
-    def upload_image(self, image_path: str) -> str:
+    def upload_image(self, image_path: str) -> Union[str, dict]:
         image_path = self._compress_image(image_path)
         url = self._url("json")
         headers = {
@@ -159,23 +162,95 @@ class Chr(Base):
                 self._update_auth_token()
                 return self.upload_image(image_path)
             else:
-                print(resp.json())
+                return resp.json()
 
     @Login
-    def upload_images(self, images_path: List[str]) -> List[str]:
+    def upload_images(self, images_path: List[str]) -> list:
         check_image_exists(images_path)
 
         self._check_images_valid(images_path)
 
         images_url = []
         for img in images_path:
-            images_url.append(self.upload_image(img))
+            result = self.upload_image(img)
+            if type(result) == str:
+                images_url.append(self.upload_image(img))
+            elif type(result) == dict:
+                images_url.append({
+                    "image_path": img,
+                    "statuc_code": result["status_code"],
+                    "error": result["error"]["message"],
+                })
 
         for i in images_url:
             print(i)
 
         self._clear_cache()
         return images_url
+
+    @Login
+    def get_all_images(self):
+        url = self._url(self.username)
+
+        # image_count = re.search(r'<b data-text="image-count">(\d+)</b>',
+        #                         resp.text)
+        # if len(image_count.groups()):
+        #     image_count = int(image_count.group(1))
+        # else:
+        #     image_count = 0
+
+        # 集合去重
+        images = set()
+
+        def visit_next_page(url):
+            resp = requests.get(url, headers=self.headers)
+            resp.encoding = "utf-8"
+
+            images_object = re.findall(
+                r"data-privacy=\"public\" data-object='(.+?)'", resp.text)
+            images_object = [
+                json.loads(parse.unquote(i)) for i in images_object
+            ]
+            for image in images_object:
+                images.add((
+                    image["url"],
+                    image["display_url"],
+                    image["id_encoded"],
+                    image["width"],
+                    image["height"],
+                ))
+                # images.append({
+                #     "url": image["url"],
+                #     "display_url": image["display_url"],
+                #     "id": image["id_encoded"],
+                #     "width": image["width"],
+                #     "height": image["height"],
+                # })
+
+            next_page_url = re.search(
+                r'data-pagination="next" href="(.+?)" ><span', resp.text)
+            if next_page_url:
+                next_page_url = next_page_url.group(1)
+            else:
+                next_page_url = ""
+
+            if next_page_url:
+                visit_next_page(next_page_url)
+
+        visit_next_page(url)
+
+        result = []
+
+        for item in images:
+            result.append({
+                "url": item[0],
+                "display_url": item[1],
+                "id": item[2],
+                "width": item[3],
+                "height": item[4],
+            })
+
+        return result
 
     @Login
     def delete_image(self, img_id: str):
@@ -224,4 +299,4 @@ class Chr(Base):
         return self.base_url + path
 
     def __str__(self):
-        return "imgchr.com"
+        return "imgtu.com"
