@@ -15,7 +15,7 @@ It supports **windows**, **linux** and **macOS** system, but it has not been tes
 Support the automatic upload of pictures of the following image bed:
 
 - sm.ms
-- imgchr.com
+- imgtu.com
 - gitee.com
 - github.com
 
@@ -35,7 +35,7 @@ Usage Options:
 
 ```
 usage: timg [-h] [-v] [-aac]
-            [-c {0: 'sm.ms', 1: 'imgchr.com', 2: 'gitee.com', 3: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
+            [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
 
 A package that can upload pictures to the image bed in Typora.
 
@@ -43,19 +43,19 @@ optional arguments:
   -h, --help            show this help message and exit
   -v, --version         show program's version number and exit
   -aac                  allow automatic image compression
-  -c {0: 'sm.ms', 1: 'imgchr.com', 2: 'gitee.com', 3: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgchr.com', 2: 'gitee.com', 3: 'github.com'}
+  -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'}
                         choose the image bed you want to use and exit
   -l USERNAME PASSWORD, --login USERNAME PASSWORD
-                        save the user authentication token after successful login. You must enter the username
-                        and password after `-l` or `--login`
+                        save the user authentication token after successful login. You
+                        must enter the username and password after `-l` or `--login`
   -lg ACCESS_TOKEN USERNAME REPO FOLDER, --login-git ACCESS_TOKEN USERNAME REPO FOLDER
-                        save the authentication information of the git website, such as gitee, github
+                        save the authentication information of the git website, such as
+                        gitee, github
   -p IMAGE_PATH, --image-path IMAGE_PATH
                         upload only one picture
   -ps IMAGE_PATH [IMAGE_PATH ...], --images-path IMAGE_PATH [IMAGE_PATH ...]
-                        upload multiple pictures, the maximum is 10 pictures, use spaces to separate each
-                        image path.
-
+                        upload multiple pictures, the maximum is 10 pictures, use spaces
+                        to separate each image path.
 ```
 ####  1 Choose image bed
 
@@ -64,7 +64,7 @@ When using for the first time, you must first select a image bed. The available 
 - 0
   - sm.ms
 - 1
-  - imgchr.com
+  - imgtu.com
 - 2
   - gitee.com
 - 3
