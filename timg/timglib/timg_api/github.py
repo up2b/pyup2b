@@ -4,13 +4,13 @@
 # @Email: thepoy@aliyun.com
 # @File Name: github.py
 # @Created: 2021-02-13 09:10:14
-# @Modified: 2021-02-24 15:31:15
+# @Modified: 2021-02-25 18:47:56
 
 import os
 import time
 import requests
 
-from typing import Optional, List, Dict, Tuple
+from typing import Optional, List, Dict, Tuple, Union
 from base64 import b64encode
 from requests.exceptions import ConnectionError
 from timg.timglib.timg_api import Base
@@ -51,7 +51,7 @@ class Github(Base):
         self._save_auth_info(auth_info)
 
     @Login
-    def upload_image(self, image_path: str) -> str:
+    def upload_image(self, image_path: str) -> Union[str, dict]:
         image_path = self._compress_image(image_path)
         suffix = os.path.splitext(image_path)[-1]
         if suffix.lower() == '.apng':
@@ -71,8 +71,11 @@ class Github(Base):
             if resp.status_code == 201:
                 return resp.json()["content"]["download_url"]
             else:
-                print(resp.status_code)
-                print(resp.json())
+                return {
+                    "error": resp.json()["message"],
+                    "status_code": resp.status_code,
+                    "image_path": image_path,
+                }
 
     @Login
     def upload_images(self, images_path: List[str]) -> List[str]:
@@ -86,7 +89,10 @@ class Github(Base):
 
         cdn_urls = []
         for url in images_url:
-            cdn_urls.append(self.cdn_url(url))
+            if type(url) == str:
+                cdn_urls.append(self.cdn_url(url))
+            else:
+                cdn_urls.append(url)
 
         self._clear_cache()
         return cdn_urls
@@ -94,18 +100,23 @@ class Github(Base):
     @Login
     def get_all_images(self):
         images = []
-        for file in self.get_all_images_in_image_bed():
-            images.append({
-                "url": self.cdn_url(file["download_url"]),
-                "sha": file["sha"],
-                "delete_url": file["url"],
-            })
+        all_images_resp = self.get_all_images_in_image_bed()
+        if all_images_resp:
+            for file in self.get_all_images_in_image_bed():
+                images.append({
+                    "url": self.cdn_url(file["download_url"]),
+                    "sha": file["sha"],
+                    "delete_url": file["url"],
+                })
         return images
 
     @Login
     def get_all_images_in_image_bed(self) -> Dict[str, str]:
         resp = requests.get(self.base_url, headers=self.headers)
-        return resp.json()
+        if resp.status_code == 200:
+            return resp.json()
+        else:
+            return None
 
     @Login
     def delete_image(self,

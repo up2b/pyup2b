@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: chr.py
 # @Created: 2021-02-13 09:04:37
-# @Modified: 2021-02-24 12:51:14
+# @Modified: 2021-02-25 18:29:09
 
 import sys
 import os
@@ -174,11 +174,11 @@ class Imgtu(Base):
         for img in images_path:
             result = self.upload_image(img)
             if type(result) == str:
-                images_url.append(self.upload_image(img))
+                images_url.append(result)
             elif type(result) == dict:
                 images_url.append({
                     "image_path": img,
-                    "statuc_code": result["status_code"],
+                    "status_code": result["status_code"],
                     "error": result["error"]["message"],
                 })
 

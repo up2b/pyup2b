@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: sm.py
 # @Created: 2021-02-13 09:04:07
-# @Modified: 2021-02-24 13:50:13
+# @Modified: 2021-02-25 18:38:54
 
 import requests
 
@@ -63,6 +63,7 @@ class SM(Base):
 
     @Login
     def upload_image(self, image_path: str):
+        # sm.ms不管出不出错，返回的状态码都是200
         url = self._url("upload")
         headers = {"Authorization": self.token}
         files = {"smfile": open(image_path, "rb")}
@@ -71,6 +72,7 @@ class SM(Base):
             return resp["data"]["url"]
         else:
             if resp["code"] == "image_repeated":
+                # 如果图片重复，会返回重复的图片的链接，所以此处不报错
                 return resp["images"]
             elif self._login_expired(resp):
                 self._auto_login()
@@ -91,7 +93,16 @@ class SM(Base):
 
         images_url = []
         for img in images_path:
-            images_url.append(self.upload_image(img))
+            try:
+                result = self.upload_image(img)
+            except errors.UploadFailed as e:
+                result = {
+                    "image_path": img,
+                    "status_code": 400,
+                    "error": f"{e}",
+                }
+
+            images_url.append(result)
 
         for i in images_url:
             print(i)

@@ -15,13 +15,13 @@
 支持以下图床自动上传:
 
 - sm.ms
-- imgtu.com
+- imgtu.com(原域名imgchr.com)
 - gitee.com
 - github.com
 
 成功上传到`github`后会返回`jsdelivr`的CDN链接，加快在中国境内对图片的访问速度。
 
-支持jpeg/jpg和png图片的自动压缩，但仅在测试阶段，可能有些小问题。
+支持jpeg/jpg和png图片的自动压缩，但仅在测试阶段，可能有些小问题，如果你不想在使用此功能时出现错误或达不到预期则不建议使用。
 
 # 怎么用
 

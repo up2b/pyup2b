@@ -4,13 +4,13 @@
 # @Email: thepoy@aliyun.com
 # @File Name: gitee.py
 # @Created: 2021-02-13 09:10:05
-# @Modified: 2021-02-24 15:30:11
+# @Modified: 2021-02-25 18:48:38
 
 import os
 import time
 import requests
 
-from typing import Optional, List, Dict, Tuple
+from typing import Optional, List, Dict, Tuple, Union
 from base64 import b64encode
 
 from timg.timglib.timg_api import Base
@@ -48,7 +48,7 @@ class Gitee(Base):
         self._save_auth_info(auth_info)
 
     @Login
-    def upload_image(self, image_path: str) -> str:
+    def upload_image(self, image_path: str) -> Union[str, dict]:
         image_path = self._compress_image(image_path)
         suffix = os.path.splitext(image_path)[-1]
         if suffix.lower() == '.apng':
@@ -65,7 +65,11 @@ class Gitee(Base):
             if resp.status_code == 201:
                 return resp.json()["content"]["download_url"]
             else:
-                print(resp.json())
+                return {
+                    "error": resp.json()["message"],
+                    "status_code": resp.status_code,
+                    "image_path": image_path,
+                }
 
     @Login
     def upload_images(self, images_path: List[str]) -> List[str]:
