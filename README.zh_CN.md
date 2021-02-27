@@ -2,6 +2,8 @@
 
 [电报群](https://t.me/pytimg)
 
+> 命令行管理太麻烦？试试[timg-gui](https://github.com/thep0y/timg-gui)吧！
+
 # timg
 
 一个能够自动将 `Typora`中的图片上传到图床的包。

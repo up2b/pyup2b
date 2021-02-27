@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: chr.py
 # @Created: 2021-02-13 09:04:37
-# @Modified: 2021-02-25 18:29:09
+# @Modified: 2021-02-27 14:53:01
 
 import sys
 import os
@@ -192,13 +192,6 @@ class Imgtu(Base):
     def get_all_images(self):
         url = self._url(self.username)
 
-        # image_count = re.search(r'<b data-text="image-count">(\d+)</b>',
-        #                         resp.text)
-        # if len(image_count.groups()):
-        #     image_count = int(image_count.group(1))
-        # else:
-        #     image_count = 0
-
         # 集合去重
         images = set()
 
@@ -206,8 +199,11 @@ class Imgtu(Base):
             resp = requests.get(url, headers=self.headers)
             resp.encoding = "utf-8"
 
-            images_object = re.findall(
-                r"data-privacy=\"public\" data-object='(.+?)'", resp.text)
+            # 只获取默认的公开相册里的图片
+            # images_object = re.findall(
+            #     r"data-privacy=\"public\" data-object='(.+?)'", resp.text)
+            # 获取用户所有图片
+            images_object = re.findall(r"data-object='(.+?)'", resp.text)
             images_object = [
                 json.loads(parse.unquote(i)) for i in images_object
             ]
