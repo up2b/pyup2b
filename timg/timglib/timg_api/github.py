@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: github.py
 # @Created: 2021-02-13 09:10:14
-# @Modified: 2021-02-25 18:47:56
+# @Modified: 2021-03-16 10:07:06
 
 import os
 import time
@@ -93,6 +93,10 @@ class Github(Base):
                 cdn_urls.append(self.cdn_url(url))
             else:
                 cdn_urls.append(url)
+
+        # 终端打印url，typora需要
+        for url in cdn_urls:
+            print(url)
 
         self._clear_cache()
         return cdn_urls
