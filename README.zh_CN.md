@@ -8,7 +8,7 @@
 
 一个能够自动将 `Typora`中的图片上传到图床的包。
 
-理论上支持linux、macOS和windows，但是macOS上没有进行测试。
+支持linux、macOS和windows。
 
 ![Peek 2021-02-13 13-10](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1613400034436.png)
 
@@ -94,7 +94,7 @@ timg -l username password
 ```
 **git仓库：**
 
-此包所指的git仓库包括`gitee`和`github`，分别针对中国和非中国用户。
+此包所指的git仓库包括`gitee`和`github`，分别针对中国和全球用户（包括中国）。
 
 使用git仓库作为图床，需要用`-lg`或`--login-git`进行认证信息的配置。
 

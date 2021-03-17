@@ -21,16 +21,25 @@ from timg.timglib.errors import UnsupportedType, OverSizeError
 from timg.timglib.constants import IMAGE_BEDS_CODE
 
 IS_WINDOWS = sys.platform == "win32"
+IS_MACOS = sys.platform == "darwin"
 
-if not IS_WINDOWS:
+if IS_WINDOWS:
+    TYPORA_APPDATA_PATH = os.path.join(
+        os.environ['APPDATA'],
+        "Typora",
+    )
+elif IS_MACOS:
     TYPORA_APPDATA_PATH = os.path.join(
         os.environ["HOME"],
         ".config",
-        "Typora",
+        "timg",
     )
+    if not os.path.exists(TYPORA_APPDATA_PATH):
+        os.makedirs(os.path.join(TYPORA_APPDATA_PATH, "conf"), 0o755)
 else:
     TYPORA_APPDATA_PATH = os.path.join(
-        os.environ['APPDATA'],
+        os.environ["HOME"],
+        ".config",
         "Typora",
     )
 

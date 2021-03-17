@@ -12,3 +12,5 @@ tests
 build/
 dist/
 *.egg-info/
+*.spec
+._README.zh_CN.md

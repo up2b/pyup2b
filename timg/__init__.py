@@ -21,7 +21,7 @@ from timg.timglib.timg_api.github import Github
 from timg.timglib.constants import (SM_MS, IMGTU, GITEE, GITHUB,
                                     IMAGE_BEDS_CODE)
 
-__version__ = '0.1.6'
+__version__ = '0.1.7'
 
 IMAGE_BEDS = {
     SM_MS: SM,
