@@ -32,7 +32,7 @@
 安装`up2b`包:
 
 ```shell
-pip install typora-upload-image
+pip install up2b
 ```
 
 安装后，会多出一条`up2b`命令：

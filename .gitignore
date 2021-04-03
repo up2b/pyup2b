@@ -14,3 +14,4 @@ dist/
 *.egg-info/
 *.spec
 ._README.zh_CN.md
+._README.md
