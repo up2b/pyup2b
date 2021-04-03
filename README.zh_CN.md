@@ -1,10 +1,10 @@
-[English](https://github.com/thep0y/timg)
+[English](https://github.com/thep0y/up2b)
 
-[电报群](https://t.me/pytimg)
+[电报群](https://t.me/py_up2b)
 
-> 命令行管理太麻烦？试试[timg-gui](https://github.com/thep0y/timg-gui)吧！
+> 命令行管理太麻烦？试试[up2b-gui](https://github.com/thep0y/up2b-gui)吧！
 
-# timg
+# up2b
 
 一个能够自动将 `Typora`中的图片上传到图床的包。
 
@@ -29,16 +29,16 @@
 
 >  **`Typora` 必须安装！**
 
-安装`timg`包:
+安装`up2b`包:
 
 ```shell
 pip install typora-upload-image
 ```
 
-安装后，会多出一条`timg`命令：
+安装后，会多出一条`up2b`命令：
 
 ```
-usage: timg [-h] [-v] [-aac]
+usage: up2b [-h] [-v] [-aac]
             [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
 
 A package that can upload pictures to the image bed in Typora.
@@ -66,7 +66,7 @@ optional arguments:
 
 第一次使用时，必须先选择图床。
 
-`timg`的`-c`参数可选值为：
+`up2b`的`-c`参数可选值为：
 
 - 0
   - sm.ms
@@ -79,7 +79,7 @@ optional arguments:
 
 ```shell
 # 如果你想选择sm.ms
-timg -c 0
+up2b -c 0
 ```
 #### 2 保存认证信息
 
@@ -90,7 +90,7 @@ git仓库本身并不算是图床，所以git仓库之外的图床都是普通�
 使用普通图床时，用`-l`或`--login`进行认证信息的配置，如：
 
 ```shell
-timg -l username password
+up2b -l username password
 ```
 **git仓库：**
 
@@ -108,28 +108,31 @@ timg -l username password
 比如，我想将图片保存在`image-bed`仓库里的`md`文件夹内，输入此命令：
 
 ```shell
-timg -lg access_token username image-bed md
+up2b -lg access_token username image-bed md
 ```
 
 #### 3 在 typora 内填写命令
 
-然后才能将`timg`命令填到`Typora`里，命令里有个参数`-aac`为可选参数，其作用为开启自动压缩功能，如果不加此参数，上传图片时不会自动压缩，超出图床限制大小就会报错。而添加此参数，则会自动将超限图片压缩到限制图片大小或以下，保证顺利上传。
+然后才能将`up2b`命令填到`Typora`里，命令里有个参数`-aac`为可选参数，其作用为开启自动压缩功能，如果不加此参数，上传图片时不会自动压缩，超出图床限制大小就会报错。而添加此参数，则会自动将超限图片压缩到限制图片大小或以下，保证顺利上传。
 
 但自动压缩功能当前没有经过严谨地测试，所以不能保证不出问题，有问题请将异常的截图发在电报群里。
 
 开启自动压缩功能：
 
 ```shell
-timg -aac -ps
+up2b -aac -ps
 ```
 
 不开启自动压缩功能：
 
 ```shell
-timg -ps
+up2b -ps
 ```
 
 下面这张图就是自动上传的：
 
-![Typora 2021_2_13 13_41_13](https://gitee.com/thepoy/image-bed/raw/master/md/1613195278517.png)
+![截屏2021-04-03 10.52.12](https://i.loli.net/2021/04/03/9wKtnvyDkj8EJx1.png)
 
+macOS 系统中，因环境变量原因，typora无法调用user下的bin中的命令，需要使用`where up2b`查找`up2b`命令的具体位置，用绝对路径填写。如下图：
+
+![截屏2021-04-03 11.00.22](https://i.loli.net/2021/04/03/KEFOZo8qV4A5IWC.png)

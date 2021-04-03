@@ -1,8 +1,8 @@
-[简体中文](https://github.com/thep0y/timg/blob/main/README.zh_CN.md)
+[简体中文](https://github.com/thep0y/up2b/blob/main/README.zh_CN.md)
 
-[Telegram](https://t.me/pytimg)
+[Telegram](https://t.me/py_up2b)
 
-# timg
+# UP2B
 
 A package that can upload pictures to the image bed in `Typora`.
 
@@ -28,13 +28,13 @@ Support automatic compression of `jpeg/jpg` and `png` format images.
 Install the package:
 
 ```shell
-pip install typora-upload-image
+pip install up2b
 ```
 
 Usage Options:
 
 ```
-usage: timg [-h] [-v] [-aac]
+usage: up2b [-h] [-v] [-aac]
             [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
 
 A package that can upload pictures to the image bed in Typora.
@@ -72,7 +72,7 @@ When using for the first time, you must first select a image bed. The available 
 
 ```shell
 # if you want to choose github:
-timg -c 3
+up2b -c 3
 ```
 #### 2 Save authentication information
 
@@ -83,7 +83,7 @@ The general picture bed refers to the website that only provides the function of
 When using the general image bed, use `-l` or `--login` to configure authentication information:
 
 ```shell
-timg -l username password
+up2b -l username password
 ```
 **Git site:**
 
@@ -102,7 +102,7 @@ The authentication information includes the following four key parameters:
 For example, I want to save the image in the `md` folder in the `image-bed` repository, and enter this command:
 
 ```shell
-timg -lg access_token username image-bed md
+up2b -lg access_token username image-bed md
 ```
 
 #### 3 Write the command in typora
@@ -118,18 +118,22 @@ Adding this parameter will automatically compress images that exceed the limit s
 Turn on automatic compression:
 
 ```shell
-timg -aac -ps
+up2b -aac -ps
 ```
 
 Turn off automatic compression:
 
 ```shell
-timg -ps
+up2b -ps
 ```
 
-Configure in `Typora`:
+Configure in `Typora` on **windows / linux**:
 
-![Typora 2021_2_13 13_40_23](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1613195345227.png)
+![截屏2021-04-03 11.04.21](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1617419183417.png)
+
+If you want to use it in the **macOS** system, you need to find the absolute path of the up2b command:
+
+![截屏2021-04-03 11.04.48](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1617419270287.png)
 
 # End
 

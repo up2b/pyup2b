@@ -4,17 +4,17 @@
 # @Email: thepoy@aliyun.com
 # @File Name: sm.py
 # @Created: 2021-02-13 09:04:07
-# @Modified: 2021-02-25 18:38:54
+# @Modified: 2021-04-03 10:23:38
 
 import requests
 
 from typing import List, Optional, Dict, Any
 
-from timg.timglib.timg_api import Base
-from timg.timglib.utils import Login, check_image_exists
-from timg.timglib import errors
-from timg.timglib.constants import SM_MS
-from timg.timglib.custom_types import DeletedResponse
+from up2b.up2b_lib.up2b_api import Base
+from up2b.up2b_lib.utils import Login, check_image_exists
+from up2b.up2b_lib import errors
+from up2b.up2b_lib.constants import SM_MS
+from up2b.up2b_lib.custom_types import DeletedResponse
 
 
 class SM(Base):

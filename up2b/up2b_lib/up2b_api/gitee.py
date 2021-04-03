@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # @Author: thepoy
 # @Email: thepoy@aliyun.com
-# @File Name: github.py
-# @Created: 2021-02-13 09:10:14
-# @Modified: 2021-03-16 10:07:06
+# @File Name: gitee.py
+# @Created: 2021-02-13 09:10:05
+# @Modified: 2021-04-03 10:20:34
 
 import os
 import time
@@ -12,34 +12,31 @@ import requests
 
 from typing import Optional, List, Dict, Tuple, Union
 from base64 import b64encode
-from requests.exceptions import ConnectionError
-from timg.timglib.timg_api import Base
-from timg.timglib.constants import GITHUB
-from timg.timglib.utils import Login, check_image_exists
+
+from up2b.up2b_lib.up2b_api import Base
+from up2b.up2b_lib.constants import GITEE
+from up2b.up2b_lib.utils import Login, check_image_exists
 
 
-class Github(Base):
+class Gitee(Base):
     def __init__(self,
                  conf_file: Optional[str] = None,
                  auto_compress: bool = False):
         if not conf_file:
-            super().__init__(GITHUB)
+            super().__init__(GITEE)
         else:
-            super().__init__(GITHUB, conf_file)
+            super().__init__(GITEE, conf_file)
 
-        self.max_size = 20 * 1024 * 1024
+        self.max_size = 1 * 1024 * 1024
         self.auto_compress: bool = auto_compress
+
+        self.headers = {"Content-Type": "application/json;charset=UTF-8"}
 
         if self.auth_info:
             self.token: str = self.auth_info["token"]
             self.username: str = self.auth_info["username"]
             self.repo: str = self.auth_info["repo"]
             self.folder: str = self.auth_info["folder"]
-
-            self.headers = {
-                "Accept": "application/vnd.github.v3+json",
-                "Authorization": "token " + self.token
-            }
 
     def login(self, token: str, username: str, repo: str, folder: str = "md"):
         auth_info = {
@@ -60,14 +57,11 @@ class Github(Base):
         with open(image_path, "rb") as fb:
             url = self.base_url + filename
             data = {
+                "access_token": self.token,
                 "content": b64encode(fb.read()).decode("utf-8"),
                 "message": "typora - " + filename,
             }
-            try:
-                resp = requests.put(url, headers=self.headers, json=data)
-            except ConnectionError as e:
-                return "Warning: %s upload failed, please try again: (%s)" % (
-                    image_path, e)
+            resp = requests.post(url, headers=self.headers, json=data)
             if resp.status_code == 201:
                 return resp.json()["content"]["download_url"]
             else:
@@ -87,47 +81,37 @@ class Github(Base):
         for img in images_path:
             images_url.append(self.upload_image(img))
 
-        cdn_urls = []
-        for url in images_url:
-            if type(url) == str:
-                cdn_urls.append(self.cdn_url(url))
-            else:
-                cdn_urls.append(url)
-
-        # 终端打印url，typora需要
-        for url in cdn_urls:
-            print(url)
+        for i in images_url:
+            print(i)
 
         self._clear_cache()
-        return cdn_urls
-
-    @Login
-    def get_all_images(self):
-        images = []
-        all_images_resp = self.get_all_images_in_image_bed()
-        if all_images_resp:
-            for file in self.get_all_images_in_image_bed():
-                images.append({
-                    "url": self.cdn_url(file["download_url"]),
-                    "sha": file["sha"],
-                    "delete_url": file["url"],
-                })
-        return images
+        return images_url
 
     @Login
     def get_all_images_in_image_bed(self) -> Dict[str, str]:
-        resp = requests.get(self.base_url, headers=self.headers)
-        if resp.status_code == 200:
-            return resp.json()
-        else:
-            return None
+        data = {
+            "access_token": self.token,
+        }
+        resp = requests.get(self.base_url, headers=self.headers, json=data)
+        return resp.json()
+
+    @Login
+    def get_all_images(self) -> List[Dict[str, str]]:
+        images = []
+        for file in self.get_all_images_in_image_bed():
+            images.append({
+                "sha": file["sha"],
+                "delete_url": file["url"],
+                "url": file["download_url"],
+            })
+        return images
 
     @Login
     def delete_image(self,
                      sha: str,
                      url: str,
                      message: str = "Delete pictures that are no longer used"):
-        data = {"sha": sha, "message": message}
+        data = {"access_token": self.token, "sha": sha, "message": message}
         resp = requests.delete(url, headers=self.headers, json=data)
         return resp.status_code == 200
 
@@ -145,13 +129,8 @@ class Github(Base):
 
     @property
     def base_url(self) -> str:
-        return "https://api.github.com/repos/%s/%s/contents/%s/" % (
+        return "https://gitee.com/api/v5/repos/%s/%s/contents/%s/" % (
             self.username, self.repo, self.folder)
 
-    def cdn_url(self, url: str) -> str:
-        path = url.split("/main/")[-1]
-        return "https://cdn.jsdelivr.net/gh/%s/%s/%s" % (self.username,
-                                                         self.repo, path)
-
     def __str__(self):
-        return "github.com"
+        return "gitee.com"

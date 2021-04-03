@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-13 09:02:21
-# @Modified: 2021-02-23 13:48:42
+# @Modified: 2021-04-03 10:24:22
 
 import os
 import sys
@@ -15,10 +15,10 @@ import mimetypes
 from io import BytesIO
 from typing import Optional, List, Tuple, Dict
 from PIL import Image
-from timg.timglib import custom_types
-from timg.timglib.utils import Login
-from timg.timglib.errors import UnsupportedType, OverSizeError
-from timg.timglib.constants import IMAGE_BEDS_CODE
+from up2b.up2b_lib import custom_types
+from up2b.up2b_lib.utils import Login
+from up2b.up2b_lib.errors import UnsupportedType, OverSizeError
+from up2b.up2b_lib.constants import IMAGE_BEDS_CODE
 
 IS_WINDOWS = sys.platform == "win32"
 IS_MACOS = sys.platform == "darwin"
@@ -32,7 +32,7 @@ elif IS_MACOS:
     TYPORA_APPDATA_PATH = os.path.join(
         os.environ["HOME"],
         ".config",
-        "timg",
+        "up2b",
     )
     if not os.path.exists(TYPORA_APPDATA_PATH):
         os.makedirs(os.path.join(TYPORA_APPDATA_PATH, "conf"), 0o755)
@@ -46,7 +46,7 @@ else:
 CONF_FILE = os.path.join(
     TYPORA_APPDATA_PATH,
     "conf",
-    "conf.timg.json",
+    "conf.up2b.json",
 )
 
 
@@ -189,7 +189,7 @@ class Base:
                 else:
                     filename += "." + img.format.lower()
                 img_io = compress(img, scale)
-                cache_path = os.path.join(TYPORA_APPDATA_PATH, "Cache", "timg")
+                cache_path = os.path.join(TYPORA_APPDATA_PATH, "Cache", "up2b")
                 img_cache_path = os.path.join(cache_path, filename)
                 try:
                     with open(img_cache_path, "wb") as f:
@@ -202,7 +202,7 @@ class Base:
         return image_path
 
     def _clear_cache(self):
-        cache_path = os.path.join(TYPORA_APPDATA_PATH, "Cache", "timg")
+        cache_path = os.path.join(TYPORA_APPDATA_PATH, "Cache", "up2b")
         if os.path.exists(cache_path):
             shutil.rmtree(cache_path)
             os.mkdir(cache_path)

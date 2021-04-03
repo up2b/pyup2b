@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # @Author: thepoy
 # @Email: thepoy@aliyun.com
-# @File Name: chr.py
+# @File Name: imgtu.py
 # @Created: 2021-02-13 09:04:37
-# @Modified: 2021-02-27 14:53:01
+# @Modified: 2021-04-03 10:21:15
 
 import sys
 import os
@@ -19,9 +19,9 @@ from typing import List, Optional, Tuple, Union
 
 from requests_toolbelt import MultipartEncoder
 
-from timg.timglib.timg_api import Base
-from timg.timglib.utils import Login, check_image_exists
-from timg.timglib.constants import IMGTU
+from up2b.up2b_lib.up2b_api import Base
+from up2b.up2b_lib.utils import Login, check_image_exists
+from up2b.up2b_lib.constants import IMGTU
 
 
 class Imgtu(Base):

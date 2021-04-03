@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-08 15:43:32
-# @Modified: 2021-03-16 10:08:39
+# @Modified: 2021-04-03 10:36:46
 
 import os
 import sys
@@ -13,15 +13,15 @@ import argparse
 
 from typing import Union
 
-from timg.timglib.timg_api import CONF_FILE, choose_image_bed
-from timg.timglib.timg_api.sm import SM
-from timg.timglib.timg_api.imgtu import Imgtu
-from timg.timglib.timg_api.gitee import Gitee
-from timg.timglib.timg_api.github import Github
-from timg.timglib.constants import (SM_MS, IMGTU, GITEE, GITHUB,
+from up2b.up2b_lib.up2b_api import CONF_FILE, choose_image_bed
+from up2b.up2b_lib.up2b_api.sm import SM
+from up2b.up2b_lib.up2b_api.imgtu import Imgtu
+from up2b.up2b_lib.up2b_api.gitee import Gitee
+from up2b.up2b_lib.up2b_api.github import Github
+from up2b.up2b_lib.constants import (SM_MS, IMGTU, GITEE, GITHUB,
                                     IMAGE_BEDS_CODE)
 
-__version__ = '0.1.7'
+__version__ = '0.1.8'
 
 IMAGE_BEDS = {
     SM_MS: SM,
