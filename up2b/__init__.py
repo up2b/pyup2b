@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-08 15:43:32
-# @Modified: 2021-04-03 10:36:46
+# @Modified: 2021-04-03 12:52:27
 
 import os
 import sys
@@ -19,7 +19,7 @@ from up2b.up2b_lib.up2b_api.imgtu import Imgtu
 from up2b.up2b_lib.up2b_api.gitee import Gitee
 from up2b.up2b_lib.up2b_api.github import Github
 from up2b.up2b_lib.constants import (SM_MS, IMGTU, GITEE, GITHUB,
-                                    IMAGE_BEDS_CODE)
+                                     IMAGE_BEDS_CODE)
 
 __version__ = '0.1.8'
 

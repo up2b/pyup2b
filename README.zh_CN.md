@@ -29,6 +29,8 @@
 
 >  **`Typora` 必须安装！**
 
+
+
 安装`up2b`包:
 
 ```shell
@@ -131,8 +133,8 @@ up2b -ps
 
 下面这张图就是自动上传的：
 
-![截屏2021-04-03 10.52.12](https://i.loli.net/2021/04/03/9wKtnvyDkj8EJx1.png)
+![截屏2021-04-03 10.52.12](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1620902616449.png)
 
 macOS 系统中，因环境变量原因，typora无法调用user下的bin中的命令，需要使用`where up2b`查找`up2b`命令的具体位置，用绝对路径填写。如下图：
 
-![截屏2021-04-03 11.00.22](https://i.loli.net/2021/04/03/KEFOZo8qV4A5IWC.png)
+![截屏2021-04-03 11.00.22](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1620902667868.png)

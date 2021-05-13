@@ -4,8 +4,8 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __main__.py
 # @Created: 2021-02-08 15:47:06
-# @Modified: 2021-02-08 16:03:34
+# @Modified: 2021-04-03 12:55:09
 
-import timg
+import up2b
 
-timg.run_main()
+up2b.run_main()
