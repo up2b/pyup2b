@@ -10,5 +10,5 @@ env:
 install:
   - pip install requests requests-toolbelt pillow
 script:
-  - cd thep0y/up2b/tests
+  - cd tests
   - python -m unittest *

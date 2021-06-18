@@ -1,9 +1,9 @@
 test.py
 __pycache__
 *.pyc
-*.png
-*.jpg
-*.jpeg
+/*.png
+/*.jpg
+/*.jpeg
 record.saz
 test.json
 note.md
