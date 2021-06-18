@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: imgtu.py
 # @Created: 2021-02-13 09:04:37
-# @Modified: 2021-06-18 11:06:44
+# @Modified: 2021-06-18 11:30:55
 
 import sys
 import os
@@ -145,6 +145,9 @@ class Imgtu(Base):
                 return self.upload_image(image_path)
             else:
                 return resp.json()
+        except json.decoder.JSONDecodeError:
+            print(resp.text)
+            sys.exit(1)
 
     @Login
     def upload_images(self, images_path: List[str]) -> list:
