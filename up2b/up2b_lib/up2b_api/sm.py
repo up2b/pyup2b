@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: sm.py
 # @Created: 2021-02-13 09:04:07
-# @Modified: 2021-04-03 10:23:38
+# @Modified: 2021-06-04 13:25:14
 
 import requests
 
@@ -14,7 +14,6 @@ from up2b.up2b_lib.up2b_api import Base
 from up2b.up2b_lib.utils import Login, check_image_exists
 from up2b.up2b_lib import errors
 from up2b.up2b_lib.constants import SM_MS
-from up2b.up2b_lib.custom_types import DeletedResponse
 
 
 class SM(Base):
@@ -51,7 +50,7 @@ class SM(Base):
         resp = requests.post(url, data=data).json()
         return resp["data"]["token"]
 
-    def _get_user_profile(self) -> Dict[str, str]:
+    def _get_user_profile(self) -> Optional[Dict[str, str]]:
         url = self._url("profile")
         resp = requests.post(url, headers=self.headers).json()
         if resp["success"]:
@@ -149,7 +148,7 @@ class SM(Base):
         return images
 
     @Login
-    def delete_image(self, delete_url: str) -> DeletedResponse:
+    def delete_image(self, delete_url: str) -> bool:
         resp = requests.get(delete_url, headers=self.headers)
         # TODO: sm.ms 删除图片后本应返回json，但实际返回的是html。而且删除链接不需要认证，任何人get都能删除图片
         return resp.status_code == 200
@@ -165,7 +164,7 @@ class SM(Base):
         return result
 
     @Login
-    def get_all_images_in_image_bed(self) -> List[str]:
+    def get_all_images_in_image_bed(self) -> List[str]: # type: ignore
         pass
 
     def _url(self, path: str) -> str:

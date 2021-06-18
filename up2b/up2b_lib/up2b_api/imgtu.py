@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: imgtu.py
 # @Created: 2021-02-13 09:04:37
-# @Modified: 2021-04-03 10:21:15
+# @Modified: 2021-06-18 11:06:44
 
 import sys
 import os
@@ -25,9 +25,7 @@ from up2b.up2b_lib.constants import IMGTU
 
 
 class Imgtu(Base):
-    def __init__(self,
-                 conf_file: Optional[str] = None,
-                 auto_compress: bool = False):
+    def __init__(self, conf_file: Optional[str] = None, auto_compress: bool = False):
         if not conf_file:
             super().__init__(IMGTU)
         else:
@@ -37,10 +35,8 @@ class Imgtu(Base):
         self.auto_compress: bool = auto_compress
 
         self.headers = {
-            "Accept":
-            "application/json",
-            "User-Agent":
-            "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0"
+            "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",
         }
 
         self.cookie: Optional[str] = None
@@ -55,35 +51,25 @@ class Imgtu(Base):
         url = self._url("login")
         auth_token, cookie = self._parse_auth_token()
 
+        if not auth_token or not cookie:
+            raise Exception("auth token or cookie is None")
+
         headers = self.headers.copy()
         headers["Cookie"] = cookie
 
-        data = {
-            "login-subject": username,
-            "password": password,
-            "auth_token": auth_token,
-        }
+        data = {"login-subject": username, "password": password, "auth_token": auth_token}
 
-        resp = requests.post(url,
-                             headers=headers,
-                             data=data,
-                             allow_redirects=False)
+        resp = requests.post(url, headers=headers, data=data, allow_redirects=False)
         if resp.status_code == 301:
             # If there is a KEEPLOGIN field in the cookie,
             # pictures will be uploaded as a normal user
-            self.cookie = cookie + "; " + resp.headers["Set-Cookie"].split(
-                "; ")[0]
+            self.cookie = cookie + "; " + resp.headers["Set-Cookie"].split("; ")[0]
 
             # If there is no KEEPLOGIN field in the cookie,
             # pictures will be uploaded as a tourist
             # self.cookie = cookie
 
-            auth_info = {
-                "token": auth_token,
-                "cookie": self.cookie,
-                "username": username,
-                "password": password
-            }
+            auth_info = {"token": auth_token, "cookie": self.cookie, "username": username, "password": password}
             self._save_auth_info(auth_info)
         else:
             print("Error: Login failed.")
@@ -93,8 +79,7 @@ class Imgtu(Base):
         url = self._url("login")
         resp = requests.get(url, headers=self.headers)
         if resp.status_code == 200:
-            auth_token = re.search(
-                r'PF.obj.config.auth_token = "([a-f0-9]{40})"', resp.text)
+            auth_token = re.search(r'PF.obj.config.auth_token = "([a-f0-9]{40})"', resp.text)
             resp_set_cookie = resp.headers["Set-Cookie"].split("; ")[0]
             return auth_token.group(1), resp_set_cookie
         else:
@@ -104,13 +89,14 @@ class Imgtu(Base):
     def _update_auth_token(self):
         headers = {
             "Accept": "application/json",
-            "User-Agent":
-            "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",
             "Cookie": self.cookie,
         }
         resp = requests.get(self.base_url, headers=headers)
-        auth_token = re.search(r'PF.obj.config.auth_token = "([a-f0-9]{40})"',
-                               resp.text).group(1)
+        auth_token = re.search(r'PF.obj.config.auth_token = "([a-f0-9]{40})"', resp.text).group(1)
+        if not self.auth_info:
+            self.auth_info = {}
+
         self.auth_info["token"] = self.token = auth_token
         self._save_auth_info(self.auth_info)
 
@@ -120,45 +106,41 @@ class Imgtu(Base):
         url = self._url("json")
         headers = {
             "Accept": "application/json",
-            "User-Agent":
-            "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",
             "Cookie": self.cookie,
         }
 
         filename_with_suffix = os.path.basename(image_path)
-        filename_without_suffix, suffix = os.path.splitext(
-            filename_with_suffix)
-        if suffix.lower() == '.apng':
+        filename_without_suffix, suffix = os.path.splitext(filename_with_suffix)
+        if suffix.lower() == ".apng":
             suffix = ".png"
         filename = filename_without_suffix + suffix
 
         mime_type = mimetypes.guess_type(image_path)[0]
 
         timestamp = int(time.time() * 1000)
-        data = MultipartEncoder({
-            "source": (filename, open(image_path, "rb"), mime_type),
-            "type":
-            "file",
-            "action":
-            "upload",
-            "timestamp":
-            str(timestamp),
-            "auth_token":
-            self.token,
-            "nsfw":
-            "0",
-        })
+
+        with open(image_path, "rb") as fb:
+            img_buffer = fb.read()
+
+        data = MultipartEncoder(
+            {
+                "source": (filename, img_buffer, mime_type),
+                "type": "file",
+                "action": "upload",
+                "timestamp": str(timestamp),
+                "auth_token": self.token,
+                "nsfw": "0",
+            }
+        )
         headers.update({"Content-Type": data.content_type})
-        resp = requests.post(url, headers=headers, data=data)
+        resp = requests.post(url, headers=headers, data=data)  # type: ignore
         resp.encoding = "utf-8"
         try:
             return resp.json()["image"]["image"]["url"]
         except KeyError:
-            if resp.json()["error"]["message"] == '请求被拒绝 (auth_token)':
-                print(
-                    "Warning: `auth_token` has expired, "
-                    "the program will try to update `auth_token` automatically."
-                )
+            if resp.json()["error"]["message"] == "请求被拒绝 (auth_token)":
+                print("Warning: `auth_token` has expired, the program will try to update `auth_token` automatically.")
                 self._update_auth_token()
                 return self.upload_image(image_path)
             else:
@@ -176,14 +158,13 @@ class Imgtu(Base):
             if type(result) == str:
                 images_url.append(result)
             elif type(result) == dict:
-                images_url.append({
-                    "image_path": img,
-                    "status_code": result["status_code"],
-                    "error": result["error"]["message"],
-                })
+                images_url.append(
+                    {"image_path": img, "status_code": result["status_code"], "error": result["error"]["message"]}
+                )
 
-        for i in images_url:
-            print(i)
+        if not os.getenv("UP2B_TEST"):
+            for i in images_url:
+                print(i)
 
         self._clear_cache()
         return images_url
@@ -204,17 +185,9 @@ class Imgtu(Base):
             #     r"data-privacy=\"public\" data-object='(.+?)'", resp.text)
             # 获取用户所有图片
             images_object = re.findall(r"data-object='(.+?)'", resp.text)
-            images_object = [
-                json.loads(parse.unquote(i)) for i in images_object
-            ]
+            images_object = [json.loads(parse.unquote(i)) for i in images_object]
             for image in images_object:
-                images.add((
-                    image["url"],
-                    image["display_url"],
-                    image["id_encoded"],
-                    image["width"],
-                    image["height"],
-                ))
+                images.add((image["url"], image["display_url"], image["id_encoded"], image["width"], image["height"]))
                 # images.append({
                 #     "url": image["url"],
                 #     "display_url": image["display_url"],
@@ -223,8 +196,7 @@ class Imgtu(Base):
                 #     "height": image["height"],
                 # })
 
-            next_page_url = re.search(
-                r'data-pagination="next" href="(.+?)" ><span', resp.text)
+            next_page_url = re.search(r'data-pagination="next" href="(.+?)" ><span', resp.text)
             if next_page_url:
                 next_page_url = next_page_url.group(1)
             else:
@@ -238,13 +210,7 @@ class Imgtu(Base):
         result = []
 
         for item in images:
-            result.append({
-                "url": item[0],
-                "display_url": item[1],
-                "id": item[2],
-                "width": item[3],
-                "height": item[4],
-            })
+            result.append({"url": item[0], "display_url": item[1], "id": item[2], "width": item[3], "height": item[4]})
 
         return result
 
@@ -260,11 +226,8 @@ class Imgtu(Base):
         }
         resp = requests.post(url, headers=self.headers, data=data)
         if resp.status_code == 400:
-            if resp.json()["error"]["message"] == '请求被拒绝 (auth_token)':
-                print(
-                    "Warning: `auth_token` has expired, "
-                    "the program will try to update `auth_token` automatically."
-                )
+            if resp.json()["error"]["message"] == "请求被拒绝 (auth_token)":
+                print("Warning: `auth_token` has expired, the program will try to update `auth_token` automatically.")
                 self._update_auth_token()
                 return self.delete_image(img_id)
         return resp.json()
@@ -282,11 +245,8 @@ class Imgtu(Base):
         }
         resp = requests.post(url, headers=self.headers, data=data)
         if resp.status_code == 400:
-            if resp.json()["error"]["message"] == '请求被拒绝 (auth_token)':
-                print(
-                    "Warning: `auth_token` has expired, "
-                    "the program will try to update `auth_token` automatically."
-                )
+            if resp.json()["error"]["message"] == "请求被拒绝 (auth_token)":
+                print("Warning: `auth_token` has expired, the program will try to update `auth_token` automatically.")
                 self._update_auth_token()
                 return self.delete_images(imgs_id)
         return resp.json()

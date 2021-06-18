@@ -4,7 +4,7 @@
 # @Email: thepoy@163.com
 # @File Name: utils.py
 # @Created:  2021-02-09 15:17:32
-# @Modified: 2021-02-20 19:30:08
+# @Modified: 2021-06-04 13:25:58
 
 import os
 import sys
@@ -23,7 +23,7 @@ class Login:
         wraps(func)(self)
 
     def __call__(self, instance, *args, **kwargs):
-        return self.__wrapped__(instance, *args, **kwargs)
+        return self.__wrapped__(instance, *args, **kwargs) # type: ignore
 
     def __get__(self, instance, cls):
         if not instance:

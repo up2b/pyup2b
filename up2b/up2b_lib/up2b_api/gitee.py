@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: gitee.py
 # @Created: 2021-02-13 09:10:05
-# @Modified: 2021-04-03 10:20:34
+# @Modified: 2021-06-04 09:34:38
 
 import os
 import time
@@ -19,9 +19,7 @@ from up2b.up2b_lib.utils import Login, check_image_exists
 
 
 class Gitee(Base):
-    def __init__(self,
-                 conf_file: Optional[str] = None,
-                 auto_compress: bool = False):
+    def __init__(self, conf_file: Optional[str] = None, auto_compress: bool = False):
         if not conf_file:
             super().__init__(GITEE)
         else:
@@ -43,7 +41,7 @@ class Gitee(Base):
             "token": token,
             "username": username,
             "repo": repo,
-            "folder": folder
+            "folder": folder,
         }
         self._save_auth_info(auth_info)
 
@@ -51,7 +49,7 @@ class Gitee(Base):
     def upload_image(self, image_path: str) -> Union[str, dict]:
         image_path = self._compress_image(image_path)
         suffix = os.path.splitext(image_path)[-1]
-        if suffix.lower() == '.apng':
+        if suffix.lower() == ".apng":
             suffix = ".png"
         filename = f"{int(time.time() * 1000)}{suffix}"
         with open(image_path, "rb") as fb:
@@ -89,9 +87,7 @@ class Gitee(Base):
 
     @Login
     def get_all_images_in_image_bed(self) -> Dict[str, str]:
-        data = {
-            "access_token": self.token,
-        }
+        data = {"access_token": self.token}
         resp = requests.get(self.base_url, headers=self.headers, json=data)
         return resp.json()
 
@@ -99,27 +95,32 @@ class Gitee(Base):
     def get_all_images(self) -> List[Dict[str, str]]:
         images = []
         for file in self.get_all_images_in_image_bed():
-            images.append({
-                "sha": file["sha"],
-                "delete_url": file["url"],
-                "url": file["download_url"],
-            })
+            images.append(
+                {
+                    "sha": file["sha"],
+                    "delete_url": file["url"],
+                    "url": file["download_url"],
+                }
+            )
         return images
 
     @Login
-    def delete_image(self,
-                     sha: str,
-                     url: str,
-                     message: str = "Delete pictures that are no longer used"):
+    def delete_image(
+        self,
+        sha: str,
+        url: str,
+        message: str = "Delete pictures that are no longer used",
+    ):
         data = {"access_token": self.token, "sha": sha, "message": message}
         resp = requests.delete(url, headers=self.headers, json=data)
         return resp.status_code == 200
 
     @Login
     def delete_images(
-            self,
-            info: Tuple[str, str],
-            message: str = "Delete pictures that are no longer used"):
+        self,
+        info: Tuple[str, str],
+        message: str = "Delete pictures that are no longer used",
+    ):
         failed = []
         for sha, url in info:
             result = self.delete_image(sha, url, message)
@@ -130,7 +131,10 @@ class Gitee(Base):
     @property
     def base_url(self) -> str:
         return "https://gitee.com/api/v5/repos/%s/%s/contents/%s/" % (
-            self.username, self.repo, self.folder)
+            self.username,
+            self.repo,
+            self.folder,
+        )
 
     def __str__(self):
         return "gitee.com"

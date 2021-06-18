@@ -7,8 +7,6 @@ __pycache__
 record.saz
 test.json
 note.md
-test_*.py
-tests
 build/
 dist/
 *.egg-info/

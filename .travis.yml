@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.6" # current default Python on Travis CI
+  - "3.7"
+  - "3.8"
+  - "3.9"
+env:
+  global:
+    - UP2B_TEST="1"
+install:
+  - pip install requests requests-toolbelt pillow
+script:
+  - cd tests
+  - python -m unittest *

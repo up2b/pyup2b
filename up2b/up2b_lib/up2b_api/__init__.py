@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-13 09:02:21
-# @Modified: 2021-04-03 10:24:22
+# @Modified: 2021-06-04 13:17:03
 
 import os
 import sys
@@ -25,7 +25,7 @@ IS_MACOS = sys.platform == "darwin"
 
 if IS_WINDOWS:
     TYPORA_APPDATA_PATH = os.path.join(
-        os.environ['APPDATA'],
+        os.environ["APPDATA"],
         "Typora",
     )
 elif IS_MACOS:
@@ -52,8 +52,9 @@ CONF_FILE = os.path.join(
 
 def choose_image_bed(image_bed_code: int, conf_file: str = CONF_FILE):
     if type(image_bed_code) != int:
-        raise TypeError("image bed code must be an integer, not %s" %
-                        str(type(image_bed_code)))
+        raise TypeError(
+            "image bed code must be an integer, not %s" % str(type(image_bed_code))
+        )
     try:
         with open(conf_file, "r+") as f:
             conf = json.loads(f.read())
@@ -74,18 +75,17 @@ class Base:
         self.max_size: int = 0
         self.auto_compress: bool = False
         self.image_bed_code: int = image_bed_code
-        self.auth_info: Optional[
-            custom_types.AuthInfo] = self._read_auth_info()
+        self.auth_info: Optional[custom_types.AuthInfo] = self._read_auth_info()
 
     def login(self, username: str, password: str):
         pass
 
     @Login
-    def get_all_images(self) -> List[str]:
+    def get_all_images(self) -> List[str]:  # type: ignore
         pass
 
     @Login
-    def upload_image(self, image_path: str) -> str:
+    def upload_image(self, image_path: str) -> str:  # type: ignore
         pass
 
     @Login
@@ -105,17 +105,19 @@ class Base:
             with open(self.conf_file, "r+") as f:
                 conf = json.loads(f.read())
                 try:
-                    conf['auth_data'][self.image_bed_code] = auth_info
+                    conf["auth_data"][self.image_bed_code] = auth_info
                 except KeyError:
-                    conf["auth_data"] = [None] * len(IMAGE_BEDS_CODE)
-                    conf['auth_data'][self.image_bed_code] = auth_info
+                    # 列表不能用 None 填充，要用空字典填充，不然 pyright 会报错
+                    conf["auth_data"] = [{}] * len(IMAGE_BEDS_CODE)
+                    conf["auth_data"][self.image_bed_code] = auth_info
                 f.seek(0, 0)
                 f.write(json.dumps(conf))
                 f.truncate()
         except FileNotFoundError:
             print(
                 "Error: Auth configure file is not found, "
-                "please choose image bed with `--choose-site` or `-c` first.")
+                "please choose image bed with `--choose-site` or `-c` first."
+            )
             sys.exit(0)
         except Exception as e:
             print(e)
@@ -126,8 +128,7 @@ class Base:
         self.login(username, password)
         self.auth_info = self._read_auth_info()
 
-    def _exceed_max_size(self,
-                         *images_path: str) -> Tuple[bool, Optional[str]]:
+    def _exceed_max_size(self, *images_path: str) -> Tuple[bool, Optional[str]]:
         for img in images_path:
             if os.path.getsize(img) > self.max_size:
                 return True, img
@@ -143,11 +144,13 @@ class Base:
                 raise OverSizeError(_img)
         else:
             for _img in images_path:
-                if os.path.getsize(_img) > self.max_size and _img.split(
-                        ".")[-1].lower() not in ["jpg", "png", "jpeg"]:
+                if os.path.getsize(_img) > self.max_size and _img.split(".")[
+                    -1
+                ].lower() not in ["jpg", "png", "jpeg"]:
                     raise UnsupportedType(
                         "currently does not support compression of this type of image: %s"
-                        % _img.split(".")[-1].upper())
+                        % _img.split(".")[-1].upper()
+                    )
 
     def _compress_image(self, image_path: str) -> str:
         if self.auto_compress:
@@ -159,25 +162,26 @@ class Base:
                 scale = self.max_size / raw_size
                 img = Image.open(image_path)
 
-                def compress(img: Image, scale: float) -> BytesIO:
+                def compress(img: Image.Image, scale: float) -> BytesIO:
                     format = img.format
                     width, height = img.size
                     img_io = BytesIO()
 
                     if format == "PNG":
                         img = img.convert("RGB")
-                        img.format = "JPEG"
+                        img.format = "JPEG"  # type: ignore
                         img.save(img_io, "jpeg")
                     elif format == "JPEG":
                         img = img.resize(
-                            (int(width * scale), int(height * scale)),
-                            Image.ANTIALIAS)
-                        img.format = "JPEG"
+                            (int(width * scale), int(height * scale)), Image.ANTIALIAS
+                        )
+                        img.format = "JPEG"  # type: ignore
                         img.save(img_io, "jpeg")
                     else:
                         raise UnsupportedType(
                             "currently does not support compression of this type of image: %s"
-                            % format)
+                            % format
+                        )
 
                     if img_io.tell() > self.max_size:
                         scale = self.max_size / img_io.tell()
@@ -187,7 +191,7 @@ class Base:
                 if img.format == "PNG":
                     filename += ".jpeg"
                 else:
-                    filename += "." + img.format.lower()
+                    filename += "." + img.format.lower()  # type: ignore
                 img_io = compress(img, scale)
                 cache_path = os.path.join(TYPORA_APPDATA_PATH, "Cache", "up2b")
                 img_cache_path = os.path.join(cache_path, filename)
