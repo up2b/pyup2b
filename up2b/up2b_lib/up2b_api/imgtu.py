@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: imgtu.py
 # @Created: 2021-02-13 09:04:37
-# @Modified: 2021-06-18 11:30:55
+# @Modified: 2021-06-20 20:17:54
 
 import sys
 import os
@@ -80,6 +80,8 @@ class Imgtu(Base):
         resp = requests.get(url, headers=self.headers)
         if resp.status_code == 200:
             auth_token = re.search(r'PF.obj.config.auth_token = "([a-f0-9]{40})"', resp.text)
+            if not auth_token:
+                return None, None
             resp_set_cookie = resp.headers["Set-Cookie"].split("; ")[0]
             return auth_token.group(1), resp_set_cookie
         else:
@@ -93,12 +95,14 @@ class Imgtu(Base):
             "Cookie": self.cookie,
         }
         resp = requests.get(self.base_url, headers=headers)
-        auth_token = re.search(r'PF.obj.config.auth_token = "([a-f0-9]{40})"', resp.text).group(1)
-        if not self.auth_info:
-            self.auth_info = {}
+        auth_token = re.search(r'PF.obj.config.auth_token = "([a-f0-9]{40})"', resp.text)
+        if auth_token:
+            auth_token = auth_token.group(1)
+            if not self.auth_info:
+                self.auth_info = {}
 
-        self.auth_info["token"] = self.token = auth_token
-        self._save_auth_info(self.auth_info)
+            self.auth_info["token"] = self.token = auth_token
+            self._save_auth_info(self.auth_info)
 
     @Login
     def upload_image(self, image_path: str) -> Union[str, dict]:

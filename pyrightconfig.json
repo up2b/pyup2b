@@ -1,4 +1,4 @@
 {
     // Install LSP-json to get validation and autocompletion in this file.
-    "venv": "spider",
+    "venv": "gui",
 }

@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-13 09:02:21
-# @Modified: 2021-06-04 13:17:03
+# @Modified: 2021-07-25 22:12:47
 
 import os
 import sys
@@ -24,37 +24,21 @@ IS_WINDOWS = sys.platform == "win32"
 IS_MACOS = sys.platform == "darwin"
 
 if IS_WINDOWS:
-    TYPORA_APPDATA_PATH = os.path.join(
-        os.environ["APPDATA"],
-        "Typora",
-    )
+    CONFIG_FOLDER_PATH = os.path.join(os.environ["APPDATA"], "up2b")
 elif IS_MACOS:
-    TYPORA_APPDATA_PATH = os.path.join(
-        os.environ["HOME"],
-        ".config",
-        "up2b",
-    )
-    if not os.path.exists(TYPORA_APPDATA_PATH):
-        os.makedirs(os.path.join(TYPORA_APPDATA_PATH, "conf"), 0o755)
+    CONFIG_FOLDER_PATH = os.path.join(os.environ["HOME"], ".config", "up2b")
 else:
-    TYPORA_APPDATA_PATH = os.path.join(
-        os.environ["HOME"],
-        ".config",
-        "Typora",
-    )
+    CONFIG_FOLDER_PATH = os.path.join(os.environ["HOME"], ".config", "up2b")
 
-CONF_FILE = os.path.join(
-    TYPORA_APPDATA_PATH,
-    "conf",
-    "conf.up2b.json",
-)
+if not os.path.exists(CONFIG_FOLDER_PATH):
+    os.makedirs(os.path.join(CONFIG_FOLDER_PATH, "conf"), 0o755)
+
+CONF_FILE = os.path.join(CONFIG_FOLDER_PATH, "conf", "conf.up2b.json")
 
 
 def choose_image_bed(image_bed_code: int, conf_file: str = CONF_FILE):
     if type(image_bed_code) != int:
-        raise TypeError(
-            "image bed code must be an integer, not %s" % str(type(image_bed_code))
-        )
+        raise TypeError("image bed code must be an integer, not %s" % str(type(image_bed_code)))
     try:
         with open(conf_file, "r+") as f:
             conf = json.loads(f.read())
@@ -115,8 +99,7 @@ class Base:
                 f.truncate()
         except FileNotFoundError:
             print(
-                "Error: Auth configure file is not found, "
-                "please choose image bed with `--choose-site` or `-c` first."
+                "Error: Auth configure file is not found, please choose image bed with `--choose-site` or `-c` first."
             )
             sys.exit(0)
         except Exception as e:
@@ -144,12 +127,9 @@ class Base:
                 raise OverSizeError(_img)
         else:
             for _img in images_path:
-                if os.path.getsize(_img) > self.max_size and _img.split(".")[
-                    -1
-                ].lower() not in ["jpg", "png", "jpeg"]:
+                if os.path.getsize(_img) > self.max_size and _img.split(".")[-1].lower() not in ["jpg", "png", "jpeg"]:
                     raise UnsupportedType(
-                        "currently does not support compression of this type of image: %s"
-                        % _img.split(".")[-1].upper()
+                        "currently does not support compression of this type of image: %s" % _img.split(".")[-1].upper()
                     )
 
     def _compress_image(self, image_path: str) -> str:
@@ -158,7 +138,6 @@ class Base:
             if raw_size > self.max_size:
 
                 filename = os.path.basename(image_path).split(".")[0]
-                img_mime, _ = mimetypes.guess_type(image_path)
                 scale = self.max_size / raw_size
                 img = Image.open(image_path)
 
@@ -172,15 +151,12 @@ class Base:
                         img.format = "JPEG"  # type: ignore
                         img.save(img_io, "jpeg")
                     elif format == "JPEG":
-                        img = img.resize(
-                            (int(width * scale), int(height * scale)), Image.ANTIALIAS
-                        )
+                        img = img.resize((int(width * scale), int(height * scale)), Image.ANTIALIAS)
                         img.format = "JPEG"  # type: ignore
                         img.save(img_io, "jpeg")
                     else:
                         raise UnsupportedType(
-                            "currently does not support compression of this type of image: %s"
-                            % format
+                            "currently does not support compression of this type of image: %s" % format
                         )
 
                     if img_io.tell() > self.max_size:
@@ -193,20 +169,20 @@ class Base:
                 else:
                     filename += "." + img.format.lower()  # type: ignore
                 img_io = compress(img, scale)
-                cache_path = os.path.join(TYPORA_APPDATA_PATH, "Cache", "up2b")
-                img_cache_path = os.path.join(cache_path, filename)
-                try:
-                    with open(img_cache_path, "wb") as f:
-                        f.write(img_io.getbuffer())
-                except FileNotFoundError:
+
+                cache_path = os.path.join(CONFIG_FOLDER_PATH, "cache")
+                if not os.path.exists(cache_path):
                     os.mkdir(cache_path)
-                    with open(img_cache_path, "wb") as f:
-                        f.write(img_io.getbuffer())
+
+                img_cache_path = os.path.join(cache_path, filename)
+                with open(img_cache_path, "wb") as f:
+                    f.write(img_io.getbuffer())
+
                 return img_cache_path
         return image_path
 
     def _clear_cache(self):
-        cache_path = os.path.join(TYPORA_APPDATA_PATH, "Cache", "up2b")
+        cache_path = os.path.join(CONFIG_FOLDER_PATH, "cache")
         if os.path.exists(cache_path):
             shutil.rmtree(cache_path)
             os.mkdir(cache_path)
