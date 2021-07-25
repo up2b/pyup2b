@@ -34,18 +34,10 @@ class Github(Base):
             self.repo: str = self.auth_info["repo"]
             self.folder: str = self.auth_info["folder"]
 
-            self.headers = {
-                "Accept": "application/vnd.github.v3+json",
-                "Authorization": "token " + self.token,
-            }
+            self.headers = {"Accept": "application/vnd.github.v3+json", "Authorization": "token " + self.token}
 
     def login(self, token: str, username: str, repo: str, folder: str = "md"):
-        auth_info = {
-            "token": token,
-            "username": username,
-            "repo": repo,
-            "folder": folder,
-        }
+        auth_info = {"token": token, "username": username, "repo": repo, "folder": folder}
         self._save_auth_info(auth_info)
 
     @Login
@@ -57,25 +49,15 @@ class Github(Base):
         filename = f"{int(time.time() * 1000)}{suffix}"
         with open(image_path, "rb") as fb:
             url = self.base_url + filename
-            data = {
-                "content": b64encode(fb.read()).decode("utf-8"),
-                "message": "typora - " + filename,
-            }
+            data = {"content": b64encode(fb.read()).decode("utf-8"), "message": "typora - " + filename}
             try:
                 resp = requests.put(url, headers=self.headers, json=data)
             except ConnectionError as e:
-                return "Warning: %s upload failed, please try again: (%s)" % (
-                    image_path,
-                    e,
-                )
+                return "Warning: %s upload failed, please try again: (%s)" % (image_path, e)
             if resp.status_code == 201:
                 return resp.json()["content"]["download_url"]
             else:
-                return {
-                    "error": resp.json()["message"],
-                    "status_code": resp.status_code,
-                    "image_path": image_path,
-                }
+                return {"error": resp.json()["message"], "status_code": resp.status_code, "image_path": image_path}
 
     @Login
     def upload_images(self, images_path: List[str]) -> List[str]:
@@ -108,11 +90,7 @@ class Github(Base):
         if all_images_resp:
             for file in self.get_all_images_in_image_bed():
                 images.append(
-                    {
-                        "url": self.cdn_url(file["download_url"]),
-                        "sha": file["sha"],
-                        "delete_url": file["url"],
-                    }
+                    {"url": self.cdn_url(file["download_url"]), "sha": file["sha"], "delete_url": file["url"]}
                 )
         return images
 
@@ -125,22 +103,13 @@ class Github(Base):
             return None
 
     @Login
-    def delete_image(
-        self,
-        sha: str,
-        url: str,
-        message: str = "Delete pictures that are no longer used",
-    ):
+    def delete_image(self, sha: str, url: str, message: str = "Delete pictures that are no longer used"):
         data = {"sha": sha, "message": message}
         resp = requests.delete(url, headers=self.headers, json=data)
         return resp.status_code == 200
 
     @Login
-    def delete_images(
-        self,
-        info: Tuple[str, str],
-        message: str = "Delete pictures that are no longer used",
-    ):
+    def delete_images(self, info: Tuple[str, str], message: str = "Delete pictures that are no longer used"):
         failed = []
         for sha, url in info:
             result = self.delete_image(sha, url, message)
@@ -150,11 +119,7 @@ class Github(Base):
 
     @property
     def base_url(self) -> str:
-        return "https://api.github.com/repos/%s/%s/contents/%s/" % (
-            self.username,
-            self.repo,
-            self.folder,
-        )
+        return "https://api.github.com/repos/%s/%s/contents/%s/" % (self.username, self.repo, self.folder)
 
     def cdn_url(self, url: str) -> str:
         path = url.split("/main/")[-1]

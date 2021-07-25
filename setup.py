@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # @Author: thepoy
 # @Email: thepoy@163.com
-# @File Name: commands.py
+# @File Name: setup.py
 # @Created: 2021-03-27 09:55:27
-# @Modified: 2021-06-04 13:28:19
+# @Modified: 2021-07-25 23:19:13
 
 import codecs
 import up2b
@@ -26,14 +26,6 @@ with codecs.open("README.md", "r", "utf-8") as fd:
         license="MIT",
         keywords="typora image bed upload",
         packages=find_packages(),
-        entry_points={
-            'console_scripts': [
-                'up2b = up2b:run_main',
-            ],
-        },
-        install_requires=[
-            "requests",
-            "requests-toolbelt",
-            "pillow",
-        ],
+        entry_points={'console_scripts': ['up2b = up2b:run_main']},
+        install_requires=["requests", "requests-toolbelt", "pillow"],
     )

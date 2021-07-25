@@ -4,13 +4,12 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-13 09:02:21
-# @Modified: 2021-07-25 22:12:47
+# @Modified: 2021-07-25 23:27:47
 
 import os
 import sys
 import json
 import shutil
-import mimetypes
 
 from io import BytesIO
 from typing import Optional, List, Tuple, Dict
@@ -106,9 +105,8 @@ class Base:
             print(e)
 
     def _auto_login(self):
-        username = self.auth_info["username"]
-        password = self.auth_info["password"]
-        self.login(username, password)
+        username = self.auth_info["username"]  # type: ignore
+        self.login(username, password)  # type: ignore
         self.auth_info = self._read_auth_info()
 
     def _exceed_max_size(self, *images_path: str) -> Tuple[bool, Optional[str]]:

@@ -23,7 +23,7 @@ class Login:
         wraps(func)(self)
 
     def __call__(self, instance, *args, **kwargs):
-        return self.__wrapped__(instance, *args, **kwargs) # type: ignore
+        return self.__wrapped__(instance, *args, **kwargs)  # type: ignore
 
     def __get__(self, instance, cls):
         if not instance:
@@ -31,7 +31,9 @@ class Login:
 
         if not instance.auth_info:
             print(
-                "Error: You have not logged in yet, please use the `-l` or `--login` parameter to log in first.\nCurrent image bed code is : `%s`."
-                % instance.image_bed_code)
+                "Error: You have not logged in yet, please use the `-l` or `--login` parameter to log in"
+                " first.\nCurrent image bed code is : `%s`."
+                % instance.image_bed_code
+            )
             sys.exit(0)
         return partial(self, instance)

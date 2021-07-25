@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: sm.py
 # @Created: 2021-02-13 09:04:07
-# @Modified: 2021-06-04 13:25:14
+# @Modified: 2021-07-25 23:30:29
 
 import requests
 
@@ -17,9 +17,7 @@ from up2b.up2b_lib.constants import SM_MS
 
 
 class SM(Base):
-    def __init__(self,
-                 conf_file: Optional[str] = None,
-                 auto_compress: bool = False):
+    def __init__(self, conf_file: Optional[str] = None, auto_compress: bool = False):
         if not conf_file:
             super().__init__(SM_MS)
         else:
@@ -31,18 +29,11 @@ class SM(Base):
         if self.auth_info:
             self.token: str = self.auth_info["token"]
 
-            self.headers = {
-                "Content-Type": "multipart/form-data",
-                "Authorization": self.token
-            }
+            self.headers = {"Content-Type": "multipart/form-data", "Authorization": self.token}
 
     def login(self, username: str, password: str):
         token = self._get_api_token(username, password)
-        self._save_auth_info({
-            "token": token,
-            "username": username,
-            "password": password
-        })
+        self._save_auth_info({"token": token, "username": username, "password": password})
 
     def _get_api_token(self, username: str, password: str) -> str:
         url = self._url("token")
@@ -58,7 +49,7 @@ class SM(Base):
         else:
             if self._login_expired(resp):
                 self._auto_login()
-                self.token = self.auth_info["token"]
+                self.token = self.auth_info["token"]  # type: ignore
 
     @Login
     def upload_image(self, image_path: str):
@@ -75,7 +66,7 @@ class SM(Base):
                 return resp["images"]
             elif self._login_expired(resp):
                 self._auto_login()
-                self.token = self.auth_info["token"]
+                self.token = self.auth_info["token"]  # type: ignore
             else:
                 raise errors.UploadFailed(resp["message"])
 
@@ -83,8 +74,8 @@ class SM(Base):
     def upload_images(self, images_path: List[str]) -> List[str]:
         if len(images_path) > 10:
             raise errors.OverSizeError(
-                "You can only upload up to 10 pictures, but you uploaded %d pictures."
-                % len(images_path))
+                "You can only upload up to 10 pictures, but you uploaded %d pictures." % len(images_path)
+            )
 
         check_image_exists(images_path)
 
@@ -95,11 +86,7 @@ class SM(Base):
             try:
                 result = self.upload_image(img)
             except errors.UploadFailed as e:
-                result = {
-                    "image_path": img,
-                    "status_code": 400,
-                    "error": f"{e}",
-                }
+                result = {"image_path": img, "status_code": 400, "error": f"{e}"}
 
             images_url.append(result)
 
@@ -138,12 +125,9 @@ class SM(Base):
     def get_all_images(self) -> List[Dict[str, str]]:
         images = []
         for file in self.upload_history()["data"]:
-            images.append({
-                "url": file["url"],
-                "delete_url": file["delete"],
-                "width": file["width"],
-                "height": file["height"],
-            })
+            images.append(
+                {"url": file["url"], "delete_url": file["delete"], "width": file["width"], "height": file["height"]}
+            )
 
         return images
 
@@ -164,15 +148,14 @@ class SM(Base):
         return result
 
     @Login
-    def get_all_images_in_image_bed(self) -> List[str]: # type: ignore
+    def get_all_images_in_image_bed(self) -> List[str]:  # type: ignore
         pass
 
     def _url(self, path: str) -> str:
         return self.base_url + path
 
     def _login_expired(self, resp: dict):
-        return resp[
-            "message"] == "Get user profile failed, invalid Authorization."
+        return resp["message"] == "Get user profile failed, invalid Authorization."
 
     def __str__(self):
         return "sm.ms"
