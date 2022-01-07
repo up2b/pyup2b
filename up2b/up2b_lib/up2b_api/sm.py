@@ -23,9 +23,9 @@ class SM(Base, ImageBedMixin):
         add_watermark: bool = False,
         conf_file: str = CONF_FILE,
     ):
+        self.image_bed_code = SM_MS
         super().__init__(auto_compress, add_watermark, conf_file)
 
-        self.image_bed_code = SM_MS
         self.base_url = "https://sm.ms/api/v2/"
         self.max_size = 5 * 1024 * 1024
 
@@ -69,6 +69,8 @@ class SM(Base, ImageBedMixin):
 
     @Login
     def upload_image(self, image_path: str):
+        image_path = self._compress_image(image_path)
+        image_path = self._add_watermark(image_path)
         # sm.ms不管出不出错，返回的状态码都是200
         url = self._url("upload")
         headers = {"Authorization": self.token}

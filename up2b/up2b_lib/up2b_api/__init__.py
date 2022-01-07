@@ -16,12 +16,16 @@ from abc import ABC, abstractmethod
 from typing import Optional, List, Tuple, Dict
 from PIL import Image
 from up2b.up2b_lib import custom_types
+from up2b.up2b_lib.utils import child_logger
 from up2b.up2b_lib.errors import UnsupportedType, OverSizeError
 from up2b.up2b_lib.constants import (
     IMAGE_BEDS_CODE,
     CONF_FILE,
     CACHE_PATH,
 )
+from up2b.up2b_lib.watermark import AddWatermark, TypeFont
+
+logger = child_logger(__name__)
 
 
 def choose_image_bed(image_bed_code: int, conf_file: str = CONF_FILE):
@@ -80,17 +84,23 @@ class Base:
         conf_file: str = CONF_FILE,
     ):
         self.conf_file: str = conf_file
+        self.conf = dict()
+        self.auth_info: Optional[custom_types.AuthInfo] = self._read_auth_info()
+        self.add_watermark: bool = add_watermark
+        if self.add_watermark:
+            if not self.conf.get("watermark"):
+                logger.fatal(
+                    "you have enabled the function of adding watermark, but the watermark is not configured, please configure the text watermark through `--config-text-watermark`"
+                )
         self.max_size: int = 0
         self.auto_compress: bool = auto_compress
-        self.add_watermark: bool = add_watermark
         self.image_bed_code: int = -1
-        self.auth_info: Optional[custom_types.AuthInfo] = self._read_auth_info()
 
     def _read_auth_info(self) -> Optional[custom_types.AuthInfo]:
         try:
             with open(self.conf_file) as f:
-                conf = json.loads(f.read())
-                return conf["auth_data"][self.image_bed_code]
+                self.conf = json.loads(f.read())
+                return self.conf["auth_data"][self.image_bed_code]
         except Exception:
             return None
 
@@ -108,12 +118,11 @@ class Base:
                 f.write(json.dumps(conf))
                 f.truncate()
         except FileNotFoundError:
-            print(
-                "Error: Auth configure file is not found, please choose image bed with `--choose-site` or `-c` first."
+            logger.fatal(
+                "auth configure file is not found, please choose image bed with `--choose-site` or `-c` first."
             )
-            sys.exit(0)
         except Exception as e:
-            print(e)
+            logger.fatal(e)
 
     def _exceed_max_size(self, *images_path: str) -> Tuple[bool, Optional[str]]:
         for img in images_path:
@@ -188,6 +197,16 @@ class Base:
                     f.write(img_io.getbuffer())
 
                 return img_cache_path
+        return image_path
+
+    def _add_watermark(self, image_path: str) -> str:
+        if self.add_watermark:
+            conf = self.conf["watermark"]
+            aw = AddWatermark(conf["x"], conf["y"], conf["opacity"])
+            return aw.add_text_watermark(
+                image_path,
+                [TypeFont(conf["text"], conf["size"], conf["font"], (0, 0, 0))],
+            )
         return image_path
 
     def _clear_cache(self):

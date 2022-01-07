@@ -6,7 +6,6 @@
 # @Created: 2021-02-13 09:04:37
 # @Modified: 2021-06-20 20:17:54
 
-import sys
 import os
 import re
 import time
@@ -20,8 +19,10 @@ from typing import List, Optional, Tuple, Union
 from requests_toolbelt import MultipartEncoder
 
 from up2b.up2b_lib.up2b_api import Base, ImageBedMixin, CONF_FILE
-from up2b.up2b_lib.utils import Login, check_image_exists
+from up2b.up2b_lib.utils import Login, check_image_exists, child_logger
 from up2b.up2b_lib.constants import IMGTU
+
+logger = child_logger(__name__)
 
 
 class Imgtu(Base, ImageBedMixin):
@@ -31,9 +32,9 @@ class Imgtu(Base, ImageBedMixin):
         add_watermark: bool = False,
         conf_file: str = CONF_FILE,
     ):
+        self.image_bed_code = IMGTU
         super().__init__(auto_compress, add_watermark, conf_file)
 
-        self.image_bed_code = IMGTU
         self.base_url: str = "https://imgtu.com/"
         self.max_size = 10 * 1024 * 1024
 
@@ -84,8 +85,7 @@ class Imgtu(Base, ImageBedMixin):
             }
             self._save_auth_info(auth_info)
         else:
-            print("Error: Login failed.")
-            sys.exit(1)
+            logger.fatal("Login failed.")
 
     def _parse_auth_token(self) -> Tuple[Optional[str], Optional[str]]:
         url = self._url("login")
@@ -99,7 +99,7 @@ class Imgtu(Base, ImageBedMixin):
             resp_set_cookie = resp.headers["Set-Cookie"].split("; ")[0]
             return auth_token.group(1), resp_set_cookie
         else:
-            print("响应错误:", resp.status_code)
+            logger.error("响应错误: %d", resp.status_code)
             return None, None
 
     def _update_auth_token(self):
@@ -121,8 +121,9 @@ class Imgtu(Base, ImageBedMixin):
             self._save_auth_info(self.auth_info)
 
     @Login
-    def upload_image(self, image_path: str) -> Union[str, dict]:
+    def upload_image(self, image_path: str) -> Union[str, dict]:  # type: ignore
         image_path = self._compress_image(image_path)
+        image_path = self._add_watermark(image_path)
         url = self._url("json")
         headers = {
             "Accept": "application/json",
@@ -160,16 +161,15 @@ class Imgtu(Base, ImageBedMixin):
             return resp.json()["image"]["image"]["url"]
         except KeyError:
             if resp.json()["error"]["message"] == "请求被拒绝 (auth_token)":
-                print(
-                    "Warning: `auth_token` has expired, the program will try to update `auth_token` automatically."
+                logger.warn(
+                    "`auth_token` has expired, the program will try to update `auth_token` automatically."
                 )
                 self._update_auth_token()
                 return self.upload_image(image_path)
             else:
                 return resp.json()
         except json.decoder.JSONDecodeError:
-            print(resp.text)
-            sys.exit(1)
+            logger.fatal(resp.text)
 
     @Login
     def upload_images(self, images_path: List[str]) -> list:
@@ -181,6 +181,7 @@ class Imgtu(Base, ImageBedMixin):
         for img in images_path:
             result = self.upload_image(img)
             if type(result) == str:
+                logger.debug("uploaded url: %s", result)
                 images_url.append(result)
             elif type(result) == dict:
                 images_url.append(
@@ -190,6 +191,7 @@ class Imgtu(Base, ImageBedMixin):
                         "error": result["error"]["message"],
                     }
                 )
+                logger.error(result)
 
         if not os.getenv("UP2B_TEST"):
             for i in images_url:
@@ -274,8 +276,8 @@ class Imgtu(Base, ImageBedMixin):
         resp = requests.post(url, headers=self.headers, data=data)
         if resp.status_code == 400:
             if resp.json()["error"]["message"] == "请求被拒绝 (auth_token)":
-                print(
-                    "Warning: `auth_token` has expired, the program will try to update `auth_token` automatically."
+                logger.warn(
+                    "`auth_token` has expired, the program will try to update `auth_token` automatically."
                 )
                 self._update_auth_token()
                 return self.delete_image(img_id)
@@ -295,8 +297,8 @@ class Imgtu(Base, ImageBedMixin):
         resp = requests.post(url, headers=self.headers, data=data)
         if resp.status_code == 400:
             if resp.json()["error"]["message"] == "请求被拒绝 (auth_token)":
-                print(
-                    "Warning: `auth_token` has expired, the program will try to update `auth_token` automatically."
+                logger.warn(
+                    "`auth_token` has expired, the program will try to update `auth_token` automatically."
                 )
                 self._update_auth_token()
                 return self.delete_images(imgs_id)

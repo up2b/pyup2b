@@ -25,10 +25,12 @@ class Github(Base, ImageBedMixin):
         add_watermark: bool = False,
         conf_file: str = CONF_FILE,
     ):
+        self.image_bed_code = GITHUB
         super().__init__(auto_compress, add_watermark, conf_file)
 
-        self.image_bed_code = GITHUB
         self.max_size = 20 * 1024 * 1024
+
+        print(self.auth_info)
 
         if self.auth_info:
             self.token: str = self.auth_info["token"]
@@ -53,6 +55,7 @@ class Github(Base, ImageBedMixin):
     @Login
     def upload_image(self, image_path: str) -> Union[str, dict]:
         image_path = self._compress_image(image_path)
+        image_path = self._add_watermark(image_path)
         suffix = os.path.splitext(image_path)[-1]
         if suffix.lower() == ".apng":
             suffix = ".png"

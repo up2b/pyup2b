@@ -140,8 +140,7 @@ class AddWatermark:
         self,
         image_path: str,
         texts: List[TypeFont],
-        suffix: str = "_with_text_watermark",
-    ):
+    ) -> str:
         img = self.__convert_image_to_rgba(image_path)
 
         watermark = Image.new("RGBA", img.size, (0, 0, 0, 0))  # 字体图层
@@ -156,19 +155,22 @@ class AddWatermark:
 
         combined = Image.alpha_composite(img, watermark)  # 将原图和字体图层合并
         combined = combined.convert("RGB")
-        filename = os.path.splitext(os.path.basename(image_path))[0] + f"{suffix}.jpg"
+        filename = os.path.splitext(os.path.basename(image_path))[0] + ".jpg"
 
         if not os.path.exists(CACHE_PATH):
             os.mkdir(CACHE_PATH)
 
+        new_path = os.path.join(CACHE_PATH, filename)
+
         combined.save(os.path.join(CACHE_PATH, filename))
+
+        return new_path
 
     def add_image_watermark(
         self,
         image_path: str,
         image_watermark_path: str,
         resize: int = 100,
-        suffix: str = "_with_image_watermark",
     ):
         """添加图片水印
 
@@ -196,6 +198,6 @@ class AddWatermark:
 
         combined = Image.alpha_composite(img, watermark)
         combined = combined.convert("RGB")
-        filename = os.path.splitext(os.path.basename(image_path))[0] + f"{suffix}.jpg"
+        filename = os.path.splitext(os.path.basename(image_path))[0] + ".jpg"
 
         combined.save(os.path.join(CACHE_PATH, filename))

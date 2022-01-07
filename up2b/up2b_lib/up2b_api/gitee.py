@@ -25,9 +25,9 @@ class Gitee(Base, ImageBedMixin):
         add_watermark: bool = False,
         conf_file: str = CONF_FILE,
     ):
+        self.image_bed_code = GITEE
         super().__init__(auto_compress, add_watermark, conf_file)
 
-        self.image_bed_code = GITEE
         self.max_size = 1 * 1024 * 1024
 
         self.headers = {"Content-Type": "application/json;charset=UTF-8"}
@@ -50,6 +50,7 @@ class Gitee(Base, ImageBedMixin):
     @Login
     def upload_image(self, image_path: str) -> Union[str, dict]:
         image_path = self._compress_image(image_path)
+        image_path = self._add_watermark(image_path)
         suffix = os.path.splitext(image_path)[-1]
         if suffix.lower() == ".apng":
             suffix = ".png"

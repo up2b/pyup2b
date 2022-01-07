@@ -19,6 +19,7 @@ from up2b.up2b_lib.up2b_api.imgtu import Imgtu
 from up2b.up2b_lib.up2b_api.gitee import Gitee
 from up2b.up2b_lib.up2b_api.github import Github
 from up2b.up2b_lib.constants import SM_MS, IMGTU, GITEE, GITHUB, IMAGE_BEDS_CODE
+from up2b.up2b_lib.utils import logger
 
 __version__ = "0.2.0"
 
@@ -67,6 +68,13 @@ def _BuildParser():
         help="save the authentication information of the git website, such as gitee, github",
         type=str,
     )
+    group.add_argument(
+        "--config-text-watermark",
+        nargs=6,
+        metavar=("X", "Y", "OPACITY", "TEXT", "FONT_PATH", "SIZE"),
+        help="configure the text watermark",
+        type=str,
+    )
     group.add_argument("-p", "--image-path", help="upload only one picture", type=str)
     group.add_argument(
         "-ps",
@@ -90,11 +98,46 @@ def _read_image_bed(
                 auto_compress=auto_compress, add_watermark=add_watermark
             )
     except FileNotFoundError:
-        print(
-            "Error: The configuration file is not found, "
+        logger.fatal(
+            "the configuration file is not found, "
             "you need to use `--choose-site` or `-c` to select the image bed first."
         )
         sys.exit(1)
+
+
+def _config_text_watermark(
+    x: int, y: int, opacity: int, text: str, font: str, size: int
+):
+    try:
+        with open(CONF_FILE, "r+") as f:
+            conf = json.loads(f.read())
+            f.seek(0, 0)
+            conf["watermark"] = {
+                "x": x,
+                "y": y,
+                "opacity": opacity,
+                "text": text,
+                "font": font,
+                "size": size,
+            }
+            f.write(json.dumps(conf))
+            f.truncate()
+    except FileNotFoundError:
+        with open(CONF_FILE, "w") as f:
+            f.write(
+                json.dumps(
+                    {
+                        "watermark": {
+                            "x": x,
+                            "y": y,
+                            "opacity": opacity,
+                            "text": text,
+                            "font": font,
+                            "size": size,
+                        }
+                    }
+                )
+            )
 
 
 def main() -> int:
@@ -104,19 +147,31 @@ def main() -> int:
     if args.choose_site:
         choose_image_bed(int(args.choose_site))
         if args.choose_site == str(GITEE):
-            print(
-                "Warning: resources bigger than 1M on `gitee` cannot be publicly accessed. "
+            logger.warn(
+                "resources bigger than 1M on `gitee` cannot be publicly accessed. "
                 "Please manually compress the image size to 1M or less, "
                 "or use the `-aac` parameter to enable the automatic compression function."
             )
+        return 0
+
+    if args.config_text_watermark:
+        _args = args.config_text_watermark
+        _config_text_watermark(
+            int(_args[0]),
+            int(_args[1]),
+            int(_args[2]),
+            _args[3],
+            _args[4],
+            int(_args[5]),
+        )
         return 0
 
     ib = _read_image_bed(args.aac, args.add_watermark)
 
     if args.login:
         if isinstance(ib, Gitee) or isinstance(ib, Github):
-            print(
-                "Error: you have chosen `gitee` or `github` as the image bed, please login with `-lg`"
+            logger.fatal(
+                "you have chosen `gitee` or `github` as the image bed, please login with `-lg`"
             )
             return 1
 
@@ -126,8 +181,8 @@ def main() -> int:
 
     if args.login_git:
         if not (isinstance(ib, Gitee) or isinstance(ib, Github)):
-            print(
-                "Error: the image bed you choose is not gitee or github, , please login with `-lg`"
+            logger.fatal(
+                "the image bed you choose is not gitee or github, , please login with `-lg`"
             )
             return 1
 
@@ -148,7 +203,8 @@ def main() -> int:
 
 
 def run_main():
-    sys.exit(main())
+    with logger:
+        sys.exit(main())
 
 
 if __name__ == "__main__":

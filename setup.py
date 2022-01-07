@@ -15,9 +15,9 @@ with codecs.open("README.md", "r", "utf-8") as fd:
     setup(
         name="up2b",
         version=up2b.__version__,
-        description='''
+        description="""
         A package that can upload images to the image bed in Typora.
-        ''',
+        """,
         long_description_content_type="text/markdown",
         long_description=fd.read(),
         author="thepoy",
@@ -26,6 +26,6 @@ with codecs.open("README.md", "r", "utf-8") as fd:
         license="MIT",
         keywords="typora image bed upload",
         packages=find_packages(),
-        entry_points={'console_scripts': ['up2b = up2b:run_main']},
-        install_requires=["requests", "requests-toolbelt", "pillow"],
+        entry_points={"console_scripts": ["up2b = up2b:run_main"]},
+        install_requires=["requests", "requests-toolbelt", "pillow", "colorful-logger"],
     )

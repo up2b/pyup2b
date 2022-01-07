@@ -7,9 +7,16 @@
 # @Modified: 2021-06-04 13:25:58
 
 import os
-import sys
 
 from functools import wraps, partial
+from colorful_logger import get_logger, child_logger as cl
+from colorful_logger.logger import ERROR
+
+logger = get_logger("up2b", level=ERROR)
+
+
+def child_logger(name: str):
+    return cl(name, logger)
 
 
 def check_image_exists(images_path: list):
@@ -30,11 +37,10 @@ class Login:
             return partial(self, instance)
 
         if not instance.auth_info:
-            print(
+            logger.fatal(
                 "Error: You have not logged in yet, please use the `-l` or `--login` parameter to log in"
                 " first.\nCurrent image bed code is : `%s`." % instance.image_bed_code
             )
-            sys.exit(0)
         return partial(self, instance)
 
 

@@ -34,8 +34,8 @@ pip install up2b
 Usage Options:
 
 ```
-usage: up2b [-h] [-v] [-aac]
-            [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
+usage: test.py [-h] [-v] [-aac] [-aw]
+               [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
 
 A package that can upload pictures to the image bed in Typora.
 
@@ -43,19 +43,19 @@ optional arguments:
   -h, --help            show this help message and exit
   -v, --version         show program's version number and exit
   -aac                  allow automatic image compression
+  -aw, --add-watermark  whether to add text watermark to the images to be uploaded
   -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'}
                         choose the image bed you want to use and exit
   -l USERNAME PASSWORD, --login USERNAME PASSWORD
-                        save the user authentication token after successful login. You
-                        must enter the username and password after `-l` or `--login`
+                        save the user authentication token after successful login. You must enter the username and password after `-l` or `--login`
   -lg ACCESS_TOKEN USERNAME REPO FOLDER, --login-git ACCESS_TOKEN USERNAME REPO FOLDER
-                        save the authentication information of the git website, such as
-                        gitee, github
+                        save the authentication information of the git website, such as gitee, github
+  --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE
+                        configure the text watermark
   -p IMAGE_PATH, --image-path IMAGE_PATH
                         upload only one picture
   -ps IMAGE_PATH [IMAGE_PATH ...], --images-path IMAGE_PATH [IMAGE_PATH ...]
-                        upload multiple pictures, the maximum is 10 pictures, use spaces
-                        to separate each image path.
+                        upload multiple pictures, the maximum is 10 pictures, use spaces to separate each image path.
 ```
 ####  1 Choose image bed
 
@@ -127,6 +127,18 @@ Turn off automatic compression:
 up2b -ps
 ```
 
+if you want add a text watermark for each image, you should add `-aw` or `--add-watermark`:
+
+```bash
+up2b -aw -ps
+```
+
+And you shoud config watermark first, like:
+
+```bash
+up2b --config-text-watermark -50 -50 50 'test watermark' '/home/thepoy/.local/share/fonts/simkai.ttf' 48
+```
+
 Configure in `Typora` on **windows / linux**:
 
 ![截屏2021-04-03 11.04.21](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1617419183417.png)
@@ -134,6 +146,10 @@ Configure in `Typora` on **windows / linux**:
 If you want to use it in the **macOS** system, you need to find the absolute path of the up2b command:
 
 ![截屏2021-04-03 11.04.48](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1617419270287.png)
+
+Image with watermark:
+
+![2022-01-08_00-24](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1641573280046.jpg)
 
 # End
 
