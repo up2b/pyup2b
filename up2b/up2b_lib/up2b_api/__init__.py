@@ -12,32 +12,23 @@ import json
 import shutil
 
 from io import BytesIO
+from abc import ABC, abstractmethod
 from typing import Optional, List, Tuple, Dict
 from PIL import Image
 from up2b.up2b_lib import custom_types
-from up2b.up2b_lib.utils import Login
 from up2b.up2b_lib.errors import UnsupportedType, OverSizeError
-from up2b.up2b_lib.constants import IMAGE_BEDS_CODE
-
-IS_WINDOWS = sys.platform == "win32"
-IS_MACOS = sys.platform == "darwin"
-
-if IS_WINDOWS:
-    CONFIG_FOLDER_PATH = os.path.join(os.environ["APPDATA"], "up2b")
-elif IS_MACOS:
-    CONFIG_FOLDER_PATH = os.path.join(os.environ["HOME"], ".config", "up2b")
-else:
-    CONFIG_FOLDER_PATH = os.path.join(os.environ["HOME"], ".config", "up2b")
-
-if not os.path.exists(CONFIG_FOLDER_PATH):
-    os.makedirs(os.path.join(CONFIG_FOLDER_PATH, "conf"), 0o755)
-
-CONF_FILE = os.path.join(CONFIG_FOLDER_PATH, "conf", "conf.up2b.json")
+from up2b.up2b_lib.constants import (
+    IMAGE_BEDS_CODE,
+    CONF_FILE,
+    CACHE_PATH,
+)
 
 
 def choose_image_bed(image_bed_code: int, conf_file: str = CONF_FILE):
     if type(image_bed_code) != int:
-        raise TypeError("image bed code must be an integer, not %s" % str(type(image_bed_code)))
+        raise TypeError(
+            "image bed code must be an integer, not %s" % str(type(image_bed_code))
+        )
     try:
         with open(conf_file, "r+") as f:
             conf = json.loads(f.read())
@@ -50,30 +41,50 @@ def choose_image_bed(image_bed_code: int, conf_file: str = CONF_FILE):
             f.write(json.dumps({"image_bed": image_bed_code}))
 
 
-class Base:
-    def __init__(self, image_bed_code: int, conf_file: str = CONF_FILE):
-        if type(image_bed_code) != int:
-            raise TypeError("image bed code must be an integer")
-        self.conf_file: str = conf_file
-        self.max_size: int = 0
-        self.auto_compress: bool = False
-        self.image_bed_code: int = image_bed_code
-        self.auth_info: Optional[custom_types.AuthInfo] = self._read_auth_info()
-
-    def login(self, username: str, password: str):
-        pass
-
-    @Login
+class ImageBedMixin(ABC):
+    @abstractmethod
     def get_all_images(self) -> List[str]:  # type: ignore
         pass
 
-    @Login
+    @abstractmethod
     def upload_image(self, image_path: str) -> str:  # type: ignore
         pass
 
-    @Login
+    @abstractmethod
     def upload_images(self, images_path: List[str]):
         pass
+
+    @abstractmethod
+    def delete_image(
+        self,
+        sha: str,
+        url: str,
+        message: str = "Delete pictures that are no longer used",
+    ):
+        pass
+
+    @abstractmethod
+    def delete_images(
+        self,
+        info: Tuple[str, str],
+        message: str = "Delete pictures that are no longer used",
+    ):
+        pass
+
+
+class Base:
+    def __init__(
+        self,
+        auto_compress: bool = False,
+        add_watermark: bool = False,
+        conf_file: str = CONF_FILE,
+    ):
+        self.conf_file: str = conf_file
+        self.max_size: int = 0
+        self.auto_compress: bool = auto_compress
+        self.add_watermark: bool = add_watermark
+        self.image_bed_code: int = -1
+        self.auth_info: Optional[custom_types.AuthInfo] = self._read_auth_info()
 
     def _read_auth_info(self) -> Optional[custom_types.AuthInfo]:
         try:
@@ -104,11 +115,6 @@ class Base:
         except Exception as e:
             print(e)
 
-    def _auto_login(self):
-        username = self.auth_info["username"]  # type: ignore
-        self.login(username, password)  # type: ignore
-        self.auth_info = self._read_auth_info()
-
     def _exceed_max_size(self, *images_path: str) -> Tuple[bool, Optional[str]]:
         for img in images_path:
             if os.path.getsize(img) > self.max_size:
@@ -125,9 +131,12 @@ class Base:
                 raise OverSizeError(_img)
         else:
             for _img in images_path:
-                if os.path.getsize(_img) > self.max_size and _img.split(".")[-1].lower() not in ["jpg", "png", "jpeg"]:
+                if os.path.getsize(_img) > self.max_size and _img.split(".")[
+                    -1
+                ].lower() not in ["jpg", "png", "jpeg"]:
                     raise UnsupportedType(
-                        "currently does not support compression of this type of image: %s" % _img.split(".")[-1].upper()
+                        "currently does not support compression of this type of image: %s"
+                        % _img.split(".")[-1].upper()
                     )
 
     def _compress_image(self, image_path: str) -> str:
@@ -149,12 +158,15 @@ class Base:
                         img.format = "JPEG"  # type: ignore
                         img.save(img_io, "jpeg")
                     elif format == "JPEG":
-                        img = img.resize((int(width * scale), int(height * scale)), Image.ANTIALIAS)
+                        img = img.resize(
+                            (int(width * scale), int(height * scale)), Image.ANTIALIAS
+                        )
                         img.format = "JPEG"  # type: ignore
                         img.save(img_io, "jpeg")
                     else:
                         raise UnsupportedType(
-                            "currently does not support compression of this type of image: %s" % format
+                            "currently does not support compression of this type of image: %s"
+                            % format
                         )
 
                     if img_io.tell() > self.max_size:
@@ -168,11 +180,10 @@ class Base:
                     filename += "." + img.format.lower()  # type: ignore
                 img_io = compress(img, scale)
 
-                cache_path = os.path.join(CONFIG_FOLDER_PATH, "cache")
-                if not os.path.exists(cache_path):
-                    os.mkdir(cache_path)
+                if not os.path.exists(CACHE_PATH):
+                    os.mkdir(CACHE_PATH)
 
-                img_cache_path = os.path.join(cache_path, filename)
+                img_cache_path = os.path.join(CACHE_PATH, filename)
                 with open(img_cache_path, "wb") as f:
                     f.write(img_io.getbuffer())
 
@@ -180,7 +191,6 @@ class Base:
         return image_path
 
     def _clear_cache(self):
-        cache_path = os.path.join(CONFIG_FOLDER_PATH, "cache")
-        if os.path.exists(cache_path):
-            shutil.rmtree(cache_path)
-            os.mkdir(cache_path)
+        if os.path.exists(CACHE_PATH):
+            shutil.rmtree(CACHE_PATH)
+            os.mkdir(CACHE_PATH)

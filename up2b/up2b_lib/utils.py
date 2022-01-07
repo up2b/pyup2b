@@ -32,8 +32,12 @@ class Login:
         if not instance.auth_info:
             print(
                 "Error: You have not logged in yet, please use the `-l` or `--login` parameter to log in"
-                " first.\nCurrent image bed code is : `%s`."
-                % instance.image_bed_code
+                " first.\nCurrent image bed code is : `%s`." % instance.image_bed_code
             )
             sys.exit(0)
         return partial(self, instance)
+
+
+def is_ascii(src: str):
+    assert len(src) == 1, "只能处理字符，而不是字符串"
+    return ord(src) < 128

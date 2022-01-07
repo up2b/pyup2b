@@ -10,30 +10,46 @@ import requests
 
 from typing import List, Optional, Dict, Any
 
-from up2b.up2b_lib.up2b_api import Base
+from up2b.up2b_lib.up2b_api import Base, ImageBedMixin, CONF_FILE
 from up2b.up2b_lib.utils import Login, check_image_exists
 from up2b.up2b_lib import errors
 from up2b.up2b_lib.constants import SM_MS
 
 
-class SM(Base):
-    def __init__(self, conf_file: Optional[str] = None, auto_compress: bool = False):
-        if not conf_file:
-            super().__init__(SM_MS)
-        else:
-            super().__init__(SM_MS, conf_file)
+class SM(Base, ImageBedMixin):
+    def __init__(
+        self,
+        auto_compress: bool = False,
+        add_watermark: bool = False,
+        conf_file: str = CONF_FILE,
+    ):
+        super().__init__(auto_compress, add_watermark, conf_file)
+
+        self.image_bed_code = SM_MS
         self.base_url = "https://sm.ms/api/v2/"
         self.max_size = 5 * 1024 * 1024
-        self.auto_compress: bool = auto_compress
 
         if self.auth_info:
             self.token: str = self.auth_info["token"]
 
-            self.headers = {"Content-Type": "multipart/form-data", "Authorization": self.token}
+            self.headers = {
+                "Content-Type": "multipart/form-data",
+                "Authorization": self.token,
+            }
 
     def login(self, username: str, password: str):
         token = self._get_api_token(username, password)
-        self._save_auth_info({"token": token, "username": username, "password": password})
+        self._save_auth_info(
+            {"token": token, "username": username, "password": password}
+        )
+
+    def _auto_login(self):
+        if not self.auth_info:
+            raise ValueError("auth info is not found")
+        username = self.auth_info["username"]
+        password = self.auth_info["password"]
+        self.login(username, password)
+        self.auth_info = self._read_auth_info()
 
     def _get_api_token(self, username: str, password: str) -> str:
         url = self._url("token")
@@ -74,7 +90,8 @@ class SM(Base):
     def upload_images(self, images_path: List[str]) -> List[str]:
         if len(images_path) > 10:
             raise errors.OverSizeError(
-                "You can only upload up to 10 pictures, but you uploaded %d pictures." % len(images_path)
+                "You can only upload up to 10 pictures, but you uploaded %d pictures."
+                % len(images_path)
             )
 
         check_image_exists(images_path)
@@ -126,7 +143,12 @@ class SM(Base):
         images = []
         for file in self.upload_history()["data"]:
             images.append(
-                {"url": file["url"], "delete_url": file["delete"], "width": file["width"], "height": file["height"]}
+                {
+                    "url": file["url"],
+                    "delete_url": file["delete"],
+                    "width": file["width"],
+                    "height": file["height"],
+                }
             )
 
         return images

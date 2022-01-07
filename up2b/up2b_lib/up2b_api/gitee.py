@@ -10,23 +10,25 @@ import os
 import time
 import requests
 
-from typing import Optional, List, Dict, Tuple, Union
+from typing import List, Dict, Tuple, Union
 from base64 import b64encode
 
-from up2b.up2b_lib.up2b_api import Base
+from up2b.up2b_lib.up2b_api import Base, ImageBedMixin, CONF_FILE
 from up2b.up2b_lib.constants import GITEE
 from up2b.up2b_lib.utils import Login, check_image_exists
 
 
-class Gitee(Base):
-    def __init__(self, conf_file: Optional[str] = None, auto_compress: bool = False):
-        if not conf_file:
-            super().__init__(GITEE)
-        else:
-            super().__init__(GITEE, conf_file)
+class Gitee(Base, ImageBedMixin):
+    def __init__(
+        self,
+        auto_compress: bool = False,
+        add_watermark: bool = False,
+        conf_file: str = CONF_FILE,
+    ):
+        super().__init__(auto_compress, add_watermark, conf_file)
 
+        self.image_bed_code = GITEE
         self.max_size = 1 * 1024 * 1024
-        self.auto_compress: bool = auto_compress
 
         self.headers = {"Content-Type": "application/json;charset=UTF-8"}
 
@@ -37,7 +39,12 @@ class Gitee(Base):
             self.folder: str = self.auth_info["folder"]
 
     def login(self, token: str, username: str, repo: str, folder: str = "md"):
-        auth_info = {"token": token, "username": username, "repo": repo, "folder": folder}
+        auth_info = {
+            "token": token,
+            "username": username,
+            "repo": repo,
+            "folder": folder,
+        }
         self._save_auth_info(auth_info)
 
     @Login
@@ -58,7 +65,11 @@ class Gitee(Base):
             if resp.status_code == 201:
                 return resp.json()["content"]["download_url"]
             else:
-                return {"error": resp.json()["message"], "status_code": resp.status_code, "image_path": image_path}
+                return {
+                    "error": resp.json()["message"],
+                    "status_code": resp.status_code,
+                    "image_path": image_path,
+                }
 
     @Login
     def upload_images(self, images_path: List[str]) -> List[str]:
@@ -86,17 +97,32 @@ class Gitee(Base):
     def get_all_images(self) -> List[Dict[str, str]]:
         images = []
         for file in self.get_all_images_in_image_bed():
-            images.append({"sha": file["sha"], "delete_url": file["url"], "url": file["download_url"]})
+            images.append(
+                {
+                    "sha": file["sha"],
+                    "delete_url": file["url"],
+                    "url": file["download_url"],
+                }
+            )
         return images
 
     @Login
-    def delete_image(self, sha: str, url: str, message: str = "Delete pictures that are no longer used"):
+    def delete_image(
+        self,
+        sha: str,
+        url: str,
+        message: str = "Delete pictures that are no longer used",
+    ):
         data = {"access_token": self.token, "sha": sha, "message": message}
         resp = requests.delete(url, headers=self.headers, json=data)
         return resp.status_code == 200
 
     @Login
-    def delete_images(self, info: Tuple[str, str], message: str = "Delete pictures that are no longer used"):
+    def delete_images(
+        self,
+        info: Tuple[str, str],
+        message: str = "Delete pictures that are no longer used",
+    ):
         failed = []
         for sha, url in info:
             result = self.delete_image(sha, url, message)
@@ -106,7 +132,11 @@ class Gitee(Base):
 
     @property
     def base_url(self) -> str:
-        return "https://gitee.com/api/v5/repos/%s/%s/contents/%s/" % (self.username, self.repo, self.folder)
+        return "https://gitee.com/api/v5/repos/%s/%s/contents/%s/" % (
+            self.username,
+            self.repo,
+            self.folder,
+        )
 
     def __str__(self):
         return "gitee.com"

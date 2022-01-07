@@ -20,15 +20,25 @@ from up2b.up2b_lib.up2b_api.gitee import Gitee
 from up2b.up2b_lib.up2b_api.github import Github
 from up2b.up2b_lib.constants import SM_MS, IMGTU, GITEE, GITHUB, IMAGE_BEDS_CODE
 
-__version__ = "0.1.9"
+__version__ = "0.2.0"
 
 IMAGE_BEDS = {SM_MS: SM, IMGTU: Imgtu, GITEE: Gitee, GITHUB: Github}
 
 
 def _BuildParser():
-    parser = argparse.ArgumentParser(description="A package that can upload pictures to the image bed in Typora.")
+    parser = argparse.ArgumentParser(
+        description="A package that can upload pictures to the image bed in Typora."
+    )
     parser.add_argument("-v", "--version", action="version", version=__version__)
-    parser.add_argument("-aac", action="store_true", help="allow automatic image compression")
+    parser.add_argument(
+        "-aac", action="store_true", help="allow automatic image compression"
+    )
+    parser.add_argument(
+        "-aw",
+        "--add-watermark",
+        action="store_true",
+        help="whether to add text watermark to the images to be uploaded",
+    )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "-c",
@@ -70,11 +80,15 @@ def _BuildParser():
     return parser
 
 
-def _read_image_bed(auto_compress: bool) -> Union[SM, Imgtu, Gitee, Github]:
+def _read_image_bed(
+    auto_compress: bool, add_watermark: bool
+) -> Union[SM, Imgtu, Gitee, Github]:
     try:
         with open(CONF_FILE) as f:
             conf = json.loads(f.read())
-            return IMAGE_BEDS[conf["image_bed"]](auto_compress=auto_compress)
+            return IMAGE_BEDS[conf["image_bed"]](
+                auto_compress=auto_compress, add_watermark=add_watermark
+            )
     except FileNotFoundError:
         print(
             "Error: The configuration file is not found, "
@@ -97,11 +111,13 @@ def main() -> int:
             )
         return 0
 
-    ib = _read_image_bed(args.aac)
+    ib = _read_image_bed(args.aac, args.add_watermark)
 
     if args.login:
         if isinstance(ib, Gitee) or isinstance(ib, Github):
-            print("Error: you have chosen `gitee` or `github` as the image bed, please login with `-lg`")
+            print(
+                "Error: you have chosen `gitee` or `github` as the image bed, please login with `-lg`"
+            )
             return 1
 
         ib.login(*args.login)
@@ -110,7 +126,9 @@ def main() -> int:
 
     if args.login_git:
         if not (isinstance(ib, Gitee) or isinstance(ib, Github)):
-            print("Error: the image bed you choose is not gitee or github, , please login with `-lg`")
+            print(
+                "Error: the image bed you choose is not gitee or github, , please login with `-lg`"
+            )
             return 1
 
         ib.login(*args.login_git)
