@@ -4,11 +4,13 @@
 # @Email: thepoy@163.com
 # @File Name: utils.py
 # @Created:  2021-02-09 15:17:32
-# @Modified: 2021-06-04 13:25:58
+# @Modified:  2022-01-09 10:47:23
 
 import os
+import locale
 
 from functools import wraps, partial
+from typing import Optional
 from colorful_logger import get_logger, child_logger as cl
 from colorful_logger.logger import ERROR
 
@@ -47,3 +49,8 @@ class Login:
 def is_ascii(src: str):
     assert len(src) == 1, "只能处理字符，而不是字符串"
     return ord(src) < 128
+
+
+def get_default_language() -> str:
+    lang = locale.getdefaultlocale()[0]
+    return lang if lang else "en_US"

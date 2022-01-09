@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-08 15:43:32
-# @Modified: 2021-06-20 20:15:43
+# @Modified:  2022-01-09 12:01:07
 
 import os
 import sys
@@ -13,6 +13,7 @@ import argparse
 
 from typing import Union
 
+from up2b.up2b_lib.i18n import read_i18n
 from up2b.up2b_lib.up2b_api import CONF_FILE, choose_image_bed
 from up2b.up2b_lib.up2b_api.sm import SM
 from up2b.up2b_lib.up2b_api.imgtu import Imgtu
@@ -21,32 +22,45 @@ from up2b.up2b_lib.up2b_api.github import Github
 from up2b.up2b_lib.constants import SM_MS, IMGTU, GITEE, GITHUB, IMAGE_BEDS_CODE
 from up2b.up2b_lib.utils import logger
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 IMAGE_BEDS = {SM_MS: SM, IMGTU: Imgtu, GITEE: Gitee, GITHUB: Github}
 
 
 def _BuildParser():
+    locale = read_i18n()
+
     parser = argparse.ArgumentParser(
-        description="A package that can upload pictures to the image bed in Typora."
+        description=locale["A package that can upload images to the image bed."]
     )
     parser.add_argument("-v", "--version", action="version", version=__version__)
     parser.add_argument(
-        "-aac", action="store_true", help="allow automatic image compression"
+        "-aac", action="store_true", help=locale["allow automatic image compression"]
     )
     parser.add_argument(
         "-aw",
         "--add-watermark",
         action="store_true",
-        help="whether to add text watermark to the images to be uploaded",
+        help=locale["whether to add text watermark to the images to be uploaded"],
     )
+    parser.add_argument(
+        "--current",
+        action="store_true",
+        help=locale["show the image bed in use"],
+    )
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        help=locale["list all configured image beds"],
+    )
+
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "-c",
         "--choose-site",
         choices=[str(k) for k in IMAGE_BEDS.keys()],
         metavar=str({v: k for k, v in IMAGE_BEDS_CODE.items()}),
-        help="choose the image bed you want to use and exit",
+        help=locale["choose the image bed you want to use and exit"],
         type=str,
     )
     group.add_argument(
@@ -54,10 +68,9 @@ def _BuildParser():
         "--login",
         nargs=2,
         metavar=("USERNAME", "PASSWORD"),
-        help=(
-            "save the user authentication token after successful login. You "
-            "must enter the username and password after `-l` or `--login`"
-        ),
+        help=locale[
+            "save the user authentication token after successful login. You must enter the username and password after `-l` or `--login`"
+        ],
         type=str,
     )
     group.add_argument(
@@ -65,23 +78,29 @@ def _BuildParser():
         "--login-git",
         nargs=4,
         metavar=("ACCESS_TOKEN", "USERNAME", "REPO", "FOLDER"),
-        help="save the authentication information of the git website, such as gitee, github",
+        help=locale[
+            "save the authentication information of the git website, such as gitee, github"
+        ],
         type=str,
     )
     group.add_argument(
         "--config-text-watermark",
         nargs=6,
         metavar=("X", "Y", "OPACITY", "TEXT", "FONT_PATH", "SIZE"),
-        help="configure the text watermark",
+        help=locale["configure the text watermark"],
         type=str,
     )
-    group.add_argument("-p", "--image-path", help="upload only one picture", type=str)
+    group.add_argument(
+        "-p", "--image-path", help=locale["upload only one picture"], type=str
+    )
     group.add_argument(
         "-ps",
         "--images-path",
         metavar="IMAGE_PATH",
         nargs="+",
-        help="upload multiple pictures, the maximum is 10 pictures, use spaces to separate each image path.",
+        help=locale[
+            "upload multiple pictures, the maximum is 10 pictures, use spaces to separate each image path"
+        ],
         type=str,
     )
 
@@ -159,7 +178,7 @@ def main() -> int:
         _config_text_watermark(
             int(_args[0]),
             int(_args[1]),
-            int(_args[2]),
+            100 - int(_args[2]),
             _args[3],
             _args[4],
             int(_args[5]),

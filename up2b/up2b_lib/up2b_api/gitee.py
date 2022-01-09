@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: gitee.py
 # @Created: 2021-02-13 09:10:05
-# @Modified: 2021-06-04 09:34:38
+# @Modified:  2022-01-09 12:07:17
 
 import os
 import time
@@ -49,6 +49,7 @@ class Gitee(Base, ImageBedMixin):
 
     @Login
     def upload_image(self, image_path: str) -> Union[str, dict]:
+        raw_filename = os.path.basename(image_path)
         image_path = self._compress_image(image_path)
         image_path = self._add_watermark(image_path)
         suffix = os.path.splitext(image_path)[-1]
@@ -60,7 +61,7 @@ class Gitee(Base, ImageBedMixin):
             data = {
                 "access_token": self.token,
                 "content": b64encode(fb.read()).decode("utf-8"),
-                "message": "typora - " + filename,
+                "message": "typora - " + raw_filename,
             }
             resp = requests.post(url, headers=self.headers, json=data)
             if resp.status_code == 201:

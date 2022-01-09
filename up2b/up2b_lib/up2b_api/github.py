@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: github.py
 # @Created: 2021-02-13 09:10:14
-# @Modified: 2021-06-04 13:19:14
+# @Modified:  2022-01-09 12:06:28
 
 import os
 import time
@@ -30,8 +30,6 @@ class Github(Base, ImageBedMixin):
 
         self.max_size = 20 * 1024 * 1024
 
-        print(self.auth_info)
-
         if self.auth_info:
             self.token: str = self.auth_info["token"]
             self.username: str = self.auth_info["username"]
@@ -54,6 +52,7 @@ class Github(Base, ImageBedMixin):
 
     @Login
     def upload_image(self, image_path: str) -> Union[str, dict]:
+        raw_filename = os.path.basename(image_path)
         image_path = self._compress_image(image_path)
         image_path = self._add_watermark(image_path)
         suffix = os.path.splitext(image_path)[-1]
@@ -64,7 +63,7 @@ class Github(Base, ImageBedMixin):
             url = self.base_url + filename
             data = {
                 "content": b64encode(fb.read()).decode("utf-8"),
-                "message": "typora - " + filename,
+                "message": "typora - " + raw_filename,
             }
             try:
                 resp = requests.put(url, headers=self.headers, json=data)

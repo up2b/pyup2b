@@ -4,17 +4,15 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-13 09:02:21
-# @Modified: 2021-07-25 23:27:47
+# @Modified:  2022-01-09 11:57:23
 
 import os
-import sys
 import json
 import shutil
 
 from io import BytesIO
 from abc import ABC, abstractmethod
 from typing import Optional, List, Tuple, Dict
-from PIL import Image
 from up2b.up2b_lib import custom_types
 from up2b.up2b_lib.utils import child_logger
 from up2b.up2b_lib.errors import UnsupportedType, OverSizeError
@@ -23,7 +21,6 @@ from up2b.up2b_lib.constants import (
     CONF_FILE,
     CACHE_PATH,
 )
-from up2b.up2b_lib.watermark import AddWatermark, TypeFont
 
 logger = child_logger(__name__)
 
@@ -150,6 +147,8 @@ class Base:
 
     def _compress_image(self, image_path: str) -> str:
         if self.auto_compress:
+            from PIL import Image
+
             raw_size = os.path.getsize(image_path)
             if raw_size > self.max_size:
 
@@ -201,6 +200,8 @@ class Base:
 
     def _add_watermark(self, image_path: str) -> str:
         if self.add_watermark:
+            from up2b.up2b_lib.watermark import AddWatermark, TypeFont
+
             conf = self.conf["watermark"]
             aw = AddWatermark(conf["x"], conf["y"], conf["opacity"])
             return aw.add_text_watermark(
