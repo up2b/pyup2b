@@ -10,11 +10,15 @@ import os
 import locale
 
 from functools import wraps, partial
-from typing import Optional
 from colorful_logger import get_logger, child_logger as cl
-from colorful_logger.logger import ERROR
+from colorful_logger.logger import DEBUG, ERROR
 
-logger = get_logger("up2b", level=ERROR)
+
+if os.getenv("DEBUG"):
+    level = DEBUG
+else:
+    level = ERROR
+logger = get_logger("up2b", level=level)
 
 
 def child_logger(name: str):

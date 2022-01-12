@@ -13,6 +13,7 @@ import argparse
 
 from typing import Union
 
+from colort import DisplayStyle
 from up2b.up2b_lib.i18n import read_i18n
 from up2b.up2b_lib.up2b_api import CONF_FILE, choose_image_bed
 from up2b.up2b_lib.up2b_api.sm import SM
@@ -107,21 +108,26 @@ def _BuildParser():
     return parser
 
 
-def _read_image_bed(
-    auto_compress: bool, add_watermark: bool
-) -> Union[SM, Imgtu, Gitee, Github]:
+def _read_conf():
     try:
         with open(CONF_FILE) as f:
             conf = json.loads(f.read())
-            return IMAGE_BEDS[conf["image_bed"]](
-                auto_compress=auto_compress, add_watermark=add_watermark
-            )
+            return conf
     except FileNotFoundError:
         logger.fatal(
             "the configuration file is not found, "
             "you need to use `--choose-site` or `-c` to select the image bed first."
         )
         sys.exit(1)
+
+
+def _read_image_bed(
+    auto_compress: bool, add_watermark: bool
+) -> Union[SM, Imgtu, Gitee, Github]:
+    conf = _read_conf()
+    return IMAGE_BEDS[conf["image_bed"]](
+        auto_compress=auto_compress, add_watermark=add_watermark
+    )
 
 
 def _config_text_watermark(
@@ -163,8 +169,43 @@ def main() -> int:
 
     args = _BuildParser().parse_args()
 
+    ds = DisplayStyle()
+
+    if args.current:
+        print(
+            ds.format_with_one_style(" " + chr(10003), ds.foreground_color.green),
+            _read_image_bed(False, False),
+        )
+        return 0
+
+    if args.list:
+        conf = _read_conf()
+        for i in range(len(conf["auth_data"])):
+            if conf["auth_data"][i]:
+                print(
+                    ds.format_with_one_style(
+                        " " + chr(10003), ds.foreground_color.green
+                    ),
+                    i,
+                    IMAGE_BEDS[i](),
+                )
+            else:
+                print(
+                    ds.format_with_one_style(" " + chr(10007), ds.foreground_color.red),
+                    i,
+                    IMAGE_BEDS[i](),
+                )
+
+        return 0
+
     if args.choose_site:
-        choose_image_bed(int(args.choose_site))
+        code = int(args.choose_site)
+        choose_image_bed(code)
+        print(
+            ds.format_with_one_style(" ==>", ds.foreground_color.cyan),
+            IMAGE_BEDS[code](),
+        )
+
         if args.choose_site == str(GITEE):
             logger.warn(
                 "resources bigger than 1M on `gitee` cannot be publicly accessed. "
@@ -194,6 +235,8 @@ def main() -> int:
             )
             return 1
 
+        logger.debug("current image bed: %s", ib)
+
         ib.login(*args.login)
 
         return 0
@@ -201,7 +244,7 @@ def main() -> int:
     if args.login_git:
         if not (isinstance(ib, Gitee) or isinstance(ib, Github)):
             logger.fatal(
-                "the image bed you choose is not gitee or github, , please login with `-lg`"
+                "the image bed you choose is not gitee or github, , please login with `-l`"
             )
             return 1
 

@@ -74,6 +74,9 @@ class ImageBedMixin(ABC):
 
 
 class Base:
+    image_bed_code: int
+    max_size: int
+
     def __init__(
         self,
         auto_compress: bool = False,
@@ -89,9 +92,7 @@ class Base:
                 logger.fatal(
                     "you have enabled the function of adding watermark, but the watermark is not configured, please configure the text watermark through `--config-text-watermark`"
                 )
-        self.max_size: int = 0
         self.auto_compress: bool = auto_compress
-        self.image_bed_code: int = -1
 
     def _read_auth_info(self) -> Optional[custom_types.AuthInfo]:
         try:
@@ -102,6 +103,7 @@ class Base:
             return None
 
     def _save_auth_info(self, auth_info: Dict[str, str]):
+        logger.debug("current image bed code: %d", self.image_bed_code)
         try:
             with open(self.conf_file, "r+") as f:
                 conf = json.loads(f.read())
