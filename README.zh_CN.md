@@ -40,28 +40,30 @@ pip install up2b
 安装后，会多出一条`up2b`命令：
 
 ```
-usage: test.py [-h] [-v] [-aac] [-aw]
-               [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
+usage: up2b [-h] [-v] [-aac] [-aw] [--current] [--list]
+            [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
 
-A package that can upload pictures to the image bed in Typora.
+一个能将本地图片压缩、加水印或原图上传到图床的包
 
 optional arguments:
   -h, --help            show this help message and exit
   -v, --version         show program's version number and exit
-  -aac                  allow automatic image compression
-  -aw, --add-watermark  whether to add text watermark to the images to be uploaded
+  -aac                  允许自动压缩图片。开启此项后，超过图床限制大小的图片将会自动压缩到限制大小后再上传
+  -aw, --add-watermark  对要上传的图片添加文字水印
+  --current             显示正在使用的图床
+  --list                列出所有已配置的图床
   -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'}
-                        choose the image bed you want to use and exit
+                        选择要使用的图床
   -l USERNAME PASSWORD, --login USERNAME PASSWORD
-                        save the user authentication token after successful login. You must enter the username and password after `-l` or `--login`
+                        保存认证信息。你需要在`-l`或`--login`后输入账名和密码
   -lg ACCESS_TOKEN USERNAME REPO FOLDER, --login-git ACCESS_TOKEN USERNAME REPO FOLDER
-                        save the authentication information of the git website, such as gitee, github
+                        保存 git 类型图床的认证信息，如github、gitee
   --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE
-                        configure the text watermark
+                        配置要添加的文字水印
   -p IMAGE_PATH, --image-path IMAGE_PATH
-                        upload only one picture
+                        上传一张图片
   -ps IMAGE_PATH [IMAGE_PATH ...], --images-path IMAGE_PATH [IMAGE_PATH ...]
-                        upload multiple pictures, the maximum is 10 pictures, use spaces to separate each image path.
+                        上传多张图片。多张图片路径之间以空格分隔，最多能上传 10 张
 ```
 
 #### 1 选择图床

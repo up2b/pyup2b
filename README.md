@@ -44,6 +44,8 @@ optional arguments:
   -v, --version         show program's version number and exit
   -aac                  allow automatic image compression
   -aw, --add-watermark  whether to add text watermark to the images to be uploaded
+  --current             show the image bed in use
+  --list                list all configured image beds
   -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'}
                         choose the image bed you want to use and exit
   -l USERNAME PASSWORD, --login USERNAME PASSWORD
