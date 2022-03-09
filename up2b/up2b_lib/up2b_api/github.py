@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: github.py
 # @Created: 2021-02-13 09:10:14
-# @Modified:  2022-01-09 12:06:28
+# @Modified:  2022-03-09 11:41:15
 
 import os
 import time
@@ -164,5 +164,5 @@ class Github(Base, ImageBedMixin):
         path = url.split("/main/")[-1]
         return "https://cdn.jsdelivr.net/gh/%s/%s/%s" % (self.username, self.repo, path)
 
-    def __str__(self):
+    def __repr__(self):
         return "github.com"

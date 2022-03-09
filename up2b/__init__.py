@@ -4,14 +4,14 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-08 15:43:32
-# @Modified:  2022-01-09 12:01:07
+# @Modified:  2022-03-09 11:34:57
 
 import os
 import sys
 import json
 import argparse
 
-from typing import Union
+from typing import Dict, List, Optional, Union
 
 from colort import DisplayStyle
 from up2b.up2b_lib.i18n import read_i18n
@@ -23,7 +23,7 @@ from up2b.up2b_lib.up2b_api.github import Github
 from up2b.up2b_lib.constants import SM_MS, IMGTU, GITEE, GITHUB, IMAGE_BEDS_CODE
 from up2b.up2b_lib.utils import logger
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 IMAGE_BEDS = {SM_MS: SM, IMGTU: Imgtu, GITEE: Gitee, GITHUB: Github}
 
@@ -116,7 +116,7 @@ def _read_conf():
     except FileNotFoundError:
         logger.fatal(
             "the configuration file is not found, "
-            "you need to use `--choose-site` or `-c` to select the image bed first."
+            + "you need to use `--choose-site` or `-c` to select the image bed first."
         )
         sys.exit(1)
 
@@ -165,6 +165,47 @@ def _config_text_watermark(
             )
 
 
+def print_list(ds: DisplayStyle) -> int:
+    conf: Dict[str, Union[int, List[Dict[str, str]]]] = _read_conf()
+    auth_data: Optional[List[Dict[str, str]]] = conf.get("auth_data")  # type: ignore
+    if not auth_data:
+        selected_code: Optional[int] = conf.get("image_bed")  # type: ignore
+        if selected_code is None:
+            logger.fatal(
+                "no image bed selected, "
+                + "you need to use `--choose-site` or `-c` to select the image bed first."
+            )
+            sys.exit(1)
+
+        logger.warning(
+            "you have selected %s, but no authentication information has been configured.\n\n%s %s %s",
+            ds.format_with_multiple_styles(
+                " " + IMAGE_BEDS[selected_code]().__str__() + " ",
+                ds.backgorud_color.dark_gray,
+                ds.foreground_color.white,
+            ),
+            ds.format_with_one_style(" " + chr(10007), ds.foreground_color.red),
+            selected_code,
+            IMAGE_BEDS[selected_code](),
+        )
+        return 0
+
+    for i in range(len(auth_data)):
+        if auth_data[i]:
+            print(
+                ds.format_with_one_style(" " + chr(10003), ds.foreground_color.green),
+                i,
+                IMAGE_BEDS[i](),
+            )
+        else:
+            print(
+                ds.format_with_one_style(" " + chr(10007), ds.foreground_color.red),
+                i,
+                IMAGE_BEDS[i](),
+            )
+    return 0
+
+
 def main() -> int:
 
     args = _BuildParser().parse_args()
@@ -179,24 +220,7 @@ def main() -> int:
         return 0
 
     if args.list:
-        conf = _read_conf()
-        for i in range(len(conf["auth_data"])):
-            if conf["auth_data"][i]:
-                print(
-                    ds.format_with_one_style(
-                        " " + chr(10003), ds.foreground_color.green
-                    ),
-                    i,
-                    IMAGE_BEDS[i](),
-                )
-            else:
-                print(
-                    ds.format_with_one_style(" " + chr(10007), ds.foreground_color.red),
-                    i,
-                    IMAGE_BEDS[i](),
-                )
-
-        return 0
+        return print_list(ds)
 
     if args.choose_site:
         code = int(args.choose_site)
@@ -209,8 +233,8 @@ def main() -> int:
         if args.choose_site == str(GITEE):
             logger.warn(
                 "resources bigger than 1M on `gitee` cannot be publicly accessed. "
-                "Please manually compress the image size to 1M or less, "
-                "or use the `-aac` parameter to enable the automatic compression function."
+                + "Please manually compress the image size to 1M or less, "
+                + "or use the `-aac` parameter to enable the automatic compression function."
             )
         return 0
 

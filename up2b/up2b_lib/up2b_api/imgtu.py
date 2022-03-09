@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: imgtu.py
 # @Created: 2021-02-13 09:04:37
-# @Modified: 2021-06-20 20:17:54
+# @Modified:  2022-03-09 11:40:58
 
 import os
 import re
@@ -307,5 +307,5 @@ class Imgtu(Base, ImageBedMixin):
     def _url(self, path: str) -> str:
         return self.base_url + path
 
-    def __str__(self):
+    def __repr__(self):
         return "imgtu.com"

@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: gitee.py
 # @Created: 2021-02-13 09:10:05
-# @Modified:  2022-01-09 12:07:17
+# @Modified:  2022-03-09 11:41:09
 
 import os
 import time
@@ -140,5 +140,5 @@ class Gitee(Base, ImageBedMixin):
             self.folder,
         )
 
-    def __str__(self):
+    def __repr__(self):
         return "gitee.com"

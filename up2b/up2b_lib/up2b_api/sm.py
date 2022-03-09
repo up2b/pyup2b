@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: sm.py
 # @Created: 2021-02-13 09:04:07
-# @Modified: 2021-07-25 23:30:29
+# @Modified:  2022-03-09 11:41:04
 
 import requests
 
@@ -181,5 +181,5 @@ class SM(Base, ImageBedMixin):
     def _login_expired(self, resp: dict):
         return resp["message"] == "Get user profile failed, invalid Authorization."
 
-    def __str__(self):
+    def __repr__(self):
         return "sm.ms"

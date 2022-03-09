@@ -1,24 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Author: thepoy
-# @Email: thepoy@163.com
+# @Author:    thepoy
+# @Email:     thepoy@163.com
 # @File Name: utils.py
-# @Created:  2021-02-09 15:17:32
-# @Modified:  2022-01-09 10:47:23
+# @Created:   2021-02-09 15:17:32
+# @Modified:  2022-03-09 11:26:44
 
 import os
 import locale
 
 from functools import wraps, partial
-from colorful_logger import get_logger, child_logger as cl
-from colorful_logger.logger import DEBUG, ERROR
+from colorful_logger import (
+    DEBUG,
+    WARNING,
+    get_logger,
+    child_logger as cl,
+)
 
 
 if os.getenv("DEBUG"):
     level = DEBUG
 else:
-    level = ERROR
-logger = get_logger("up2b", level=level)
+    level = WARNING
+logger = get_logger("up2b", level=level, print_position=False)
 
 
 def child_logger(name: str):
@@ -44,9 +48,11 @@ class Login:
 
         if not instance.auth_info:
             logger.fatal(
-                "Error: You have not logged in yet, please use the `-l` or `--login` parameter to log in"
-                " first.\nCurrent image bed code is : `%s`." % instance.image_bed_code
+                "you have not logged in yet, please use the `-l` or `--login` parameter to log in"
+                + " first.\nCurrent image bed code is : `%s`.",
+                instance.image_bed_code,
             )
+
         return partial(self, instance)
 
 
