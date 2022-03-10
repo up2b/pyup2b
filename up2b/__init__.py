@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-08 15:43:32
-# @Modified:  2022-03-09 11:34:57
+# @Modified:  2022-03-10 09:55:41
 
 import os
 import sys
@@ -23,7 +23,7 @@ from up2b.up2b_lib.up2b_api.github import Github
 from up2b.up2b_lib.constants import SM_MS, IMGTU, GITEE, GITHUB, IMAGE_BEDS_CODE
 from up2b.up2b_lib.utils import logger
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 
 IMAGE_BEDS = {SM_MS: SM, IMGTU: Imgtu, GITEE: Gitee, GITHUB: Github}
 
@@ -118,7 +118,6 @@ def _read_conf():
             "the configuration file is not found, "
             + "you need to use `--choose-site` or `-c` to select the image bed first."
         )
-        sys.exit(1)
 
 
 def _read_image_bed(
@@ -175,7 +174,6 @@ def print_list(ds: DisplayStyle) -> int:
                 "no image bed selected, "
                 + "you need to use `--choose-site` or `-c` to select the image bed first."
             )
-            sys.exit(1)
 
         logger.warning(
             "you have selected %s, but no authentication information has been configured.\n\n%s %s %s",
@@ -257,7 +255,6 @@ def main() -> int:
             logger.fatal(
                 "you have chosen `gitee` or `github` as the image bed, please login with `-lg`"
             )
-            return 1
 
         logger.debug("current image bed: %s", ib)
 
@@ -270,7 +267,6 @@ def main() -> int:
             logger.fatal(
                 "the image bed you choose is not gitee or github, , please login with `-l`"
             )
-            return 1
 
         ib.login(*args.login_git)
 

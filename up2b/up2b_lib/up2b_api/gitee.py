@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: gitee.py
 # @Created: 2021-02-13 09:10:05
-# @Modified:  2022-03-09 11:41:09
+# @Modified:  2022-03-10 11:31:33
 
 import os
 import time
@@ -15,7 +15,9 @@ from base64 import b64encode
 
 from up2b.up2b_lib.up2b_api import Base, ImageBedMixin, CONF_FILE
 from up2b.up2b_lib.constants import GITEE
-from up2b.up2b_lib.utils import Login, check_image_exists
+from up2b.up2b_lib.utils import Login, check_image_exists, child_logger
+
+logger = child_logger(__name__)
 
 
 class Gitee(Base, ImageBedMixin):
@@ -49,6 +51,8 @@ class Gitee(Base, ImageBedMixin):
 
     @Login
     def upload_image(self, image_path: str) -> Union[str, dict]:
+        logger.debug("uploading: %s", image_path)
+
         raw_filename = os.path.basename(image_path)
         image_path = self._compress_image(image_path)
         image_path = self._add_watermark(image_path)
@@ -65,10 +69,14 @@ class Gitee(Base, ImageBedMixin):
             }
             resp = requests.post(url, headers=self.headers, json=data)
             if resp.status_code == 201:
-                return resp.json()["content"]["download_url"]
+                uploaded_url = resp.json()["content"]["download_url"]
+                logger.debug("uploaded: %s => %s", image_path, uploaded_url)
+                return uploaded_url
             else:
+                error = resp.json()["message"]
+                logger.error("upload failed: image=%s, error=%s", image_path, error)
                 return {
-                    "error": resp.json()["message"],
+                    "error": error,
                     "status_code": resp.status_code,
                     "image_path": image_path,
                 }

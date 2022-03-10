@@ -2,14 +2,24 @@
 # -*- coding: utf-8 -*-
 # @Author: thepoy
 # @Email: thepoy@163.com
-# @File Name: utils.py
+# @File Name: watermark.py
 # @Created:  2021-02-09 15:17:32
-# @Modified: 2021-06-04 13:25:58
+# @Modified:  2022-03-10 10:28:31
 
 import os
 
-from PIL import Image, ImageDraw, ImageFont, ImageEnhance
-from PIL.ImageDraw import ImageDraw as Draw
+from up2b.up2b_lib.utils import child_logger
+
+logger = child_logger(__name__)
+
+try:
+    from PIL import Image, ImageDraw, ImageFont, ImageEnhance
+    from PIL.ImageDraw import ImageDraw as Draw
+except ModuleNotFoundError:
+    logger.fatal(
+        "you have enabled the feature of adding watermark, but [ pillow ] is not installed, please execute `pip install pillow` before enabling this feature"
+    )
+
 from typing import List, Tuple
 from collections import namedtuple
 

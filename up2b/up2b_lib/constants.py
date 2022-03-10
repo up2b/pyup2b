@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: constants.py
 # @Created: 2021-02-13 09:17:07
-# @Modified: 2021-07-25 23:26:27
+# @Modified:  2022-03-10 09:15:48
 
 import sys
 import os
@@ -29,8 +29,6 @@ IS_MACOS = sys.platform == "darwin"
 
 if IS_WINDOWS:
     CONFIG_FOLDER_PATH = os.path.join(os.environ["APPDATA"], "up2b")
-elif IS_MACOS:
-    CONFIG_FOLDER_PATH = os.path.join(os.environ["HOME"], ".config", "up2b")
 else:
     CONFIG_FOLDER_PATH = os.path.join(os.environ["HOME"], ".config", "up2b")
 

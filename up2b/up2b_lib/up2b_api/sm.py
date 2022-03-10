@@ -4,16 +4,18 @@
 # @Email: thepoy@aliyun.com
 # @File Name: sm.py
 # @Created: 2021-02-13 09:04:07
-# @Modified:  2022-03-09 11:41:04
+# @Modified:  2022-03-10 11:36:28
 
 import requests
 
 from typing import List, Optional, Dict, Any
 
 from up2b.up2b_lib.up2b_api import Base, ImageBedMixin, CONF_FILE
-from up2b.up2b_lib.utils import Login, check_image_exists
 from up2b.up2b_lib import errors
 from up2b.up2b_lib.constants import SM_MS
+from up2b.up2b_lib.utils import Login, check_image_exists, child_logger
+
+logger = child_logger(__name__)
 
 
 class SM(Base, ImageBedMixin):
@@ -69,6 +71,8 @@ class SM(Base, ImageBedMixin):
 
     @Login
     def upload_image(self, image_path: str):
+        logger.debug("uploading: %s", image_path)
+
         image_path = self._compress_image(image_path)
         image_path = self._add_watermark(image_path)
         # sm.ms不管出不出错，返回的状态码都是200
@@ -77,16 +81,21 @@ class SM(Base, ImageBedMixin):
         files = {"smfile": open(image_path, "rb")}
         resp = requests.post(url, headers=headers, files=files).json()
         if resp["success"]:
-            return resp["data"]["url"]
+            uploaded_url = resp["data"]["url"]
+            logger.debug("uploaded: %s => %s", image_path, uploaded_url)
+            return uploaded_url
         else:
             if resp["code"] == "image_repeated":
                 # 如果图片重复，会返回重复的图片的链接，所以此处不报错
+                logger.info("repeated image: %s", resp["images"])
                 return resp["images"]
             elif self._login_expired(resp):
                 self._auto_login()
                 self.token = self.auth_info["token"]  # type: ignore
             else:
-                raise errors.UploadFailed(resp["message"])
+                error = resp["message"]
+                logger.error("upload failed: img=%s, error=%s", image_path, error)
+                raise errors.UploadFailed(error)
 
     @Login
     def upload_images(self, images_path: List[str]) -> List[str]:

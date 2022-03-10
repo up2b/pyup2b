@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-13 09:02:21
-# @Modified:  2022-01-09 11:57:23
+# @Modified:  2022-03-10 10:46:47
 
 import os
 import json
@@ -149,7 +149,12 @@ class Base:
 
     def _compress_image(self, image_path: str) -> str:
         if self.auto_compress:
-            from PIL import Image
+            try:
+                from PIL import Image
+            except ModuleNotFoundError:
+                logger.fatal(
+                    "you have enabled the automatic image compression feature, but [ pillow ] is not installed, please execute `pip install pillow` before enabling this feature"
+                )
 
             raw_size = os.path.getsize(image_path)
             if raw_size > self.max_size:
@@ -216,3 +221,5 @@ class Base:
         if os.path.exists(CACHE_PATH):
             shutil.rmtree(CACHE_PATH)
             os.mkdir(CACHE_PATH)
+
+            logger.info("cache folder has been cleared: %s", CACHE_PATH)

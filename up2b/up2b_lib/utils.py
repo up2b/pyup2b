@@ -4,25 +4,32 @@
 # @Email:     thepoy@163.com
 # @File Name: utils.py
 # @Created:   2021-02-09 15:17:32
-# @Modified:  2022-03-09 11:26:44
+# @Modified:  2022-03-10 10:39:47
 
 import os
 import locale
 
 from functools import wraps, partial
-from colorful_logger import (
-    DEBUG,
-    WARNING,
-    get_logger,
-    child_logger as cl,
+from colorful_logger import get_logger, child_logger as cl
+from colorful_logger.logger import is_debug
+
+from up2b.up2b_lib.constants import CONFIG_FOLDER_PATH
+
+log_file_path = None
+print_position = False
+show = True
+
+if is_debug():
+    log_file_path = os.path.join(CONFIG_FOLDER_PATH, "up2b.log")
+    print_position = True
+    show = False
+
+logger = get_logger(
+    "up2b",
+    show=show,
+    file_path=log_file_path,
+    print_position=print_position,
 )
-
-
-if os.getenv("DEBUG"):
-    level = DEBUG
-else:
-    level = WARNING
-logger = get_logger("up2b", level=level, print_position=False)
 
 
 def child_logger(name: str):
@@ -56,11 +63,16 @@ class Login:
         return partial(self, instance)
 
 
-def is_ascii(src: str):
-    assert len(src) == 1, "只能处理字符，而不是字符串"
-    return ord(src) < 128
+def is_ascii(char: str):
+    assert len(char) == 1, "只能处理字符，而不是字符串"
+    return ord(char) < 128
 
 
 def get_default_language() -> str:
-    lang = locale.getdefaultlocale()[0]
+    sys_locale = locale.getdefaultlocale()
+
+    logger.debug(f"system locale: {sys_locale}")
+
+    lang = sys_locale[0]
+
     return lang if lang else "en_US"

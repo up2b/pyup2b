@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: github.py
 # @Created: 2021-02-13 09:10:14
-# @Modified:  2022-03-09 11:41:15
+# @Modified:  2022-03-10 11:32:58
 
 import os
 import time
@@ -15,7 +15,9 @@ from base64 import b64encode
 from requests.exceptions import ConnectionError
 from up2b.up2b_lib.up2b_api import Base, ImageBedMixin, CONF_FILE
 from up2b.up2b_lib.constants import GITHUB
-from up2b.up2b_lib.utils import Login, check_image_exists
+from up2b.up2b_lib.utils import Login, check_image_exists, child_logger
+
+logger = child_logger(__name__)
 
 
 class Github(Base, ImageBedMixin):
@@ -73,10 +75,14 @@ class Github(Base, ImageBedMixin):
                     e,
                 )
             if resp.status_code == 201:
-                return resp.json()["content"]["download_url"]
+                uploaded_url = resp.json()["content"]["download_url"]
+                logger.debug("uploaded: %s => %s", image_path, uploaded_url)
+                return uploaded_url
             else:
+                error = resp.json()["message"]
+                logger.error("upload failed: image=%s, error=%s", image_path, error)
                 return {
-                    "error": resp.json()["message"],
+                    "error": error,
                     "status_code": resp.status_code,
                     "image_path": image_path,
                 }

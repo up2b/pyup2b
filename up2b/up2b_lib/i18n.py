@@ -4,14 +4,17 @@
 # @Email:     thepoy@163.com
 # @File Name: i18n.py
 # @Created:   2022-01-09 11:17:23
-# @Modified:  2022-01-09 11:50:39
+# @Modified:  2022-03-10 10:12:35
 
 import json
 import os
 from typing import Dict
 
+
 from up2b.up2b_lib.constants import CONFIG_FOLDER_PATH
-from up2b.up2b_lib.utils import get_default_language
+from up2b.up2b_lib.utils import get_default_language, child_logger
+
+logger = child_logger(__name__)
 
 _i18n_folder = os.path.join(CONFIG_FOLDER_PATH, "i18n")
 
@@ -53,15 +56,25 @@ _i18ns: Dict[LangType, Locale] = {
 def read_i18n() -> Locale:
     if not os.path.exists(_i18n_folder):
         os.mkdir(_i18n_folder)
+
+        logger.debug("the language used: [ en_US ]")
+
         return _i18ns["en_US"]
 
     lang = get_default_language()
     locale = _i18ns.get(lang)
     if locale:
+        logger.debug("the language used: [ %s ]", lang)
         return locale
 
-    translation_file = os.path.join(_i18n_folder, get_default_language() + ".json")
+    translation_file = os.path.join(_i18n_folder, lang + ".json")
     if not os.path.exists(translation_file):
+        logger.info(
+            "the language used is [ %s ], but no translation file for [ %s ] was found, so use [ en_US ]",
+            lang,
+            lang,
+        )
         return _i18ns["en_US"]
 
+    logger.debug("translation file [ %s ] will be used", translation_file)
     return json.loads(translation_file)

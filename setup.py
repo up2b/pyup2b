@@ -4,7 +4,7 @@
 # @Email: thepoy@163.com
 # @File Name: setup.py
 # @Created: 2021-03-27 09:55:27
-# @Modified:  2022-03-09 11:39:34
+# @Modified:  2022-03-10 11:40:19
 
 import codecs
 import up2b
@@ -30,7 +30,7 @@ with codecs.open("README.md", "r", "utf-8") as fd:
         install_requires=[
             "requests",
             "requests-toolbelt",
-            "colorful-logger>=0.1.3",
+            "colorful-logger>=0.1.5",
         ],
         extras_require={
             "mark": ["pillow"],

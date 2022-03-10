@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: imgtu.py
 # @Created: 2021-02-13 09:04:37
-# @Modified:  2022-03-09 11:40:58
+# @Modified:  2022-03-10 11:32:23
 
 import os
 import re
@@ -122,6 +122,8 @@ class Imgtu(Base, ImageBedMixin):
 
     @Login
     def upload_image(self, image_path: str) -> Union[str, dict]:  # type: ignore
+        logger.debug("uploading: %s", image_path)
+
         image_path = self._compress_image(image_path)
         image_path = self._add_watermark(image_path)
         url = self._url("json")
@@ -158,7 +160,9 @@ class Imgtu(Base, ImageBedMixin):
         resp = requests.post(url, headers=headers, data=data)  # type: ignore
         resp.encoding = "utf-8"
         try:
-            return resp.json()["image"]["image"]["url"]
+            uploaded_url = resp.json()["image"]["image"]["url"]
+            logger.debug("uploaded url: %s => %s", image_path, uploaded_url)
+            return uploaded_url
         except KeyError:
             if resp.json()["error"]["message"] == "请求被拒绝 (auth_token)":
                 logger.warn(
@@ -167,7 +171,13 @@ class Imgtu(Base, ImageBedMixin):
                 self._update_auth_token()
                 return self.upload_image(image_path)
             else:
-                return resp.json()
+                resp = resp.json()
+                logger.error(
+                    "upload failed: img=%s, error=%s",
+                    image_path,
+                    resp["error"]["message"],
+                )
+                return resp
         except json.decoder.JSONDecodeError:
             logger.fatal(resp.text)
 
@@ -181,7 +191,6 @@ class Imgtu(Base, ImageBedMixin):
         for img in images_path:
             result = self.upload_image(img)
             if type(result) == str:
-                logger.debug("uploaded url: %s", result)
                 images_url.append(result)
             elif type(result) == dict:
                 images_url.append(
@@ -191,7 +200,6 @@ class Imgtu(Base, ImageBedMixin):
                         "error": result["error"]["message"],
                     }
                 )
-                logger.error(result)
 
         if not os.getenv("UP2B_TEST"):
             for i in images_url:
