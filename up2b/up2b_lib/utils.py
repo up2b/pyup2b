@@ -4,16 +4,17 @@
 # @Email:     thepoy@163.com
 # @File Name: utils.py
 # @Created:   2021-02-09 15:17:32
-# @Modified:  2022-03-10 10:39:47
+# @Modified:  2022-03-11 12:05:30
 
 import os
 import locale
 
 from functools import wraps, partial
+import sys
 from colorful_logger import get_logger, child_logger as cl
 from colorful_logger.logger import is_debug
 
-from up2b.up2b_lib.constants import CONFIG_FOLDER_PATH
+from up2b.up2b_lib.constants import CONFIG_FOLDER_PATH, IS_MACOS
 
 log_file_path = None
 print_position = False
@@ -69,10 +70,16 @@ def is_ascii(char: str):
 
 
 def get_default_language() -> str:
-    sys_locale = locale.getdefaultlocale()
+    if IS_MACOS and sys.version_info < (3, 7, 5):
+        logger.warning(
+            f"the version [ {sys.version_info} ] below 3.7.5 on the macOS platform cannot obtain the system locale, and [ en_US ] is used by default."
+        )
+        lang = None
+    else:
+        sys_locale = locale.getdefaultlocale()
 
-    logger.debug(f"system locale: {sys_locale}")
+        logger.debug(f"system locale: {sys_locale}")
 
-    lang = sys_locale[0]
+        lang = sys_locale[0]
 
     return lang if lang else "en_US"

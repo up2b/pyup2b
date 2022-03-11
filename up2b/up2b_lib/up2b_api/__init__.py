@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-13 09:02:21
-# @Modified:  2022-03-10 10:46:47
+# @Modified:  2022-03-11 11:59:50
 
 import os
 import json
@@ -110,7 +110,6 @@ class Base:
                 try:
                     conf["auth_data"][self.image_bed_code] = auth_info
                 except KeyError:
-                    # 列表不能用 None 填充，要用空字典填充，不然 pyright 会报错
                     conf["auth_data"] = [{}] * len(IMAGE_BEDS_CODE)
                     conf["auth_data"][self.image_bed_code] = auth_info
                 f.seek(0, 0)
