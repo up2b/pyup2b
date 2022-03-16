@@ -86,7 +86,6 @@ class Imgtu(Base, ImageBedMixin):
             self._save_auth_info(auth_info)
             return True
 
-        logger.error("username or password incorrect")
         return False
 
     def _parse_auth_token(self) -> Tuple[Optional[str], Optional[str]]:
