@@ -39,11 +39,16 @@ class SM(Base, ImageBedMixin):
                 "Authorization": self.token,
             }
 
-    def login(self, username: str, password: str):
-        token = self._get_api_token(username, password)
-        self._save_auth_info(
-            {"token": token, "username": username, "password": password}
-        )
+    def login(self, username: str, password: str) -> bool:
+        try:
+            token = self._get_api_token(username, password)
+            self._save_auth_info(
+                {"token": token, "username": username, "password": password}
+            )
+            return True
+        except Exception as e:
+            logger.error(e)
+            return False
 
     def _auto_login(self):
         if not self.auth_info:

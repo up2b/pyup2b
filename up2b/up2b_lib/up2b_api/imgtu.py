@@ -51,7 +51,7 @@ class Imgtu(Base, ImageBedMixin):
             self.username = self.auth_info["username"]
             self.headers["Cookie"] = self.cookie
 
-    def login(self, username: str, password: str):
+    def login(self, username: str, password: str) -> bool:
         url = self._url("login")
         auth_token, cookie = self._parse_auth_token()
 
@@ -84,8 +84,10 @@ class Imgtu(Base, ImageBedMixin):
                 "password": password,
             }
             self._save_auth_info(auth_info)
-        else:
-            logger.fatal("Login failed.")
+            return True
+
+        logger.error("username or password incorrect")
+        return False
 
     def _parse_auth_token(self) -> Tuple[Optional[str], Optional[str]]:
         url = self._url("login")

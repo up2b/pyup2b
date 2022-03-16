@@ -23,7 +23,7 @@ from up2b.up2b_lib.up2b_api.github import Github
 from up2b.up2b_lib.constants import SM_MS, IMGTU, GITEE, GITHUB, IMAGE_BEDS_CODE
 from up2b.up2b_lib.utils import logger
 
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 IMAGE_BEDS = {SM_MS: SM, IMGTU: Imgtu, GITEE: Gitee, GITHUB: Github}
 
@@ -258,7 +258,9 @@ def main() -> int:
 
         logger.debug("current image bed: %s", ib)
 
-        ib.login(*args.login)
+        ok = ib.login(*args.login)
+        if not ok:
+            logger.fatal("username or password incorrect")
 
         return 0
 
