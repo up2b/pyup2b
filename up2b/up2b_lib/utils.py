@@ -4,17 +4,17 @@
 # @Email:     thepoy@163.com
 # @File Name: utils.py
 # @Created:   2021-02-09 15:17:32
-# @Modified:  2022-03-11 12:05:30
+# @Modified:  2022-03-17 18:55:49
 
 import os
 import locale
 
 from functools import wraps, partial
-import sys
 from colorful_logger import get_logger, child_logger as cl
 from colorful_logger.logger import is_debug
 
-from up2b.up2b_lib.constants import CONFIG_FOLDER_PATH, IS_MACOS
+from up2b.up2b_lib.constants import CONFIG_FOLDER_PATH, IS_MACOS, PYTHON_VERSION
+from up2b.up2b_lib.custom_types import ImageType
 
 log_file_path = None
 print_position = False
@@ -37,9 +37,9 @@ def child_logger(name: str):
     return cl(name, logger)
 
 
-def check_image_exists(images_path: list):
-    for image in images_path:
-        if not os.path.exists(image):
+def check_image_exists(*images: ImageType):
+    for image in images:
+        if isinstance(image, str) and not os.path.exists(image):
             raise FileNotFoundError(image)
 
 
@@ -70,9 +70,9 @@ def is_ascii(char: str):
 
 
 def get_default_language() -> str:
-    if IS_MACOS and sys.version_info < (3, 7, 5):
+    if IS_MACOS and PYTHON_VERSION < (3, 7, 5):
         logger.warning(
-            f"the version [ {sys.version_info} ] below 3.7.5 on the macOS platform cannot obtain the system locale, and [ en_US ] is used by default."
+            f"the version [ {PYTHON_VERSION} ] below 3.7.5 on the macOS platform cannot obtain the system locale, and [ en_US ] is used by default."
         )
         lang = None
     else:

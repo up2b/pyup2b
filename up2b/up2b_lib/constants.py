@@ -4,10 +4,12 @@
 # @Email: thepoy@aliyun.com
 # @File Name: constants.py
 # @Created: 2021-02-13 09:17:07
-# @Modified:  2022-03-10 09:15:48
+# @Modified:  2022-03-11 12:08:25
 
 import sys
 import os
+
+PYTHON_VERSION = sys.version_info
 
 SM_MS = 0
 IMGTU = 1

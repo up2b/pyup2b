@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created: 2021-02-13 09:02:21
-# @Modified:  2022-03-11 11:59:50
+# @Modified:  2022-03-17 19:19:29
 
 import os
 import json
@@ -13,7 +13,12 @@ import shutil
 from io import BytesIO
 from abc import ABC, abstractmethod
 from typing import Optional, List, Tuple, Dict
-from up2b.up2b_lib import custom_types
+from up2b.up2b_lib.custom_types import (
+    ImageStream,
+    ImageType,
+    Images,
+    AuthInfo,
+)
 from up2b.up2b_lib.utils import child_logger
 from up2b.up2b_lib.errors import UnsupportedType, OverSizeError
 from up2b.up2b_lib.constants import (
@@ -44,15 +49,19 @@ def choose_image_bed(image_bed_code: int, conf_file: str = CONF_FILE):
 
 class ImageBedMixin(ABC):
     @abstractmethod
-    def get_all_images(self) -> List[str]:  # type: ignore
+    def get_all_images(self) -> List[str]:
         pass
 
     @abstractmethod
-    def upload_image(self, image_path: str) -> str:  # type: ignore
+    def upload_image(self, image_path: str) -> str:
         pass
 
     @abstractmethod
-    def upload_images(self, images_path: List[str]):
+    def upload_image_stream(self, image: ImageStream) -> str:
+        pass
+
+    @abstractmethod
+    def upload_images(self, images: Images, to_console=True):
         pass
 
     @abstractmethod
@@ -85,7 +94,7 @@ class Base:
     ):
         self.conf_file: str = conf_file
         self.conf = dict()
-        self.auth_info: Optional[custom_types.AuthInfo] = self._read_auth_info()
+        self.auth_info: Optional[AuthInfo] = self._read_auth_info()
         self.add_watermark: bool = add_watermark
         if self.add_watermark:
             if not self.conf.get("watermark"):
@@ -94,7 +103,7 @@ class Base:
                 )
         self.auto_compress: bool = auto_compress
 
-    def _read_auth_info(self) -> Optional[custom_types.AuthInfo]:
+    def _read_auth_info(self) -> Optional[AuthInfo]:
         try:
             with open(self.conf_file) as f:
                 self.conf = json.loads(f.read())
@@ -122,87 +131,95 @@ class Base:
         except Exception as e:
             logger.fatal(e)
 
-    def _exceed_max_size(self, *images_path: str) -> Tuple[bool, Optional[str]]:
-        for img in images_path:
-            if os.path.getsize(img) > self.max_size:
-                return True, img
+    def _exceed_max_size(self, *images: ImageType) -> Tuple[bool, Optional[str]]:
+        for img in images:
+            size = os.path.getsize(img) if isinstance(img, str) else len(img.stream)
+            if size > self.max_size:
+                return True, img if isinstance(img, str) else img.filename
         return False, None
 
-    def _check_images_valid(self, images_path: List[str]):
+    def _check_images_valid(self, images: Tuple[ImageType, ...]):
         """
         Check if all images exceed the max size or can be compressed
         """
         if not self.auto_compress:
-            exceeded, _img = self._exceed_max_size(*images_path)
+            exceeded, _img = self._exceed_max_size(*images)
             if exceeded:
                 raise OverSizeError(_img)
         else:
-            for _img in images_path:
-                if os.path.getsize(_img) > self.max_size and _img.split(".")[
-                    -1
-                ].lower() not in ["jpg", "png", "jpeg"]:
+            for _img in images:
+                mime_type = (
+                    _img.split(".")[-1].lower()
+                    if isinstance(_img, str)
+                    else _img.mime_type
+                )
+                if mime_type not in ["jpg", "png", "jpeg"]:
                     raise UnsupportedType(
                         "currently does not support compression of this type of image: %s"
-                        % _img.split(".")[-1].upper()
+                        % mime_type.upper()
                     )
 
-    def _compress_image(self, image_path: str) -> str:
-        if self.auto_compress:
-            try:
-                from PIL import Image
-            except ModuleNotFoundError:
-                logger.fatal(
-                    "you have enabled the automatic image compression feature, but [ pillow ] is not installed, please execute `pip install pillow` before enabling this feature"
-                )
+    def _compress_image(self, image: ImageType) -> ImageType:
+        try:
+            from PIL import Image
+        except ModuleNotFoundError:
+            logger.fatal(
+                "you have enabled the automatic image compression feature, but [ pillow ] is not installed, please execute `pip install pillow` before enabling this feature"
+            )
 
-            raw_size = os.path.getsize(image_path)
-            if raw_size > self.max_size:
+        raw_size = (
+            os.path.getsize(image) if isinstance(image, str) else len(image.stream)
+        )
+        if raw_size > self.max_size:
+            filename = os.path.basename(
+                image if isinstance(image, str) else image.filename
+            ).split(".")[0]
 
-                filename = os.path.basename(image_path).split(".")[0]
-                scale = self.max_size / raw_size
-                img = Image.open(image_path)
+            scale = self.max_size / raw_size
+            img = Image.open(image if isinstance(image, str) else image.stream)
 
-                def compress(img: Image.Image, scale: float) -> BytesIO:
-                    format = img.format
-                    width, height = img.size
-                    img_io = BytesIO()
+            def compress(img: Image.Image, scale: float) -> BytesIO:
+                format = img.format
+                width, height = img.size
+                img_io = BytesIO()
 
-                    if format == "PNG":
-                        img = img.convert("RGB")
-                        img.format = "JPEG"  # type: ignore
-                        img.save(img_io, "jpeg")
-                    elif format == "JPEG":
-                        img = img.resize(
-                            (int(width * scale), int(height * scale)), Image.ANTIALIAS
-                        )
-                        img.format = "JPEG"  # type: ignore
-                        img.save(img_io, "jpeg")
-                    else:
-                        raise UnsupportedType(
-                            "currently does not support compression of this type of image: %s"
-                            % format
-                        )
-
-                    if img_io.tell() > self.max_size:
-                        scale = self.max_size / img_io.tell()
-                        return compress(img, scale)
-                    return img_io
-
-                if img.format == "PNG":
-                    filename += ".jpeg"
+                if format == "PNG":
+                    img = img.convert("RGB")
+                    img.format = "JPEG"  # type: ignore
+                    img.save(img_io, "jpeg")
+                elif format == "JPEG":
+                    img = img.resize(
+                        (int(width * scale), int(height * scale)), Image.ANTIALIAS
+                    )
+                    img.format = "JPEG"  # type: ignore
+                    img.save(img_io, "jpeg")
                 else:
-                    filename += "." + img.format.lower()  # type: ignore
-                img_io = compress(img, scale)
+                    raise UnsupportedType(
+                        "currently does not support compression of this type of image: %s"
+                        % format
+                    )
 
-                if not os.path.exists(CACHE_PATH):
-                    os.mkdir(CACHE_PATH)
+                if img_io.tell() > self.max_size:
+                    scale = self.max_size / img_io.tell()
+                    return compress(img, scale)
+                return img_io
 
-                img_cache_path = os.path.join(CACHE_PATH, filename)
-                with open(img_cache_path, "wb") as f:
-                    f.write(img_io.getbuffer())
+            if img.format == "PNG":
+                filename += ".jpeg"
+            else:
+                filename += "." + img.format.lower()  # type: ignore
+            img_io = compress(img, scale)
 
-                return img_cache_path
-        return image_path
+            if not os.path.exists(CACHE_PATH):
+                os.mkdir(CACHE_PATH)
+
+            img_cache_path = os.path.join(CACHE_PATH, filename)
+            with open(img_cache_path, "wb") as f:
+                f.write(img_io.getbuffer())
+
+            return img_cache_path
+
+        return image
 
     def _add_watermark(self, image_path: str) -> str:
         if self.add_watermark:

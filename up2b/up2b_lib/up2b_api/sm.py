@@ -4,11 +4,12 @@
 # @Email: thepoy@aliyun.com
 # @File Name: sm.py
 # @Created: 2021-02-13 09:04:07
-# @Modified:  2022-03-10 11:36:28
+# @Modified:  2022-03-17 21:28:53
 
 import requests
 
 from typing import List, Optional, Dict, Any
+from up2b.up2b_lib.custom_types import ImagePath, ImageStream, ImageType
 
 from up2b.up2b_lib.up2b_api import Base, ImageBedMixin, CONF_FILE
 from up2b.up2b_lib import errors
@@ -74,20 +75,32 @@ class SM(Base, ImageBedMixin):
                 self._auto_login()
                 self.token = self.auth_info["token"]  # type: ignore
 
-    @Login
-    def upload_image(self, image_path: str):
-        logger.debug("uploading: %s", image_path)
+    def __upload(self, image: ImageType):
+        logger.debug(
+            "uploading: %s", image if isinstance(image, str) else image.filename
+        )
 
-        image_path = self._compress_image(image_path)
-        image_path = self._add_watermark(image_path)
+        image = self._compress_image(image)
+
+        if isinstance(image, str):
+            image = self._add_watermark(image)
+
         # sm.ms不管出不出错，返回的状态码都是200
         url = self._url("upload")
         headers = {"Authorization": self.token}
-        files = {"smfile": open(image_path, "rb")}
+        files = (
+            {"smfile": open(image, "rb")}
+            if isinstance(image, str)
+            else {"smfile": (image.filename, image.stream, image.mime_type)}
+        )
         resp = requests.post(url, headers=headers, files=files).json()
         if resp["success"]:
             uploaded_url = resp["data"]["url"]
-            logger.debug("uploaded: %s => %s", image_path, uploaded_url)
+            logger.debug(
+                "uploaded: %s => %s",
+                image if isinstance(image, str) else image.filename,
+                uploaded_url,
+            )
             return uploaded_url
         else:
             if resp["code"] == "image_repeated":
@@ -99,32 +112,52 @@ class SM(Base, ImageBedMixin):
                 self.token = self.auth_info["token"]  # type: ignore
             else:
                 error = resp["message"]
-                logger.error("upload failed: img=%s, error=%s", image_path, error)
+                logger.error(
+                    "upload failed: img=%s, error=%s",
+                    image if isinstance(image, str) else image.filename,
+                    error,
+                )
                 raise errors.UploadFailed(error)
 
     @Login
-    def upload_images(self, images_path: List[str]) -> List[str]:
-        if len(images_path) > 10:
+    def upload_image(self, image_path: ImagePath):
+        return self.__upload(image_path)
+
+    @Login
+    def upload_image_stream(self, image: ImageStream) -> str:
+        return self.__upload(image)
+
+    @Login
+    def upload_images(self, *images: ImageType, to_console=True) -> List[str]:
+        if len(images) > 10:
             raise errors.OverSizeError(
                 "You can only upload up to 10 pictures, but you uploaded %d pictures."
-                % len(images_path)
+                % len(images)
             )
 
-        check_image_exists(images_path)
+        check_image_exists(*images)
 
-        self._check_images_valid(images_path)
+        self._check_images_valid(images)
 
         images_url = []
-        for img in images_path:
+        for img in images:
             try:
-                result = self.upload_image(img)
+                if isinstance(img, str):
+                    result = self.upload_image(img)
+                else:
+                    result = self.upload_image_stream(img)
             except errors.UploadFailed as e:
-                result = {"image_path": img, "status_code": 400, "error": f"{e}"}
+                result = {
+                    "image_path": img if isinstance(img, str) else img.filename,
+                    "status_code": 400,
+                    "error": f"{e}",
+                }
 
             images_url.append(result)
 
-        for i in images_url:
-            print(i)
+        if to_console:
+            for i in images_url:
+                print(i)
 
         self._clear_cache()
 

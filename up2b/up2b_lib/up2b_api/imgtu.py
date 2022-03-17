@@ -4,7 +4,7 @@
 # @Email: thepoy@aliyun.com
 # @File Name: imgtu.py
 # @Created: 2021-02-13 09:04:37
-# @Modified:  2022-03-10 11:32:23
+# @Modified:  2022-03-17 19:48:21
 
 import os
 import re
@@ -18,6 +18,7 @@ from typing import List, Optional, Tuple, Union
 
 from requests_toolbelt import MultipartEncoder
 
+from up2b.up2b_lib.custom_types import ImageType, ImageStream, ImagePath
 from up2b.up2b_lib.up2b_api import Base, ImageBedMixin, CONF_FILE
 from up2b.up2b_lib.utils import Login, check_image_exists, child_logger
 from up2b.up2b_lib.constants import IMGTU
@@ -121,12 +122,9 @@ class Imgtu(Base, ImageBedMixin):
             self.auth_info["token"] = self.token = auth_token
             self._save_auth_info(self.auth_info)
 
-    @Login
-    def upload_image(self, image_path: str) -> Union[str, dict]:  # type: ignore
-        logger.debug("uploading: %s", image_path)
+    def __upload(self, image: ImageType):
+        is_path = isinstance(image, str)
 
-        image_path = self._compress_image(image_path)
-        image_path = self._add_watermark(image_path)
         url = self._url("json")
         headers = {
             "Accept": "application/json",
@@ -134,18 +132,24 @@ class Imgtu(Base, ImageBedMixin):
             "Cookie": self.cookie,
         }
 
-        filename_with_suffix = os.path.basename(image_path)
+        filename_with_suffix = os.path.basename(image if is_path else image.filename)
         filename_without_suffix, suffix = os.path.splitext(filename_with_suffix)
-        if suffix.lower() == ".apng":
-            suffix = ".png"
-        filename = filename_without_suffix + suffix
+        if is_path:
+            if suffix.lower() == ".apng":
+                suffix = ".png"
+            filename = filename_without_suffix + suffix
+        else:
+            filename = filename_with_suffix + "." + image.mime_type
 
-        mime_type = mimetypes.guess_type(image_path)[0]
+        mime_type = mimetypes.guess_type(image)[0] if is_path else image.mime_type
 
         timestamp = int(time.time() * 1000)
 
-        with open(image_path, "rb") as fb:
-            img_buffer = fb.read()
+        if is_path:
+            with open(image, "rb") as fb:
+                img_buffer = fb.read()
+        else:
+            img_buffer = image.stream
 
         data = MultipartEncoder(
             {
@@ -162,7 +166,12 @@ class Imgtu(Base, ImageBedMixin):
         resp.encoding = "utf-8"
         try:
             uploaded_url = resp.json()["image"]["image"]["url"]
-            logger.debug("uploaded url: %s => %s", image_path, uploaded_url)
+            logger.debug(
+                "uploaded url: %s => %s",
+                image if is_path else image.filename,
+                uploaded_url,
+            )
+
             return uploaded_url
         except KeyError:
             if resp.json()["error"]["message"] == "请求被拒绝 (auth_token)":
@@ -170,12 +179,12 @@ class Imgtu(Base, ImageBedMixin):
                     "`auth_token` has expired, the program will try to update `auth_token` automatically."
                 )
                 self._update_auth_token()
-                return self.upload_image(image_path)
+                return self.upload_image(image)
             else:
                 resp = resp.json()
                 logger.error(
                     "upload failed: img=%s, error=%s",
-                    image_path,
+                    image if is_path else image.filename,
                     resp["error"]["message"],
                 )
                 return resp
@@ -183,14 +192,41 @@ class Imgtu(Base, ImageBedMixin):
             logger.fatal(resp.text)
 
     @Login
-    def upload_images(self, images_path: List[str]) -> list:
-        check_image_exists(images_path)
+    def upload_image(self, image_path: ImagePath) -> Union[str, dict]:  # type: ignore
+        logger.debug("uploading: %s", image_path)
+
+        image_path = self._add_watermark(image_path)
+
+        if self.auto_compress:
+            # 输入的是路径，返回的也必然是路径，忽略 pyright 的错误提示
+            image_path = self._compress_image(image_path)  # type: ignore
+
+        return self.__upload(image_path)
+
+    @Login
+    def upload_image_stream(self, image: ImageStream) -> str:
+        logger.debug("uploading: %s", image.filename)
+
+        if self.auto_compress:
+            new_image = self._compress_image(image)
+        else:
+            new_image = image
+
+        return self.__upload(new_image)
+
+    @Login
+    def upload_images(self, *images_path: ImageType, to_console=True) -> list:
+        check_image_exists(*images_path)
 
         self._check_images_valid(images_path)
 
         images_url = []
         for img in images_path:
-            result = self.upload_image(img)
+            if isinstance(img, str):
+                result = self.upload_image(img)
+            else:
+                result = self.upload_image_stream(img)
+
             if type(result) == str:
                 images_url.append(result)
             elif type(result) == dict:
@@ -202,7 +238,7 @@ class Imgtu(Base, ImageBedMixin):
                     }
                 )
 
-        if not os.getenv("UP2B_TEST"):
+        if to_console:
             for i in images_url:
                 print(i)
 
