@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Author: thepoy
-# @Email: thepoy@aliyun.com
+# @Author:    thepoy
+# @Email:     thepoy@aliyun.com
 # @File Name: __init__.py
-# @Created: 2021-02-08 15:43:32
-# @Modified:  2022-03-10 09:55:41
+# @Created:   2021-02-08 15:43:32
+# @Modified:  2022-03-18 18:24:21
 
 import os
 import sys
 import json
 import argparse
 
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Type, Union
 
 from colort import DisplayStyle
 from up2b.up2b_lib.i18n import read_i18n
@@ -25,7 +25,12 @@ from up2b.up2b_lib.utils import logger
 
 __version__ = "0.2.5"
 
-IMAGE_BEDS = {SM_MS: SM, IMGTU: Imgtu, GITEE: Gitee, GITHUB: Github}
+IMAGE_BEDS: Dict[int, Union[Type[SM], Type[Imgtu], Type[Gitee], Type[Github]]] = {
+    SM_MS: SM,
+    IMGTU: Imgtu,
+    GITEE: Gitee,
+    GITHUB: Github,
+}
 
 
 def _BuildParser():
@@ -280,7 +285,7 @@ def main() -> int:
         return 0
 
     if args.images_path:
-        ib.upload_images(args.images_path)
+        ib.upload_images(*args.images_path)
         return 0
 
     return 1

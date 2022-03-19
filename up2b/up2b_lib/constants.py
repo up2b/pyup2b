@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Author: thepoy
-# @Email: thepoy@aliyun.com
+# @Author:    thepoy
+# @Email:     thepoy@aliyun.com
 # @File Name: constants.py
-# @Created: 2021-02-13 09:17:07
-# @Modified:  2022-03-11 12:08:25
+# @Created:   2021-02-13 09:17:07
+# @Modified:  2022-03-18 15:53:13
 
 import sys
 import os

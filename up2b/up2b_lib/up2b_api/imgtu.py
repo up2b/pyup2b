@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Author: thepoy
-# @Email: thepoy@aliyun.com
+# @Author:    thepoy
+# @Email:     thepoy@163.com
 # @File Name: imgtu.py
-# @Created: 2021-02-13 09:04:37
-# @Modified:  2022-03-17 19:48:21
+# @Created:   2021-02-13 09:04:37
+# @Modified:  2022-03-18 15:52:22
 
 import os
 import re
@@ -14,35 +14,42 @@ import mimetypes
 import requests
 
 from urllib import parse
-from typing import List, Optional, Tuple, Union
-
+from typing import Dict, List, Optional, Tuple, Union
 from requests_toolbelt import MultipartEncoder
-
-from up2b.up2b_lib.custom_types import ImageType, ImageStream, ImagePath
-from up2b.up2b_lib.up2b_api import Base, ImageBedMixin, CONF_FILE
-from up2b.up2b_lib.utils import Login, check_image_exists, child_logger
+from up2b.up2b_lib.custom_types import (
+    ErrorResponse,
+    ImageBedType,
+    ImageType,
+    ImageStream,
+    ImagePath,
+    ImgtuResponse,
+    UploadErrorResponse,
+)
+from up2b.up2b_lib.errors import MissingAuth
+from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract, CONF_FILE
+from up2b.up2b_lib.utils import check_image_exists, child_logger
 from up2b.up2b_lib.constants import IMGTU
 
 logger = child_logger(__name__)
 
 
-class Imgtu(Base, ImageBedMixin):
+class Imgtu(Base, ImageBedAbstract):
+    image_bed_type = ImageBedType.common
+    image_bed_code = IMGTU
+    max_size = 10 * 1024 * 1024
+    base_url = "https://imgtu.com/"
+    __headers = {
+        "Accept": "application/json",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",
+    }
+
     def __init__(
         self,
         auto_compress: bool = False,
         add_watermark: bool = False,
         conf_file: str = CONF_FILE,
     ):
-        self.image_bed_code = IMGTU
         super().__init__(auto_compress, add_watermark, conf_file)
-
-        self.base_url: str = "https://imgtu.com/"
-        self.max_size = 10 * 1024 * 1024
-
-        self.headers = {
-            "Accept": "application/json",
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",
-        }
 
         self.cookie: Optional[str] = None
         self.token: Optional[str] = None
@@ -50,16 +57,16 @@ class Imgtu(Base, ImageBedMixin):
             self.cookie = self.auth_info["cookie"]
             self.token = self.auth_info["token"]
             self.username = self.auth_info["username"]
-            self.headers["Cookie"] = self.cookie
+            self.__headers["Cookie"] = self.cookie
 
     def login(self, username: str, password: str) -> bool:
         url = self._url("login")
         auth_token, cookie = self._parse_auth_token()
 
         if not auth_token or not cookie:
-            raise Exception("auth token or cookie is None")
+            raise MissingAuth("auth token or cookie is None")
 
-        headers = self.headers.copy()
+        headers = self.__headers.copy()
         headers["Cookie"] = cookie
 
         data = {
@@ -91,7 +98,7 @@ class Imgtu(Base, ImageBedMixin):
 
     def _parse_auth_token(self) -> Tuple[Optional[str], Optional[str]]:
         url = self._url("login")
-        resp = requests.get(url, headers=self.headers)
+        resp = requests.get(url, headers=self.__headers)
         if resp.status_code == 200:
             auth_token = re.search(
                 r'PF.obj.config.auth_token = "([a-f0-9]{40})"', resp.text
@@ -101,38 +108,43 @@ class Imgtu(Base, ImageBedMixin):
             resp_set_cookie = resp.headers["Set-Cookie"].split("; ")[0]
             return auth_token.group(1), resp_set_cookie
         else:
-            logger.error("响应错误: %d", resp.status_code)
+            logger.error("response error: status_code=%d", resp.status_code)
             return None, None
 
+    @property
+    def headers(self):
+        assert self.cookie != None
+
+        headers = self.__headers.copy()
+        headers.update(
+            {
+                "Cookie": self.cookie,
+            }
+        )
+        return headers
+
     def _update_auth_token(self):
-        headers = {
-            "Accept": "application/json",
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",
-            "Cookie": self.cookie,
-        }
-        resp = requests.get(self.base_url, headers=headers)
+        resp = requests.get(self.base_url, headers=self.headers)
         auth_token = re.search(
             r'PF.obj.config.auth_token = "([a-f0-9]{40})"', resp.text
         )
-        if auth_token:
-            auth_token = auth_token.group(1)
-            if not self.auth_info:
-                self.auth_info = {}
 
-            self.auth_info["token"] = self.token = auth_token
-            self._save_auth_info(self.auth_info)
+        assert auth_token != None
 
-    def __upload(self, image: ImageType):
+        auth_token = auth_token.group(1)
+        if not self.auth_info:
+            self.auth_info = {}
+
+        self.auth_info["token"] = self.token = auth_token
+        self._save_auth_info(self.auth_info)
+
+    def __upload(self, image: ImageType, retries=0) -> Union[str, UploadErrorResponse]:
+        self.check_login()
+
         is_path = isinstance(image, str)
 
         url = self._url("json")
-        headers = {
-            "Accept": "application/json",
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",
-            "Cookie": self.cookie,
-        }
-
-        filename_with_suffix = os.path.basename(image if is_path else image.filename)
+        filename_with_suffix = os.path.basename(str(image))
         filename_without_suffix, suffix = os.path.splitext(filename_with_suffix)
         if is_path:
             if suffix.lower() == ".apng":
@@ -161,38 +173,47 @@ class Imgtu(Base, ImageBedMixin):
                 "nsfw": "0",
             }
         )
+
+        headers = self.headers
         headers.update({"Content-Type": data.content_type})
+
         resp = requests.post(url, headers=headers, data=data)  # type: ignore
         resp.encoding = "utf-8"
+
         try:
-            uploaded_url = resp.json()["image"]["image"]["url"]
+            json_resp = resp.json()
+        except json.decoder.JSONDecodeError:
+            return UploadErrorResponse(resp.status_code, resp.text, str(image))
+
+        try:
+            uploaded_url: str = json_resp["image"]["image"]["url"]
             logger.debug(
-                "uploaded url: %s => %s",
-                image if is_path else image.filename,
+                "uploaded url: '%s' => '%s'",
+                image,
                 uploaded_url,
             )
 
             return uploaded_url
         except KeyError:
-            if resp.json()["error"]["message"] == "请求被拒绝 (auth_token)":
+            if json_resp["error"]["message"] == "请求被拒绝 (auth_token)":
+                if retries >= 3:
+                    return UploadErrorResponse(
+                        resp.status_code, resp.json()["error"]["message"], str(image)
+                    )
+
                 logger.warn(
-                    "`auth_token` has expired, the program will try to update `auth_token` automatically."
+                    "`auth_token` has expired, the program will try to update `auth_token` automatically, number of retries: %d",
+                    retries + 1,
                 )
                 self._update_auth_token()
-                return self.upload_image(image)
-            else:
-                resp = resp.json()
-                logger.error(
-                    "upload failed: img=%s, error=%s",
-                    image if is_path else image.filename,
-                    resp["error"]["message"],
-                )
-                return resp
-        except json.decoder.JSONDecodeError:
-            logger.fatal(resp.text)
 
-    @Login
-    def upload_image(self, image_path: ImagePath) -> Union[str, dict]:  # type: ignore
+                return self.__upload(image, retries + 1)
+            else:
+                return UploadErrorResponse(
+                    resp.status_code, resp.json()["error"]["message"], str(image)
+                )
+
+    def upload_image(self, image_path: ImagePath) -> Union[str, UploadErrorResponse]:
         logger.debug("uploading: %s", image_path)
 
         image_path = self._add_watermark(image_path)
@@ -203,8 +224,9 @@ class Imgtu(Base, ImageBedMixin):
 
         return self.__upload(image_path)
 
-    @Login
-    def upload_image_stream(self, image: ImageStream) -> str:
+    def upload_image_stream(
+        self, image: ImageStream
+    ) -> Union[str, UploadErrorResponse]:
         logger.debug("uploading: %s", image.filename)
 
         if self.auto_compress:
@@ -214,47 +236,45 @@ class Imgtu(Base, ImageBedMixin):
 
         return self.__upload(new_image)
 
-    @Login
-    def upload_images(self, *images_path: ImageType, to_console=True) -> list:
-        check_image_exists(*images_path)
+    def upload_images(
+        self, *images: ImageType, to_console=True
+    ) -> List[Union[str, UploadErrorResponse]]:
+        self.check_login()
 
-        self._check_images_valid(images_path)
+        check_image_exists(*images)
 
-        images_url = []
-        for img in images_path:
+        self._check_images_valid(*images)
+
+        image_urls: List[Union[str, UploadErrorResponse]] = []
+        for img in images:
             if isinstance(img, str):
                 result = self.upload_image(img)
             else:
                 result = self.upload_image_stream(img)
 
-            if type(result) == str:
-                images_url.append(result)
-            elif type(result) == dict:
-                images_url.append(
-                    {
-                        "image_path": img,
-                        "status_code": result["status_code"],
-                        "error": result["error"]["message"],
-                    }
-                )
+            image_urls.append(result)
 
         if to_console:
-            for i in images_url:
+            for i in image_urls:
                 print(i)
 
         self._clear_cache()
-        return images_url
+        return image_urls
 
-    @Login
     def get_all_images(self):
+        self.check_login()
+
         url = self._url(self.username)
 
         # 集合去重
         images = set()
 
         def visit_next_page(url):
-            resp = requests.get(url, headers=self.headers)
+            resp = requests.get(url, headers=self.__headers)
             resp.encoding = "utf-8"
+
+            if resp.status_code != 200:
+                return ErrorResponse(resp.status_code, resp.text)
 
             # 只获取默认的公开相册里的图片
             # images_object = re.findall(
@@ -272,13 +292,6 @@ class Imgtu(Base, ImageBedMixin):
                         image["height"],
                     )
                 )
-                # images.append({
-                #     "url": image["url"],
-                #     "display_url": image["display_url"],
-                #     "id": image["id_encoded"],
-                #     "width": image["width"],
-                #     "height": image["height"],
-                # })
 
             next_page_url = re.search(
                 r'data-pagination="next" href="(.+?)" ><span', resp.text
@@ -291,25 +304,28 @@ class Imgtu(Base, ImageBedMixin):
             if next_page_url:
                 visit_next_page(next_page_url)
 
-        visit_next_page(url)
+        resp = visit_next_page(url)
+        if resp:
+            return resp
 
-        result = []
+        result: List[ImgtuResponse] = []
 
         for item in images:
             result.append(
-                {
-                    "url": item[0],
-                    "display_url": item[1],
-                    "id": item[2],
-                    "width": item[3],
-                    "height": item[4],
-                }
+                ImgtuResponse(
+                    item[2],
+                    item[0],
+                    item[1],
+                    int(item[3]),
+                    int(item[4]),
+                )
             )
 
         return result
 
-    @Login
-    def delete_image(self, img_id: str):
+    def delete_image(self, img_id: str, retries=0) -> Optional[ErrorResponse]:
+        self.check_login()
+
         url = self._url("json")
         data = {
             "auth_token": self.token,
@@ -318,18 +334,29 @@ class Imgtu(Base, ImageBedMixin):
             "delete": "image",
             "deleting[id]": img_id,
         }
-        resp = requests.post(url, headers=self.headers, data=data)
+        resp = requests.post(url, headers=self.__headers, data=data)
         if resp.status_code == 400:
             if resp.json()["error"]["message"] == "请求被拒绝 (auth_token)":
+                if retries >= 3:
+                    return ErrorResponse(
+                        resp.status_code, resp.json()["error"]["message"]
+                    )
+
                 logger.warn(
-                    "`auth_token` has expired, the program will try to update `auth_token` automatically."
+                    "`auth_token` has expired, the program will try to update `auth_token` automatically, number of retries: %d",
+                    retries + 1,
                 )
                 self._update_auth_token()
-                return self.delete_image(img_id)
-        return resp.json()
+                return self.delete_image(img_id, retries + 1)
 
-    @Login
-    def delete_images(self, imgs_id: List[str]):
+        if resp.status_code == 200:
+            return None
+
+        return ErrorResponse(resp.status_code, resp.json()["error"]["message"])
+
+    def delete_images(self, imgs_id: List[str], retries=0) -> Dict[str, ErrorResponse]:
+        self.check_login()
+
         url = self._url("json")
         data = {
             "auth_token": self.token,
@@ -339,15 +366,29 @@ class Imgtu(Base, ImageBedMixin):
             "delete": "images",
             "deleting[ids][]": imgs_id,
         }
-        resp = requests.post(url, headers=self.headers, data=data)
+        resp = requests.post(url, headers=self.__headers, data=data)
+        json_resp = resp.json()
         if resp.status_code == 400:
-            if resp.json()["error"]["message"] == "请求被拒绝 (auth_token)":
+            if json_resp["error"]["message"] == "请求被拒绝 (auth_token)":
+                if retries >= 3:
+                    # 删除多张图片时如果重试3次仍无法成功响应则退出程序
+                    logger.fatal(
+                        "authentication information is invalid: %s",
+                        resp.json()["error"]["message"],
+                    )
+
                 logger.warn(
-                    "`auth_token` has expired, the program will try to update `auth_token` automatically."
+                    "`auth_token` has expired, the program will try to update `auth_token` automatically, number of retries: %d",
+                    retries + 1,
                 )
                 self._update_auth_token()
-                return self.delete_images(imgs_id)
-        return resp.json()
+                return self.delete_images(imgs_id, retries + 1)
+            elif json_resp["error"]["code"] == 106:
+                # imgtu 只有删除的所有 id 都无效时才会返回这个错误
+                # 只要有一个有效 id，就会返回 200
+                return {img_id: ErrorResponse(404, "服务器中无此图片") for img_id in imgs_id}
+
+        return {}
 
     def _url(self, path: str) -> str:
         return self.base_url + path

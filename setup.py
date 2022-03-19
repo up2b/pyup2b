@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Author: thepoy
-# @Email: thepoy@163.com
+# @Author:    thepoy
+# @Email:     thepoy@163.com
 # @File Name: setup.py
-# @Created: 2021-03-27 09:55:27
-# @Modified:  2022-03-10 11:40:19
+# @Created:   2021-03-27 09:55:27
+# @Modified:  2022-03-18 15:54:21
 
 import codecs
 import up2b

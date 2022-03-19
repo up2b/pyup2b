@@ -1,42 +1,50 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Author: thepoy
-# @Email: thepoy@aliyun.com
+# @Author:    thepoy
+# @Email:     thepoy@163.com
 # @File Name: sm.py
-# @Created: 2021-02-13 09:04:07
-# @Modified:  2022-03-17 21:28:53
+# @Created:   2021-02-13 09:04:07
+# @Modified:  2022-03-18 18:00:15
 
+import re
 import requests
 
-from typing import List, Optional, Dict, Any
-from up2b.up2b_lib.custom_types import ImagePath, ImageStream, ImageType
-
-from up2b.up2b_lib.up2b_api import Base, ImageBedMixin, CONF_FILE
+from typing import List, Optional, Dict, Any, Union
+from up2b.up2b_lib.custom_types import (
+    ErrorResponse,
+    ImageBedType,
+    ImagePath,
+    ImageStream,
+    ImageType,
+    SMMSResponse,
+    UploadErrorResponse,
+)
+from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract, CONF_FILE
 from up2b.up2b_lib import errors
 from up2b.up2b_lib.constants import SM_MS
-from up2b.up2b_lib.utils import Login, check_image_exists, child_logger
+from up2b.up2b_lib.utils import check_image_exists, child_logger
 
 logger = child_logger(__name__)
 
 
-class SM(Base, ImageBedMixin):
+class SM(Base, ImageBedAbstract):
+    image_bed_type = ImageBedType.common
+    image_bed_code = SM_MS
+    base_url = "https://sm.ms/api/v2/"
+    max_size = 5 * 1024 * 1024
+
     def __init__(
         self,
         auto_compress: bool = False,
         add_watermark: bool = False,
         conf_file: str = CONF_FILE,
     ):
-        self.image_bed_code = SM_MS
         super().__init__(auto_compress, add_watermark, conf_file)
-
-        self.base_url = "https://sm.ms/api/v2/"
-        self.max_size = 5 * 1024 * 1024
 
         if self.auth_info:
             self.token: str = self.auth_info["token"]
 
             self.headers = {
-                "Content-Type": "multipart/form-data",
                 "Authorization": self.token,
             }
 
@@ -54,6 +62,7 @@ class SM(Base, ImageBedMixin):
     def _auto_login(self):
         if not self.auth_info:
             raise ValueError("auth info is not found")
+
         username = self.auth_info["username"]
         password = self.auth_info["password"]
         self.login(username, password)
@@ -75,10 +84,10 @@ class SM(Base, ImageBedMixin):
                 self._auto_login()
                 self.token = self.auth_info["token"]  # type: ignore
 
-    def __upload(self, image: ImageType):
-        logger.debug(
-            "uploading: %s", image if isinstance(image, str) else image.filename
-        )
+    def __upload(self, image: ImageType, retries=0) -> Union[str, UploadErrorResponse]:
+        self.check_login()
+
+        logger.debug("uploading: %s", image)
 
         image = self._compress_image(image)
 
@@ -87,18 +96,18 @@ class SM(Base, ImageBedMixin):
 
         # sm.ms不管出不出错，返回的状态码都是200
         url = self._url("upload")
-        headers = {"Authorization": self.token}
         files = (
             {"smfile": open(image, "rb")}
             if isinstance(image, str)
             else {"smfile": (image.filename, image.stream, image.mime_type)}
         )
-        resp = requests.post(url, headers=headers, files=files).json()
+
+        resp = requests.post(url, headers=self.headers, files=files).json()
         if resp["success"]:
-            uploaded_url = resp["data"]["url"]
+            uploaded_url: str = resp["data"]["url"]
             logger.debug(
-                "uploaded: %s => %s",
-                image if isinstance(image, str) else image.filename,
+                "uploaded: '%s' => '%s'",
+                image,
                 uploaded_url,
             )
             return uploaded_url
@@ -106,29 +115,43 @@ class SM(Base, ImageBedMixin):
             if resp["code"] == "image_repeated":
                 # 如果图片重复，会返回重复的图片的链接，所以此处不报错
                 logger.info("repeated image: %s", resp["images"])
-                return resp["images"]
+                image_url: str = resp["images"]
+                return image_url
             elif self._login_expired(resp):
+                assert self.auth_info != None
+
+                if retries >= 3:
+                    return UploadErrorResponse(401, "认证信息无效", str(image))
+
+                logger.warn(
+                    "`auth_token` has expired, the program will try to update `auth_token` automatically, number of retries: %d",
+                    retries + 1,
+                )
+
                 self._auto_login()
-                self.token = self.auth_info["token"]  # type: ignore
+                self.token = self.auth_info["token"]
+
+                return self.__upload(image, retries + 1)
             else:
                 error = resp["message"]
                 logger.error(
-                    "upload failed: img=%s, error=%s",
-                    image if isinstance(image, str) else image.filename,
+                    "upload failed: img='%s', error='%s'",
+                    image,
                     error,
                 )
-                raise errors.UploadFailed(error)
+                return UploadErrorResponse(400, error, str(image))
 
-    @Login
     def upload_image(self, image_path: ImagePath):
         return self.__upload(image_path)
 
-    @Login
-    def upload_image_stream(self, image: ImageStream) -> str:
+    def upload_image_stream(self, image: ImageStream):
         return self.__upload(image)
 
-    @Login
-    def upload_images(self, *images: ImageType, to_console=True) -> List[str]:
+    def upload_images(
+        self, *images: ImageType, to_console=True
+    ) -> List[Union[str, UploadErrorResponse]]:
+        self.check_login()
+
         if len(images) > 10:
             raise errors.OverSizeError(
                 "You can only upload up to 10 pictures, but you uploaded %d pictures."
@@ -137,21 +160,14 @@ class SM(Base, ImageBedMixin):
 
         check_image_exists(*images)
 
-        self._check_images_valid(images)
+        self._check_images_valid(*images)
 
-        images_url = []
+        images_url: List[Union[str, UploadErrorResponse]] = []
         for img in images:
-            try:
-                if isinstance(img, str):
-                    result = self.upload_image(img)
-                else:
-                    result = self.upload_image_stream(img)
-            except errors.UploadFailed as e:
-                result = {
-                    "image_path": img if isinstance(img, str) else img.filename,
-                    "status_code": 400,
-                    "error": f"{e}",
-                }
+            if isinstance(img, str):
+                result = self.upload_image(img)
+            else:
+                result = self.upload_image_stream(img)
 
             images_url.append(result)
 
@@ -163,62 +179,86 @@ class SM(Base, ImageBedMixin):
 
         return images_url
 
-    @Login
     def history(self) -> Dict[str, Any]:
         """
         Temporary History - IP Based Temporary Upload History
         """
+        self.check_login()
+
         url = self._url("history")
         resp = requests.get(url, headers=self.headers)
         return resp.json()
 
-    @Login
     def clear(self) -> Dict[str, Any]:
         """
         Clear Temporary History - Clear IP Based Temporary Upload History
         """
+        self.check_login()
+
         url = self._url("clear")
         resp = requests.get(url, headers=self.headers)
         return resp.json()
 
-    @Login
-    def upload_history(self) -> dict:
-        url = self._url("upload_history")
-        resp = requests.get(url, headers=self.headers)
-        return resp.json()
+    def upload_history(self) -> Union[ErrorResponse, List[Dict[str, Any]]]:
+        self.check_login()
 
-    @Login
-    def get_all_images(self) -> List[Dict[str, str]]:
-        images = []
-        for file in self.upload_history()["data"]:
+        url = self._url("upload_history")
+        resp = requests.get(url, headers=self.headers).json()
+        if resp["code"] != "success":
+            if resp["code"] == "unauthorized":
+                return ErrorResponse(401, resp["message"])
+            else:
+                return ErrorResponse(0, resp)
+        return resp["data"]
+
+    def get_all_images(self):
+        self.check_login()
+
+        images: List[SMMSResponse] = []
+        data = self.upload_history()
+        if isinstance(data, ErrorResponse):
+            return data
+
+        for file in data:
             images.append(
-                {
-                    "url": file["url"],
-                    "delete_url": file["delete"],
-                    "width": file["width"],
-                    "height": file["height"],
-                }
+                SMMSResponse(
+                    file["url"],
+                    file["delete"],
+                    file["width"],
+                    file["height"],
+                )
             )
 
         return images
 
-    @Login
-    def delete_image(self, delete_url: str) -> bool:
-        resp = requests.get(delete_url, headers=self.headers)
-        # TODO: sm.ms 删除图片后本应返回json，但实际返回的是html。而且删除链接不需要认证，任何人get都能删除图片
-        return resp.status_code == 200
+    def delete_image(self, delete_url: str) -> Optional[ErrorResponse]:
+        self.check_login()
 
-    @Login
-    def delete_images(self, urls: List[str]) -> dict:
-        result = {}
+        resp = requests.get(delete_url)
+
+        re_res = re.search(r'<div class="card-body">\n\s+(.*?)\n', resp.text)
+        if not re_res:
+            return ErrorResponse(500, "未知错误")
+
+        msg = re_res.group(1)
+        if msg == "File is deleted and our cache will refresh within minutes.":
+            return
+
+        if msg == "Picture was already deleted.":
+            return ErrorResponse(404, "图片已被删除，请勿重复删除")
+        else:
+            return ErrorResponse(0, msg)
+
+    def delete_images(self, urls: List[str]) -> Dict[str, ErrorResponse]:
+        self.check_login()
+
+        result: Dict[str, ErrorResponse] = {}
         for url in urls:
             r = self.delete_image(url)
-            # if not r["success"]:
-            #     result[hash] = {"message": r["message"], "code": r["code"]}
-            result[url] = r
+            if r:
+                result[url] = r
         return result
 
-    @Login
     def get_all_images_in_image_bed(self) -> List[str]:  # type: ignore
         pass
 
