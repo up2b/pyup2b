@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-03-18 19:59:40
+# @Modified:  2022-03-20 21:32:25
 
 import os
 import time
@@ -359,7 +359,7 @@ class GitBase(Base, ImageBedAbstract):
         if resp.status_code != 200:
             return ErrorResponse(resp.status_code, resp.text)
 
-        all_images_resp: List[Dict[str, str]] = resp.json  # type: ignore
+        all_images_resp: List[Dict[str, str]] = resp.json()
         images = []
         for file in all_images_resp:
             images.append(
