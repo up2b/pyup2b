@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-03-20 21:32:25
+# @Modified:  2022-03-20 21:54:07
 
 import os
 import time
@@ -362,9 +362,12 @@ class GitBase(Base, ImageBedAbstract):
         all_images_resp: List[Dict[str, str]] = resp.json()
         images = []
         for file in all_images_resp:
+            download_url = file["download_url"]
+            if hasattr(self, "cdn_url") and callable(getattr(self, "cdn_url")):
+                download_url = self.cdn_url(file["download_url"])  # type: ignore
             images.append(
                 GitGetAllImagesResponse(
-                    file["download_url"],
+                    download_url,
                     file["sha"],
                     file["url"],
                 )
