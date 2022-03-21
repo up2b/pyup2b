@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: github.py
 # @Created:   2021-02-13 09:10:14
-# @Modified:  2022-03-18 15:52:25
+# @Modified:  2022-03-21 12:09:09
 
 import os
 import requests
@@ -32,10 +32,11 @@ class Github(GitBase):
     ):
         super().__init__(auto_compress, add_watermark, conf_file)
 
-        self.headers = {
-            "Accept": "application/vnd.github.v3+json",
-            "Authorization": "token " + self.token,
-        }
+        if hasattr(self, "token"):
+            self.headers = {
+                "Accept": "application/vnd.github.v3+json",
+                "Authorization": "token " + self.token,
+            }
 
     def upload_image(self, image_path: str):
         basename = os.path.basename(image_path)

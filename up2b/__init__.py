@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created:   2021-02-08 15:43:32
-# @Modified:  2022-03-18 18:24:21
+# @Modified:  2022-03-21 12:05:52
 
 import os
 import sys
@@ -23,7 +23,7 @@ from up2b.up2b_lib.up2b_api.github import Github
 from up2b.up2b_lib.constants import SM_MS, IMGTU, GITEE, GITHUB, IMAGE_BEDS_CODE
 from up2b.up2b_lib.utils import logger
 
-__version__ = "0.2.5"
+__version__ = "0.2.6"
 
 IMAGE_BEDS: Dict[int, Union[Type[SM], Type[Imgtu], Type[Gitee], Type[Github]]] = {
     SM_MS: SM,

@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-03-20 21:54:07
+# @Modified:  2022-03-21 12:08:38
 
 import os
 import time
@@ -263,6 +263,11 @@ class GitBase(Base, ImageBedAbstract):
     headers: Dict[str, str]
     api_url: str
 
+    token: str
+    username: str
+    repo: str
+    folder: str
+
     def __init__(
         self,
         auto_compress: bool = False,
@@ -272,10 +277,10 @@ class GitBase(Base, ImageBedAbstract):
         super().__init__(auto_compress, add_watermark, conf_file)
 
         if self.auth_info:
-            self.token: str = self.auth_info["token"]
-            self.username: str = self.auth_info["username"]
-            self.repo: str = self.auth_info["repo"]
-            self.folder: str = self.auth_info["folder"]
+            self.token = self.auth_info["token"]
+            self.username = self.auth_info["username"]
+            self.repo = self.auth_info["repo"]
+            self.folder = self.auth_info["folder"]
 
     def login(self, token: str, username: str, repo: str, folder: str = "up2b"):
         auth_info = {
