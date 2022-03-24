@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: watermark.py
 # @Created:   2021-02-09 15:17:32
-# @Modified:  2022-03-18 15:52:52
+# @Modified:  2022-03-24 20:05:42
 
 import os
 
@@ -26,7 +26,7 @@ from collections import namedtuple
 from up2b.up2b_lib.constants import CACHE_PATH
 from up2b.up2b_lib.utils import is_ascii
 
-TypeFont = namedtuple("Font", ["text", "size", "font_path", "color"])
+TypeFont = namedtuple("TypeFont", ["text", "size", "font_path", "color"])
 
 
 class AddWatermark:

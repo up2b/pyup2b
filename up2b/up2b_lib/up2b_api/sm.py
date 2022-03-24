@@ -4,12 +4,13 @@
 # @Email:     thepoy@163.com
 # @File Name: sm.py
 # @Created:   2021-02-13 09:04:07
-# @Modified:  2022-03-18 18:00:15
+# @Modified:  2022-03-24 20:50:30
 
 import re
 import requests
 
-from typing import List, Optional, Dict, Any, Union
+from typing import BinaryIO, List, Optional, Dict, Any, Tuple, Union
+from io import BufferedReader
 from up2b.up2b_lib.custom_types import (
     ErrorResponse,
     ImageBedType,
@@ -68,6 +69,8 @@ class SM(Base, ImageBedAbstract):
         self.login(username, password)
         self.auth_info = self._read_auth_info()
 
+        assert self.auth_info is not None
+
     def _get_api_token(self, username: str, password: str) -> str:
         url = self._url("token")
         data = {"username": username, "password": password}
@@ -83,6 +86,7 @@ class SM(Base, ImageBedAbstract):
             if self._login_expired(resp):
                 self._auto_login()
                 self.token = self.auth_info["token"]  # type: ignore
+        return None
 
     def __upload(self, image: ImageType, retries=0) -> Union[str, UploadErrorResponse]:
         self.check_login()
@@ -96,7 +100,7 @@ class SM(Base, ImageBedAbstract):
 
         # sm.ms不管出不出错，返回的状态码都是200
         url = self._url("upload")
-        files = (
+        files: Dict[str, Union[Tuple[str, bytes, str], BinaryIO]] = (
             {"smfile": open(image, "rb")}
             if isinstance(image, str)
             else {"smfile": (image.filename, image.stream, image.mime_type)}
@@ -118,7 +122,7 @@ class SM(Base, ImageBedAbstract):
                 image_url: str = resp["images"]
                 return image_url
             elif self._login_expired(resp):
-                assert self.auth_info != None
+                assert self.auth_info is not None
 
                 if retries >= 3:
                     return UploadErrorResponse(401, "认证信息无效", str(image))
@@ -129,6 +133,7 @@ class SM(Base, ImageBedAbstract):
                 )
 
                 self._auto_login()
+                assert self.auth_info is not None
                 self.token = self.auth_info["token"]
 
                 return self.__upload(image, retries + 1)
@@ -242,7 +247,7 @@ class SM(Base, ImageBedAbstract):
 
         msg = re_res.group(1)
         if msg == "File is deleted and our cache will refresh within minutes.":
-            return
+            return ErrorResponse(400, "图片已被删除，请耐心等待服务器刷新缓存")
 
         if msg == "Picture was already deleted.":
             return ErrorResponse(404, "图片已被删除，请勿重复删除")

@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-03-21 12:08:38
+# @Modified:  2022-03-24 20:23:27
 
 import os
 import time
@@ -21,7 +21,6 @@ from up2b.up2b_lib.custom_types import (
     ImageBedType,
     ImageStream,
     ImageType,
-    Images,
     AuthInfo,
     UploadErrorResponse,
 )
@@ -55,7 +54,7 @@ def choose_image_bed(image_bed_code: int, conf_file: str = CONF_FILE):
 
 class ImageBedAbstract(ABC):
     @abstractmethod
-    def get_all_images(self) -> List[str]:
+    def get_all_images(self) -> Union[List[GitGetAllImagesResponse], ErrorResponse]:
         pass
 
     @abstractmethod
@@ -70,8 +69,8 @@ class ImageBedAbstract(ABC):
 
     @abstractmethod
     def upload_images(
-        self, images: Images, to_console=True
-    ) -> List[Union[str, ErrorResponse]]:
+        self, *images: ImageType, to_console=True
+    ) -> List[Union[str, UploadErrorResponse]]:
         pass
 
     @abstractmethod
@@ -86,7 +85,7 @@ class ImageBedAbstract(ABC):
     @abstractmethod
     def delete_images(
         self,
-        info: Tuple[str, str],
+        info: List[Tuple[str, str]],
         message: str = "Delete pictures that are no longer used",
     ) -> Dict[str, ErrorResponse]:
         pass
@@ -163,9 +162,9 @@ class Base:
         Check if all images exceed the max size or can be compressed
         """
         if not self.auto_compress:
-            exceeded, _img = self._exceed_max_size(*images)
+            exceeded, img = self._exceed_max_size(*images)
             if exceeded:
-                raise OverSizeError(_img)
+                raise OverSizeError(img)
         else:
             for _img in images:
                 mime_type = (
@@ -339,14 +338,14 @@ class GitBase(Base, ImageBedAbstract):
             image_urls.append(result)
 
         if hasattr(self, "cdn_url") and callable(getattr(self, "cdn_url")):
-            for i in range(len(image_urls)):
-                item = image_urls[i]
+            for idx in range(len(image_urls)):
+                item = image_urls[idx]
                 if isinstance(item, str):
-                    image_urls[i] = self.cdn_url(item)  # type: ignore
+                    image_urls[idx] = self.cdn_url(item)  # type: ignore
 
         if to_console:
-            for i in image_urls:
-                print(i)
+            for iu in image_urls:
+                print(iu)
 
         self._clear_cache()
         return image_urls
@@ -400,7 +399,7 @@ class GitBase(Base, ImageBedAbstract):
 
     def delete_images(
         self,
-        info: Tuple[str, str],
+        info: List[Tuple[str, str]],
         message: str = "Delete pictures that are no longer used",
     ) -> Dict[str, ErrorResponse]:
         self.check_login()

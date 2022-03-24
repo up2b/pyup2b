@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created:   2021-02-08 15:43:32
-# @Modified:  2022-03-21 12:05:52
+# @Modified:  2022-03-24 20:46:52
 
 import os
 import sys
@@ -173,7 +173,10 @@ def print_list(ds: DisplayStyle) -> int:
     conf: Dict[str, Union[int, List[Dict[str, str]]]] = _read_conf()
     auth_data: Optional[List[Dict[str, str]]] = conf.get("auth_data")  # type: ignore
     if not auth_data:
-        selected_code: Optional[int] = conf.get("image_bed")  # type: ignore
+        selected_code = conf.get("image_bed", -1)
+
+        assert isinstance(selected_code, int)
+
         if selected_code is None:
             logger.fatal(
                 "no image bed selected, "
