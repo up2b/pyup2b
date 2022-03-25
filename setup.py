@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: setup.py
 # @Created:   2021-03-27 09:55:27
-# @Modified:  2022-03-25 11:45:22
+# @Modified:  2022-03-25 11:56:28
 
 import codecs
 import up2b
@@ -27,7 +27,11 @@ with codecs.open("README.md", "r", "utf-8") as fd:
         license="MIT",
         keywords="typora image bed upload",
         packages=["up2b", "up2b.up2b_lib", "up2b.up2b_lib.up2b_api"],
-        package_data={"up2b.up2b_lib.up2b_api": ["__init__.pyi"]},
+        package_data={
+            "up2b": ["py.typed"],
+            "up2b.up2b_lib": ["py.typed"],
+            "up2b.up2b_lib.up2b_api": ["py.typed", "__init__.pyi"],
+        },
         entry_points={"console_scripts": ["up2b = up2b:run_main"]},
         install_requires=[
             "requests",
