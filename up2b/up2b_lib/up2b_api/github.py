@@ -4,15 +4,16 @@
 # @Email:     thepoy@163.com
 # @File Name: github.py
 # @Created:   2021-02-13 09:10:14
-# @Modified:  2022-03-21 12:09:09
+# @Modified:  2022-03-25 11:48:26
 
 import os
 import requests
 
 from base64 import b64encode
-from up2b.up2b_lib.custom_types import ImageBedType, ImageStream
-from up2b.up2b_lib.up2b_api import GitBase, CONF_FILE
-from up2b.up2b_lib.constants import GITHUB
+from typing import Optional
+from up2b.up2b_lib.custom_types import ImageBedType, ImageStream, ErrorResponse
+from up2b.up2b_lib.up2b_api import GitBase
+from up2b.up2b_lib.constants import CONF_FILE, GITHUB
 from up2b.up2b_lib.utils import child_logger
 
 logger = child_logger(__name__)
@@ -68,7 +69,7 @@ class Github(GitBase):
         sha: str,
         url: str,
         message: str = "Delete pictures that are no longer used",
-    ):
+    ) -> Optional[ErrorResponse]:
         return self._delete_image(sha, url, message)
 
     def cdn_url(self, url: str) -> str:

@@ -4,13 +4,14 @@
 # @Email:     thepoy@163.com
 # @File Name: gitee.py
 # @Created:   2021-02-13 09:10:05
-# @Modified:  2022-03-18 15:52:27
+# @Modified:  2022-03-25 11:48:51
 
 import os
+from typing import Optional
 import requests
 
 from base64 import b64encode
-from up2b.up2b_lib.custom_types import ImageBedType, ImageStream
+from up2b.up2b_lib.custom_types import ImageBedType, ImageStream, ErrorResponse
 from up2b.up2b_lib.up2b_api import GitBase
 from up2b.up2b_lib.constants import GITEE
 from up2b.up2b_lib.utils import child_logger
@@ -60,7 +61,7 @@ class Gitee(GitBase):
         sha: str,
         url: str,
         message: str = "Delete pictures that are no longer used",
-    ):
+    ) -> Optional[ErrorResponse]:
         extra = {"access_token": self.token}
 
         return self._delete_image(sha, url, message, extra)

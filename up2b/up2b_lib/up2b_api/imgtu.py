@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: imgtu.py
 # @Created:   2021-02-13 09:04:37
-# @Modified:  2022-03-24 20:12:35
+# @Modified:  2022-03-25 11:16:28
 
 import os
 import re
@@ -15,7 +15,6 @@ import requests
 
 from urllib import parse
 from typing import Dict, List, Optional, Tuple, Union
-from requests_toolbelt import MultipartEncoder
 from up2b.up2b_lib.custom_types import (
     ErrorResponse,
     ImageBedType,
@@ -26,9 +25,9 @@ from up2b.up2b_lib.custom_types import (
     UploadErrorResponse,
 )
 from up2b.up2b_lib.errors import MissingAuth
-from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract, CONF_FILE
+from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract
 from up2b.up2b_lib.utils import check_image_exists, child_logger
-from up2b.up2b_lib.constants import IMGTU
+from up2b.up2b_lib.constants import CONF_FILE, IMGTU
 
 logger = child_logger(__name__)
 
@@ -141,43 +140,43 @@ class Imgtu(Base, ImageBedAbstract):
     def __upload(self, image: ImageType, retries=0) -> Union[str, UploadErrorResponse]:
         self.check_login()
 
-        is_path = isinstance(image, str)
-
         url = self._url("json")
         filename_with_suffix = os.path.basename(str(image))
         filename_without_suffix, suffix = os.path.splitext(filename_with_suffix)
-        if is_path:
+        if isinstance(image, str):
             if suffix.lower() == ".apng":
                 suffix = ".png"
             filename = filename_without_suffix + suffix
         else:
             filename = filename_with_suffix + "." + image.mime_type
 
-        mime_type = mimetypes.guess_type(image)[0] if is_path else image.mime_type
+        mime_type = (
+            mimetypes.guess_type(image)[0]
+            if isinstance(image, str)
+            else image.mime_type
+        )
 
         timestamp = int(time.time() * 1000)
 
-        if is_path:
+        if isinstance(image, str):
             with open(image, "rb") as fb:
                 img_buffer = fb.read()
         else:
             img_buffer = image.stream
 
-        data = MultipartEncoder(
-            {
-                "source": (filename, img_buffer, mime_type),
-                "type": "file",
-                "action": "upload",
-                "timestamp": str(timestamp),
-                "auth_token": self.token,
-                "nsfw": "0",
-            }
-        )
+        data = {
+            "type": "file",
+            "action": "upload",
+            "timestamp": str(timestamp),
+            "auth_token": self.token,
+            "nsfw": "0",
+        }
 
-        headers = self.headers
-        headers.update({"Content-Type": data.content_type})
+        files = {
+            "source": (filename, img_buffer, mime_type),
+        }
 
-        resp = requests.post(url, headers=headers, data=data)  # type: ignore
+        resp = requests.post(url, headers=self.headers, data=data, files=files)
         resp.encoding = "utf-8"
 
         try:

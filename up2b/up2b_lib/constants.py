@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: constants.py
 # @Created:   2021-02-13 09:17:07
-# @Modified:  2022-03-18 15:53:13
+# @Modified:  2022-03-25 11:31:15
 
 import sys
 import os
@@ -18,9 +18,9 @@ GITHUB = 3
 
 # fmt: off
 IMAGE_BEDS_CODE = {
-    "sm.ms": SM_MS,
-    "imgtu.com": IMGTU,
-    "gitee.com": GITEE,
+    "sm.ms":      SM_MS,
+    "imgtu.com":  IMGTU,
+    "gitee.com":  GITEE,
     "github.com": GITHUB,
 }
 # fmt: on

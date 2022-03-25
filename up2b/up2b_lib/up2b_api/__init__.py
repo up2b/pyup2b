@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-03-24 20:23:27
+# @Modified:  2022-03-25 11:19:52
 
 import os
 import time
@@ -16,6 +16,7 @@ from io import BytesIO
 from abc import ABC, abstractmethod
 from typing import Optional, List, Tuple, Dict, Union
 from up2b.up2b_lib.custom_types import (
+    ConfigFile,
     ErrorResponse,
     GitGetAllImagesResponse,
     ImageBedType,
@@ -74,27 +75,18 @@ class ImageBedAbstract(ABC):
         pass
 
     @abstractmethod
-    def delete_image(
-        self,
-        sha: str,
-        url: str,
-        message: str = "Delete pictures that are no longer used",
-    ) -> Optional[ErrorResponse]:
+    def delete_image(self, *args, **kwargs) -> Optional[ErrorResponse]:
         pass
 
     @abstractmethod
-    def delete_images(
-        self,
-        info: List[Tuple[str, str]],
-        message: str = "Delete pictures that are no longer used",
-    ) -> Dict[str, ErrorResponse]:
+    def delete_images(self, *args, **kwargs) -> Dict[str, ErrorResponse]:
         pass
 
 
 class Base:
     image_bed_code: int
     max_size: int
-    conf: dict
+    conf: ConfigFile
     image_bed_type: ImageBedType
 
     def __init__(
@@ -243,6 +235,9 @@ class Base:
             from up2b.up2b_lib.watermark import AddWatermark, TypeFont
 
             conf = self.conf["watermark"]
+
+            assert isinstance(conf, dict)
+
             aw = AddWatermark(conf["x"], conf["y"], conf["opacity"])
             return aw.add_text_watermark(
                 image_path,

@@ -4,13 +4,12 @@
 # @Email:     thepoy@163.com
 # @File Name: sm.py
 # @Created:   2021-02-13 09:04:07
-# @Modified:  2022-03-24 20:50:30
+# @Modified:  2022-03-25 11:29:02
 
 import re
 import requests
 
 from typing import BinaryIO, List, Optional, Dict, Any, Tuple, Union
-from io import BufferedReader
 from up2b.up2b_lib.custom_types import (
     ErrorResponse,
     ImageBedType,
@@ -20,9 +19,9 @@ from up2b.up2b_lib.custom_types import (
     SMMSResponse,
     UploadErrorResponse,
 )
-from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract, CONF_FILE
+from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract
 from up2b.up2b_lib import errors
-from up2b.up2b_lib.constants import SM_MS
+from up2b.up2b_lib.constants import SM_MS, CONF_FILE
 from up2b.up2b_lib.utils import check_image_exists, child_logger
 
 logger = child_logger(__name__)

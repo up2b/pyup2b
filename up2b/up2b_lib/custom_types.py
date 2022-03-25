@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: custom_types.py
 # @Created:   2021-02-09 11:27:21
-# @Modified:  2022-03-18 16:20:49
+# @Modified:  2022-03-25 11:20:42
 
 from enum import Enum
 from typing import Dict, List, Union
@@ -26,6 +26,7 @@ class ImageStream:
         return self.filename
 
 
+ConfigFile = Dict[str, Union[int, List[Dict[str, str]], Dict[str, int]]]
 ImagePath = str
 AuthInfo = Dict[str, str]
 DeletedResponse = Dict[str, Union[bool, str]]

@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created:   2021-02-08 15:43:32
-# @Modified:  2022-03-24 20:46:52
+# @Modified:  2022-03-25 11:36:23
 
 import os
 import sys
@@ -15,15 +15,23 @@ from typing import Dict, List, Optional, Type, Union
 
 from colort import DisplayStyle
 from up2b.up2b_lib.i18n import read_i18n
-from up2b.up2b_lib.up2b_api import CONF_FILE, choose_image_bed
+from up2b.up2b_lib.up2b_api import choose_image_bed
 from up2b.up2b_lib.up2b_api.sm import SM
 from up2b.up2b_lib.up2b_api.imgtu import Imgtu
 from up2b.up2b_lib.up2b_api.gitee import Gitee
 from up2b.up2b_lib.up2b_api.github import Github
-from up2b.up2b_lib.constants import SM_MS, IMGTU, GITEE, GITHUB, IMAGE_BEDS_CODE
+from up2b.up2b_lib.constants import (
+    CONF_FILE,
+    SM_MS,
+    IMGTU,
+    GITEE,
+    GITHUB,
+    IMAGE_BEDS_CODE,
+)
+from up2b.up2b_lib.custom_types import ConfigFile
 from up2b.up2b_lib.utils import logger
 
-__version__ = "0.2.6"
+__version__ = "0.2.7"
 
 IMAGE_BEDS: Dict[int, Union[Type[SM], Type[Imgtu], Type[Gitee], Type[Github]]] = {
     SM_MS: SM,
@@ -113,10 +121,11 @@ def _BuildParser():
     return parser
 
 
-def _read_conf():
+def _read_conf() -> ConfigFile:  # type: ignore
     try:
         with open(CONF_FILE) as f:
             conf = json.loads(f.read())
+
             return conf
     except FileNotFoundError:
         logger.fatal(
@@ -129,7 +138,11 @@ def _read_image_bed(
     auto_compress: bool, add_watermark: bool
 ) -> Union[SM, Imgtu, Gitee, Github]:
     conf = _read_conf()
-    return IMAGE_BEDS[conf["image_bed"]](
+
+    selected_code = conf["image_bed"]
+    assert isinstance(selected_code, int)
+
+    return IMAGE_BEDS[selected_code](
         auto_compress=auto_compress, add_watermark=add_watermark
     )
 
@@ -170,7 +183,7 @@ def _config_text_watermark(
 
 
 def print_list(ds: DisplayStyle) -> int:
-    conf: Dict[str, Union[int, List[Dict[str, str]]]] = _read_conf()
+    conf = _read_conf()
     auth_data: Optional[List[Dict[str, str]]] = conf.get("auth_data")  # type: ignore
     if not auth_data:
         selected_code = conf.get("image_bed", -1)
