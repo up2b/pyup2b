@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: constants.py
 # @Created:   2021-02-13 09:17:07
-# @Modified:  2022-03-25 11:31:15
+# @Modified:  2022-03-27 22:07:34
 
 import sys
 import os
@@ -15,6 +15,8 @@ SM_MS = 0
 IMGTU = 1
 GITEE = 2
 GITHUB = 3
+
+DEFAULT_TIMEOUT = 3.0
 
 # fmt: off
 IMAGE_BEDS_CODE = {

@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: gitee.py
 # @Created:   2021-02-13 09:10:05
-# @Modified:  2022-03-25 11:48:51
+# @Modified:  2022-03-27 22:09:15
 
 import os
 from typing import Optional
@@ -52,7 +52,9 @@ class Gitee(GitBase):
         self.check_login()
 
         data = {"access_token": self.token}
-        resp = requests.get(self.base_url, headers=self.headers, json=data)
+        resp = requests.get(
+            self.base_url, headers=self.headers, json=data, timeout=self.timeout
+        )
 
         return resp
 

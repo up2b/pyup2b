@@ -83,6 +83,7 @@ class Base:
     auth_info: Optional[AuthInfo]
     add_watermark: bool
     auto_compress: bool
+    timeout: float
 
     def __init__(
         self,

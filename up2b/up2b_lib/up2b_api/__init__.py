@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-03-25 11:19:52
+# @Modified:  2022-03-27 22:08:35
 
 import os
 import time
@@ -25,7 +25,7 @@ from up2b.up2b_lib.custom_types import (
     AuthInfo,
     UploadErrorResponse,
 )
-from up2b.up2b_lib.utils import child_logger, check_image_exists
+from up2b.up2b_lib.utils import child_logger, check_image_exists, timeout
 from up2b.up2b_lib.errors import UnsupportedType, OverSizeError
 from up2b.up2b_lib.constants import (
     IMAGE_BEDS_CODE,
@@ -88,6 +88,7 @@ class Base:
     max_size: int
     conf: ConfigFile
     image_bed_type: ImageBedType
+    timeout = timeout()
 
     def __init__(
         self,
@@ -301,7 +302,9 @@ class GitBase(Base, ImageBedAbstract):
 
         logger.debug("request headers: %s", self.headers)
 
-        resp = requests.request(request_method, url, headers=self.headers, json=data)
+        resp = requests.request(
+            request_method, url, headers=self.headers, json=data, timeout=self.timeout
+        )
         if resp.status_code == 201:
             uploaded_url: str = resp.json()["content"]["download_url"]
             logger.debug("uploaded: '%s' => '%s'", image, uploaded_url)
@@ -386,7 +389,9 @@ class GitBase(Base, ImageBedAbstract):
         if extra:
             data.update(extra)
 
-        resp = requests.delete(url, headers=self.headers, json=data)
+        resp = requests.delete(
+            url, headers=self.headers, json=data, timeout=self.timeout
+        )
         if resp.status_code == 200:
             return None
 

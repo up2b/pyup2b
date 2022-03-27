@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: utils.py
 # @Created:   2021-02-09 15:17:32
-# @Modified:  2022-03-18 13:44:08
+# @Modified:  2022-03-27 22:07:44
 
 import os
 import locale
@@ -13,7 +13,12 @@ from functools import wraps, partial
 from colorful_logger import get_logger, child_logger as cl
 from colorful_logger.logger import is_debug
 
-from up2b.up2b_lib.constants import CONFIG_FOLDER_PATH, IS_MACOS, PYTHON_VERSION
+from up2b.up2b_lib.constants import (
+    CONFIG_FOLDER_PATH,
+    DEFAULT_TIMEOUT,
+    IS_MACOS,
+    PYTHON_VERSION,
+)
 from up2b.up2b_lib.custom_types import ImageType
 
 log_file_path = None
@@ -31,6 +36,17 @@ logger = get_logger(
     file_path=log_file_path,
     print_position=print_position,
 )
+
+
+def timeout() -> float:
+    t = os.getenv("UP2B_TIMEOUT")
+    if not t:
+        return DEFAULT_TIMEOUT
+
+    try:
+        return float(t)
+    except ValueError:
+        return DEFAULT_TIMEOUT
 
 
 def child_logger(name: str):

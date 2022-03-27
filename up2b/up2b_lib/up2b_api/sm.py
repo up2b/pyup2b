@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: sm.py
 # @Created:   2021-02-13 09:04:07
-# @Modified:  2022-03-25 11:29:02
+# @Modified:  2022-03-27 22:13:38
 
 import re
 import requests
@@ -73,12 +73,12 @@ class SM(Base, ImageBedAbstract):
     def _get_api_token(self, username: str, password: str) -> str:
         url = self._url("token")
         data = {"username": username, "password": password}
-        resp = requests.post(url, data=data).json()
+        resp = requests.post(url, data=data, timeout=self.timeout).json()
         return resp["data"]["token"]
 
     def _get_user_profile(self) -> Optional[Dict[str, str]]:
         url = self._url("profile")
-        resp = requests.post(url, headers=self.headers).json()
+        resp = requests.post(url, headers=self.headers, timeout=self.timeout).json()
         if resp["success"]:
             return resp["data"]
         else:
@@ -105,7 +105,9 @@ class SM(Base, ImageBedAbstract):
             else {"smfile": (image.filename, image.stream, image.mime_type)}
         )
 
-        resp = requests.post(url, headers=self.headers, files=files).json()
+        resp = requests.post(
+            url, headers=self.headers, files=files, timeout=self.timeout
+        ).json()
         if resp["success"]:
             uploaded_url: str = resp["data"]["url"]
             logger.debug(
@@ -190,7 +192,7 @@ class SM(Base, ImageBedAbstract):
         self.check_login()
 
         url = self._url("history")
-        resp = requests.get(url, headers=self.headers)
+        resp = requests.get(url, headers=self.headers, timeout=self.timeout)
         return resp.json()
 
     def clear(self) -> Dict[str, Any]:
@@ -200,14 +202,14 @@ class SM(Base, ImageBedAbstract):
         self.check_login()
 
         url = self._url("clear")
-        resp = requests.get(url, headers=self.headers)
+        resp = requests.get(url, headers=self.headers, timeout=self.timeout)
         return resp.json()
 
     def upload_history(self) -> Union[ErrorResponse, List[Dict[str, Any]]]:
         self.check_login()
 
         url = self._url("upload_history")
-        resp = requests.get(url, headers=self.headers).json()
+        resp = requests.get(url, headers=self.headers, timeout=self.timeout).json()
         if resp["code"] != "success":
             if resp["code"] == "unauthorized":
                 return ErrorResponse(401, resp["message"])
@@ -238,7 +240,7 @@ class SM(Base, ImageBedAbstract):
     def delete_image(self, delete_url: str) -> Optional[ErrorResponse]:
         self.check_login()
 
-        resp = requests.get(delete_url)
+        resp = requests.get(delete_url, timeout=self.timeout)
 
         re_res = re.search(r'<div class="card-body">\n\s+(.*?)\n', resp.text)
         if not re_res:

@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: imgtu.py
 # @Created:   2021-02-13 09:04:37
-# @Modified:  2022-03-25 11:16:28
+# @Modified:  2022-03-27 22:11:58
 
 import os
 import re
@@ -74,7 +74,9 @@ class Imgtu(Base, ImageBedAbstract):
             "auth_token": auth_token,
         }
 
-        resp = requests.post(url, headers=headers, data=data, allow_redirects=False)
+        resp = requests.post(
+            url, headers=headers, data=data, allow_redirects=False, timeout=self.timeout
+        )
         if resp.status_code == 301:
             # If there is a KEEPLOGIN field in the cookie,
             # pictures will be uploaded as a normal user
@@ -97,7 +99,7 @@ class Imgtu(Base, ImageBedAbstract):
 
     def _parse_auth_token(self) -> Tuple[Optional[str], Optional[str]]:
         url = self._url("login")
-        resp = requests.get(url, headers=self.__headers)
+        resp = requests.get(url, headers=self.__headers, timeout=self.timeout)
         if resp.status_code == 200:
             auth_token = re.search(
                 r'PF.obj.config.auth_token = "([a-f0-9]{40})"', resp.text
@@ -123,7 +125,7 @@ class Imgtu(Base, ImageBedAbstract):
         return headers
 
     def _update_auth_token(self):
-        resp = requests.get(self.base_url, headers=self.headers)
+        resp = requests.get(self.base_url, headers=self.headers, timeout=self.timeout)
         auth_token = re.search(
             r'PF.obj.config.auth_token = "([a-f0-9]{40})"', resp.text
         )
@@ -176,7 +178,9 @@ class Imgtu(Base, ImageBedAbstract):
             "source": (filename, img_buffer, mime_type),
         }
 
-        resp = requests.post(url, headers=self.headers, data=data, files=files)
+        resp = requests.post(
+            url, headers=self.headers, data=data, files=files, timeout=self.timeout
+        )
         resp.encoding = "utf-8"
 
         try:
@@ -269,7 +273,7 @@ class Imgtu(Base, ImageBedAbstract):
         images = set()
 
         def visit_next_page(url):
-            resp = requests.get(url, headers=self.__headers)
+            resp = requests.get(url, headers=self.__headers, timeout=self.timeout)
             resp.encoding = "utf-8"
 
             if resp.status_code != 200:
@@ -333,7 +337,9 @@ class Imgtu(Base, ImageBedAbstract):
             "delete": "image",
             "deleting[id]": img_id,
         }
-        resp = requests.post(url, headers=self.__headers, data=data)
+        resp = requests.post(
+            url, headers=self.__headers, data=data, timeout=self.timeout
+        )
         if resp.status_code == 400:
             if resp.json()["error"]["message"] == "请求被拒绝 (auth_token)":
                 if retries >= 3:
@@ -365,7 +371,9 @@ class Imgtu(Base, ImageBedAbstract):
             "delete": "images",
             "deleting[ids][]": imgs_id,
         }
-        resp = requests.post(url, headers=self.__headers, data=data)
+        resp = requests.post(
+            url, headers=self.__headers, data=data, timeout=self.timeout
+        )
         json_resp = resp.json()
         if resp.status_code == 400:
             if json_resp["error"]["message"] == "请求被拒绝 (auth_token)":

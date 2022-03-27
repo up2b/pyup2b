@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: github.py
 # @Created:   2021-02-13 09:10:14
-# @Modified:  2022-03-25 11:48:26
+# @Modified:  2022-03-27 22:10:07
 
 import os
 import requests
@@ -60,7 +60,7 @@ class Github(GitBase):
     def _get_all_images_in_image_bed(
         self,
     ):
-        resp = requests.get(self.base_url, headers=self.headers)
+        resp = requests.get(self.base_url, headers=self.headers, timeout=self.timeout)
 
         return resp
 
