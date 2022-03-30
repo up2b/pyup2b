@@ -50,7 +50,7 @@ optional arguments:
   -l USERNAME PASSWORD, --login USERNAME PASSWORD
                         save the user authentication token after successful login. You must enter the username and password after `-l` or `--login`
   -lg ACCESS_TOKEN USERNAME REPO FOLDER, --login-git ACCESS_TOKEN USERNAME REPO FOLDER
-                        save the authentication information of the git website, such as gitee, github
+                        save the authentication information of the git website, such as github
   --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE
                         configure the text watermark
   -p IMAGE_PATH, --image-path IMAGE_PATH
@@ -86,7 +86,7 @@ up2b -l username password
 ```
 **Git site:**
 
-Including gitee and github.
+Including github.
 
 When using a git site, use `-lg` or `--login-git` to configure authentication information.
 

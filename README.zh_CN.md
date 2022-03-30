@@ -56,7 +56,7 @@ optional arguments:
   -l USERNAME PASSWORD, --login USERNAME PASSWORD
                         保存认证信息。你需要在`-l`或`--login`后输入账名和密码
   -lg ACCESS_TOKEN USERNAME REPO FOLDER, --login-git ACCESS_TOKEN USERNAME REPO FOLDER
-                        保存 git 类型图床的认证信息，如github、gitee
+                        保存 git 类型图床的认证信息，如github
   --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE
                         配置要添加的文字水印
   -p IMAGE_PATH, --image-path IMAGE_PATH
