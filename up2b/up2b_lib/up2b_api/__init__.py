@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-03-30 11:51:34
+# @Modified:  2022-03-30 13:00:48
 
 import os
 import time
@@ -128,7 +128,7 @@ class Base:
 
         if len(auth_data) > len(IMAGE_BEDS_CODE):
             logger.warning(
-                "gitee 已不支持图片外链，0.2.7 版本开始移除对 gitee 的支持，旧配置文件中仍然有 gitee 配置信息，将会自动删除 gitee 相关配置"
+                "gitee 已不支持图片外链，0.3.0 版本开始移除对 gitee 的支持，旧配置文件中仍然有 gitee 配置信息，将会自动删除其相关配置"
             )
 
         del auth_data[2]  # 旧版中 gitee 配置的索引是 2
