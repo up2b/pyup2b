@@ -4,7 +4,7 @@
 
 # UP2B
 
-A package that can upload pictures to the image bed in `Typora`.
+A package that can upload images to the image bed in the terminal.
 
 It supports **windows**, **linux** and **macOS** system. 
 
@@ -21,8 +21,6 @@ Support the automatic upload of pictures of the following image bed:
 Support automatic compression of `jpeg/jpg` and `png` format images.
 
 # How to use
-
->  **`Typora` must be installed!**
 
 Install the package:
 
@@ -104,7 +102,7 @@ For example, I want to save the image in the `md` folder in the `image-bed` repo
 up2b -lg access_token username image-bed md
 ```
 
-#### 3 Write the command in typora
+#### 3 (Optional) Write the command in typora
 
 Then fill in the command as shown in the figure below.
 
