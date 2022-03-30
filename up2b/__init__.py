@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created:   2021-02-08 15:43:32
-# @Modified:  2022-03-25 11:36:23
+# @Modified:  2022-03-30 11:41:42
 
 import os
 import sys
@@ -18,26 +18,20 @@ from up2b.up2b_lib.i18n import read_i18n
 from up2b.up2b_lib.up2b_api import choose_image_bed
 from up2b.up2b_lib.up2b_api.sm import SM
 from up2b.up2b_lib.up2b_api.imgtu import Imgtu
-from up2b.up2b_lib.up2b_api.gitee import Gitee
 from up2b.up2b_lib.up2b_api.github import Github
 from up2b.up2b_lib.constants import (
     CONF_FILE,
-    SM_MS,
-    IMGTU,
-    GITEE,
-    GITHUB,
+    ImageBedCode,
     IMAGE_BEDS_CODE,
 )
-from up2b.up2b_lib.custom_types import ConfigFile
-from up2b.up2b_lib.utils import logger
+from up2b.up2b_lib.utils import logger, read_conf
 
 __version__ = "0.2.7"
 
-IMAGE_BEDS: Dict[int, Union[Type[SM], Type[Imgtu], Type[Gitee], Type[Github]]] = {
-    SM_MS: SM,
-    IMGTU: Imgtu,
-    GITEE: Gitee,
-    GITHUB: Github,
+IMAGE_BEDS: Dict[ImageBedCode, Union[Type[SM], Type[Imgtu], Type[Github]]] = {
+    ImageBedCode.SM_MS: SM,
+    ImageBedCode.IMGTU: Imgtu,
+    ImageBedCode.GITHUB: Github,
 }
 
 
@@ -73,7 +67,7 @@ def _BuildParser():
         "-c",
         "--choose-site",
         choices=[str(k) for k in IMAGE_BEDS.keys()],
-        metavar=str({v: k for k, v in IMAGE_BEDS_CODE.items()}),
+        metavar=str({v.value: k for k, v in IMAGE_BEDS_CODE.items()}),
         help=locale["choose the image bed you want to use and exit"],
         type=str,
     )
@@ -93,7 +87,7 @@ def _BuildParser():
         nargs=4,
         metavar=("ACCESS_TOKEN", "USERNAME", "REPO", "FOLDER"),
         help=locale[
-            "save the authentication information of the git website, such as gitee, github"
+            "save the authentication information of the git website, such as github"
         ],
         type=str,
     )
@@ -121,30 +115,17 @@ def _BuildParser():
     return parser
 
 
-def _read_conf() -> ConfigFile:  # type: ignore
-    try:
-        with open(CONF_FILE) as f:
-            conf = json.loads(f.read())
-
-            return conf
-    except FileNotFoundError:
-        logger.fatal(
-            "the configuration file is not found, "
-            + "you need to use `--choose-site` or `-c` to select the image bed first."
-        )
-
-
 def _read_image_bed(
     auto_compress: bool, add_watermark: bool
-) -> Union[SM, Imgtu, Gitee, Github]:
-    conf = _read_conf()
+) -> Union[SM, Imgtu, Github]:
+    conf = read_conf()
 
     selected_code = conf["image_bed"]
     assert isinstance(selected_code, int)
 
-    return IMAGE_BEDS[selected_code](
-        auto_compress=auto_compress, add_watermark=add_watermark
-    )
+    code = ImageBedCode(selected_code)
+
+    return IMAGE_BEDS[code](auto_compress=auto_compress, add_watermark=add_watermark)
 
 
 def _config_text_watermark(
@@ -183,29 +164,31 @@ def _config_text_watermark(
 
 
 def print_list(ds: DisplayStyle) -> int:
-    conf = _read_conf()
+    conf = read_conf()
     auth_data: Optional[List[Dict[str, str]]] = conf.get("auth_data")  # type: ignore
+
     if not auth_data:
         selected_code = conf.get("image_bed", -1)
-
-        assert isinstance(selected_code, int)
-
         if selected_code is None:
             logger.fatal(
                 "no image bed selected, "
                 + "you need to use `--choose-site` or `-c` to select the image bed first."
             )
 
+        assert isinstance(selected_code, int)
+
+        code = ImageBedCode(selected_code)
+
         logger.warning(
             "you have selected %s, but no authentication information has been configured.\n\n%s %s %s",
             ds.format_with_multiple_styles(
-                " " + IMAGE_BEDS[selected_code]().__str__() + " ",
+                " " + IMAGE_BEDS[code]().__str__() + " ",
                 ds.backgorud_color.dark_gray,
                 ds.foreground_color.white,
             ),
             ds.format_with_one_style(" " + chr(10007), ds.foreground_color.red),
             selected_code,
-            IMAGE_BEDS[selected_code](),
+            IMAGE_BEDS[code](),
         )
         return 0
 
@@ -214,19 +197,18 @@ def print_list(ds: DisplayStyle) -> int:
             print(
                 ds.format_with_one_style(" " + chr(10003), ds.foreground_color.green),
                 i,
-                IMAGE_BEDS[i](),
+                IMAGE_BEDS[ImageBedCode(i)](),
             )
         else:
             print(
                 ds.format_with_one_style(" " + chr(10007), ds.foreground_color.red),
                 i,
-                IMAGE_BEDS[i](),
+                IMAGE_BEDS[ImageBedCode(i)](),
             )
     return 0
 
 
 def main() -> int:
-
     args = _BuildParser().parse_args()
 
     ds = DisplayStyle()
@@ -246,15 +228,9 @@ def main() -> int:
         choose_image_bed(code)
         print(
             ds.format_with_one_style(" ==>", ds.foreground_color.cyan),
-            IMAGE_BEDS[code](),
+            IMAGE_BEDS[ImageBedCode(code)](),
         )
 
-        if args.choose_site == str(GITEE):
-            logger.warn(
-                "resources bigger than 1M on `gitee` cannot be publicly accessed. "
-                + "Please manually compress the image size to 1M or less, "
-                + "or use the `-aac` parameter to enable the automatic compression function."
-            )
         return 0
 
     if args.config_text_watermark:
@@ -272,9 +248,9 @@ def main() -> int:
     ib = _read_image_bed(args.aac, args.add_watermark)
 
     if args.login:
-        if isinstance(ib, Gitee) or isinstance(ib, Github):
+        if isinstance(ib, Github):
             logger.fatal(
-                "you have chosen `gitee` or `github` as the image bed, please login with `-lg`"
+                "you have chosen `github` as the image bed, please login with `-lg`"
             )
 
         logger.debug("current image bed: %s", ib)
@@ -286,9 +262,9 @@ def main() -> int:
         return 0
 
     if args.login_git:
-        if not (isinstance(ib, Gitee) or isinstance(ib, Github)):
+        if not isinstance(ib, Github):
             logger.fatal(
-                "the image bed you choose is not gitee or github, , please login with `-l`"
+                "the image bed you choose is not `github`, , please login with `-l`"
             )
 
         ib.login(*args.login_git)

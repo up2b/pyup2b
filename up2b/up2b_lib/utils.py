@@ -4,8 +4,9 @@
 # @Email:     thepoy@163.com
 # @File Name: utils.py
 # @Created:   2021-02-09 15:17:32
-# @Modified:  2022-03-27 22:07:44
+# @Modified:  2022-03-30 11:40:50
 
+import json
 import os
 import locale
 
@@ -14,12 +15,13 @@ from colorful_logger import get_logger, child_logger as cl
 from colorful_logger.logger import is_debug
 
 from up2b.up2b_lib.constants import (
+    CONF_FILE,
     CONFIG_FOLDER_PATH,
     DEFAULT_TIMEOUT,
     IS_MACOS,
     PYTHON_VERSION,
 )
-from up2b.up2b_lib.custom_types import ImageType
+from up2b.up2b_lib.custom_types import ImageType, ConfigFile
 
 log_file_path = None
 print_position = False
@@ -57,6 +59,19 @@ def check_image_exists(*images: ImageType):
     for image in images:
         if isinstance(image, str) and not os.path.exists(image):
             raise FileNotFoundError(image)
+
+
+def read_conf() -> ConfigFile:
+    try:
+        with open(CONF_FILE) as f:
+            conf = json.loads(f.read())
+
+            return conf
+    except FileNotFoundError:
+        logger.fatal(
+            "the configuration file is not found, "
+            + "you need to use `--choose-site` or `-c` to select the image bed first."
+        )
 
 
 class Login:

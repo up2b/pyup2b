@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: imgtu.py
 # @Created:   2021-02-13 09:04:37
-# @Modified:  2022-03-30 10:54:04
+# @Modified:  2022-03-30 11:12:52
 
 import os
 import re
@@ -27,14 +27,14 @@ from up2b.up2b_lib.custom_types import (
 from up2b.up2b_lib.errors import MissingAuth
 from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract
 from up2b.up2b_lib.utils import check_image_exists, child_logger
-from up2b.up2b_lib.constants import CONF_FILE, IMGTU
+from up2b.up2b_lib.constants import CONF_FILE, ImageBedCode
 
 logger = child_logger(__name__)
 
 
 class Imgtu(Base, ImageBedAbstract):
     image_bed_type = ImageBedType.common
-    image_bed_code = IMGTU
+    image_bed_code = ImageBedCode.IMGTU
     max_size = 10 * 1024 * 1024
     base_url = "https://imgtu.com/"
     __headers = {

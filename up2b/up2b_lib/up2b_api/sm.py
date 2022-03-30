@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: sm.py
 # @Created:   2021-02-13 09:04:07
-# @Modified:  2022-03-30 10:52:34
+# @Modified:  2022-03-30 11:13:03
 
 import re
 import requests
@@ -21,7 +21,7 @@ from up2b.up2b_lib.custom_types import (
 )
 from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract
 from up2b.up2b_lib import errors
-from up2b.up2b_lib.constants import SM_MS, CONF_FILE
+from up2b.up2b_lib.constants import ImageBedCode, CONF_FILE
 from up2b.up2b_lib.utils import check_image_exists, child_logger
 
 logger = child_logger(__name__)
@@ -29,7 +29,7 @@ logger = child_logger(__name__)
 
 class SM(Base, ImageBedAbstract):
     image_bed_type = ImageBedType.common
-    image_bed_code = SM_MS
+    image_bed_code = ImageBedCode.SM_MS
     base_url = "https://sm.ms/api/v2/"
     max_size = 5 * 1024 * 1024
 

@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: i18n.py
 # @Created:   2022-01-09 11:17:23
-# @Modified:  2022-03-10 10:12:35
+# @Modified:  2022-03-30 11:22:05
 
 import json
 import os
@@ -32,7 +32,7 @@ _i18ns: Dict[LangType, Locale] = {
         "list all configured image beds": "list all configured image beds",
         "choose the image bed you want to use and exit": "choose the image bed you want to use and exit",
         "save the user authentication token after successful login. You must enter the username and password after `-l` or `--login`": "save the user authentication token after successful login. You must enter the username and password after `-l` or `--login`",
-        "save the authentication information of the git website, such as gitee, github": "save the authentication information of the git website, such as gitee, github",
+        "save the authentication information of the git website, such as github": "save the authentication information of the git website, such as github",
         "configure the text watermark": "configure the text watermark",
         "upload only one picture": "upload only one picture",
         "upload multiple pictures, the maximum is 10 pictures, use spaces to separate each image path": "upload multiple pictures, the maximum is 10 pictures, use spaces to separate each image path",
@@ -45,7 +45,7 @@ _i18ns: Dict[LangType, Locale] = {
         "list all configured image beds": "列出所有已配置的图床",
         "choose the image bed you want to use and exit": "选择要使用的图床",
         "save the user authentication token after successful login. You must enter the username and password after `-l` or `--login`": "保存认证信息。你需要在`-l`或`--login`后输入账名和密码",
-        "save the authentication information of the git website, such as gitee, github": "保存 git 类型图床的认证信息，如github、gitee",
+        "save the authentication information of the git website, such as github": "保存 git 类型图床的认证信息，如github",
         "configure the text watermark": "配置要添加的文字水印",
         "upload only one picture": "上传一张图片",
         "upload multiple pictures, the maximum is 10 pictures, use spaces to separate each image path": "上传多张图片。多张图片路径之间以空格分隔，最多能上传 10 张",

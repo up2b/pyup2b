@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: github.py
 # @Created:   2021-02-13 09:10:14
-# @Modified:  2022-03-27 22:10:07
+# @Modified:  2022-03-30 11:13:17
 
 import os
 import requests
@@ -13,14 +13,14 @@ from base64 import b64encode
 from typing import Optional
 from up2b.up2b_lib.custom_types import ImageBedType, ImageStream, ErrorResponse
 from up2b.up2b_lib.up2b_api import GitBase
-from up2b.up2b_lib.constants import CONF_FILE, GITHUB
+from up2b.up2b_lib.constants import CONF_FILE, ImageBedCode
 from up2b.up2b_lib.utils import child_logger
 
 logger = child_logger(__name__)
 
 
 class Github(GitBase):
-    image_bed_code = GITHUB
+    image_bed_code = ImageBedCode.GITHUB
     max_size = 20 * 1024 * 1024
     api_url = "https://api.github.com"
     image_bed_type = ImageBedType.git

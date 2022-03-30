@@ -18,7 +18,6 @@
 
 - sm.ms
 - imgtu.com(原域名imgchr.com)
-- gitee.com
 - github.com
 
 成功上传到`github`后会返回`jsdelivr`的CDN链接，加快在中国境内对图片的访问速度。

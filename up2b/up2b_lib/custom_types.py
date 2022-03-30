@@ -4,14 +4,14 @@
 # @Email:     thepoy@163.com
 # @File Name: custom_types.py
 # @Created:   2021-02-09 11:27:21
-# @Modified:  2022-03-25 11:20:42
+# @Modified:  2022-03-30 11:53:35
 
-from enum import Enum
-from typing import Dict, List, Union
+from enum import IntEnum
+from typing import Any, Dict, List, Union
 from dataclasses import dataclass, asdict
 
 
-class ImageBedType(Enum):
+class ImageBedType(IntEnum):
     common = 1
     git = 2
 
@@ -37,7 +37,7 @@ Images = List[ImageType]
 @dataclass
 class ErrorResponse:
     status_code: int
-    error: Union[str, dict]
+    error: Union[str, Dict[str, Any]]
 
     def to_dict(self) -> Dict[str, Union[str, int]]:
         return asdict(self)

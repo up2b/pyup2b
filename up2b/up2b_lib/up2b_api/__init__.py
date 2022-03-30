@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-03-30 10:54:36
+# @Modified:  2022-03-30 11:51:34
 
 import os
 import time
@@ -25,12 +25,13 @@ from up2b.up2b_lib.custom_types import (
     AuthInfo,
     UploadErrorResponse,
 )
-from up2b.up2b_lib.utils import child_logger, check_image_exists, timeout
+from up2b.up2b_lib.utils import child_logger, check_image_exists, read_conf, timeout
 from up2b.up2b_lib.errors import UnsupportedType, OverSizeError
 from up2b.up2b_lib.constants import (
     IMAGE_BEDS_CODE,
     CONF_FILE,
     CACHE_PATH,
+    ImageBedCode,
 )
 
 logger = child_logger(__name__)
@@ -84,7 +85,7 @@ class ImageBedAbstract(ABC):
 
 
 class Base:
-    image_bed_code: int
+    image_bed_code: ImageBedCode
     max_size: int
     conf: ConfigFile
     image_bed_type: ImageBedType
@@ -94,9 +95,12 @@ class Base:
         self,
         auto_compress: bool = False,
         add_watermark: bool = False,
-        conf_file: str = CONF_FILE,
     ):
-        self.conf_file: str = conf_file
+        self.conf = read_conf()
+
+        # 未来版本会删除此功能
+        self.__remove_gitee()
+
         self.auth_info: Optional[AuthInfo] = self._read_auth_info()
         self.add_watermark: bool = add_watermark
         if self.add_watermark:
@@ -115,18 +119,45 @@ class Base:
                 self,
             )
 
+    def __remove_gitee(self):
+        auth_data = self.conf.get("auth_data")
+        if not auth_data:
+            return
+
+        assert isinstance(auth_data, list)
+
+        if len(auth_data) > len(IMAGE_BEDS_CODE):
+            logger.warning(
+                "gitee 已不支持图片外链，0.2.7 版本开始移除对 gitee 的支持，旧配置文件中仍然有 gitee 配置信息，将会自动删除 gitee 相关配置"
+            )
+
+        del auth_data[2]  # 旧版中 gitee 配置的索引是 2
+
+        selected_code = self.conf["image_bed"]
+        assert isinstance(selected_code, int)
+
+        if selected_code == 2:
+            logger.warning("由于 gitee 被移除，重置当前图床为 sm.ms，如果想指定其他图床，请使用`-c`重新选择")
+            self.conf["image_bed"] = 0
+
+        with open(CONF_FILE, "w") as f:
+            f.write(json.dumps(self.conf))
+
+        logger.warning("已保存移除 gitee 后的新配置文件")
+
     def _read_auth_info(self) -> Optional[AuthInfo]:
-        try:
-            with open(self.conf_file) as f:
-                self.conf = json.loads(f.read())
-                return self.conf["auth_data"][self.image_bed_code]
-        except Exception:
-            return None
+        auth_data = self.conf.get("auth_data")
+        if not auth_data:
+            return
+
+        assert isinstance(auth_data, list)
+
+        return auth_data[self.image_bed_code]
 
     def _save_auth_info(self, auth_info: Dict[str, str]):
         logger.debug("current image bed code: %d", self.image_bed_code)
         try:
-            with open(self.conf_file, "r+") as f:
+            with open(CONF_FILE, "r+") as f:
                 conf = json.loads(f.read())
                 try:
                     conf["auth_data"][self.image_bed_code] = auth_info
@@ -271,9 +302,8 @@ class GitBase(Base, ImageBedAbstract):
         self,
         auto_compress: bool = False,
         add_watermark: bool = False,
-        conf_file: str = CONF_FILE,
     ):
-        super().__init__(auto_compress, add_watermark, conf_file)
+        super().__init__(auto_compress, add_watermark)
 
         if self.auth_info:
             self.token = self.auth_info["token"]
