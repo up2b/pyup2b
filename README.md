@@ -16,7 +16,6 @@ Support the automatic upload of pictures of the following image bed:
 
 - sm.ms
 - imgtu.com
-- gitee.com
 - github.com
 
 Support automatic compression of `jpeg/jpg` and `png` format images.
@@ -35,7 +34,7 @@ Usage Options:
 
 ```
 usage: test.py [-h] [-v] [-aac] [-aw]
-               [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
+               [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
 
 A package that can upload pictures to the image bed in Typora.
 
@@ -46,7 +45,7 @@ optional arguments:
   -aw, --add-watermark  whether to add text watermark to the images to be uploaded
   --current             show the image bed in use
   --list                list all configured image beds
-  -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'}
+  -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com'}
                         choose the image bed you want to use and exit
   -l USERNAME PASSWORD, --login USERNAME PASSWORD
                         save the user authentication token after successful login. You must enter the username and password after `-l` or `--login`
@@ -68,8 +67,6 @@ When using for the first time, you must first select a image bed. The available 
 - 1
   - imgtu.com
 - 2
-  - gitee.com
-- 3
   - github.com
 
 ```shell

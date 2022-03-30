@@ -40,7 +40,7 @@ pip install up2b
 
 ```
 usage: up2b [-h] [-v] [-aac] [-aw] [--current] [--list]
-            [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
+            [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
 
 一个能将本地图片压缩、加水印或原图上传到图床的包
 
@@ -51,7 +51,7 @@ optional arguments:
   -aw, --add-watermark  对要上传的图片添加文字水印
   --current             显示正在使用的图床
   --list                列出所有已配置的图床
-  -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'gitee.com', 3: 'github.com'}
+  -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com'}
                         选择要使用的图床
   -l USERNAME PASSWORD, --login USERNAME PASSWORD
                         保存认证信息。你需要在`-l`或`--login`后输入账名和密码
@@ -76,8 +76,6 @@ optional arguments:
 - 1
   - imgtu.com
 - 2
-  - gitee.com
-- 3
   - github.com
 
 ```shell
@@ -97,7 +95,7 @@ up2b -l username password
 ```
 **git仓库：**
 
-此包所指的git仓库包括`gitee`和`github`，分别针对中国和全球用户（包括中国）。
+此包所指的git仓库包括`github`。
 
 使用git仓库作为图床，需要用`-lg`或`--login-git`进行认证信息的配置。
 
