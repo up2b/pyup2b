@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created:   2021-02-08 15:43:32
-# @Modified:  2022-03-30 13:00:12
+# @Modified:  2022-03-30 20:03:32
 
 import os
 import sys
@@ -66,7 +66,7 @@ def _BuildParser():
     group.add_argument(
         "-c",
         "--choose-site",
-        choices=[str(k) for k in IMAGE_BEDS.keys()],
+        choices=[str(k.value) for k in IMAGE_BEDS.keys()],
         metavar=str({v.value: k for k, v in IMAGE_BEDS_CODE.items()}),
         help=locale["choose the image bed you want to use and exit"],
         type=str,
@@ -123,9 +123,17 @@ def _read_image_bed(
     selected_code = conf["image_bed"]
     assert isinstance(selected_code, int)
 
-    code = ImageBedCode(selected_code)
+    try:
+        code = ImageBedCode(selected_code)
 
-    return IMAGE_BEDS[code](auto_compress=auto_compress, add_watermark=add_watermark)
+        return IMAGE_BEDS[code](
+            auto_compress=auto_compress, add_watermark=add_watermark
+        )
+    except ValueError:
+        IMAGE_BEDS[ImageBedCode.SM_MS](
+            auto_compress=auto_compress, add_watermark=add_watermark
+        )
+        logger.fatal("未知的图床代码：%d，可能因为清除无效的 gitee 配置，请重试", selected_code)
 
 
 def _config_text_watermark(
@@ -211,6 +219,8 @@ def print_list(ds: DisplayStyle) -> int:
 def main() -> int:
     args = _BuildParser().parse_args()
 
+    ib = _read_image_bed(args.aac, args.add_watermark)
+
     ds = DisplayStyle()
 
     if args.current:
@@ -244,8 +254,6 @@ def main() -> int:
             int(_args[5]),
         )
         return 0
-
-    ib = _read_image_bed(args.aac, args.add_watermark)
 
     if args.login:
         if isinstance(ib, Github):

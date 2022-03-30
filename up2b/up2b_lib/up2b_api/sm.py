@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: sm.py
 # @Created:   2021-02-13 09:04:07
-# @Modified:  2022-03-30 11:13:03
+# @Modified:  2022-03-30 19:47:48
 
 import re
 import requests
@@ -21,7 +21,7 @@ from up2b.up2b_lib.custom_types import (
 )
 from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract
 from up2b.up2b_lib import errors
-from up2b.up2b_lib.constants import ImageBedCode, CONF_FILE
+from up2b.up2b_lib.constants import ImageBedCode
 from up2b.up2b_lib.utils import check_image_exists, child_logger
 
 logger = child_logger(__name__)
@@ -37,9 +37,8 @@ class SM(Base, ImageBedAbstract):
         self,
         auto_compress: bool = False,
         add_watermark: bool = False,
-        conf_file: str = CONF_FILE,
     ):
-        super().__init__(auto_compress, add_watermark, conf_file)
+        super().__init__(auto_compress, add_watermark)
 
         if self.auth_info:
             self.token: str = self.auth_info["token"]

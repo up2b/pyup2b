@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: imgtu.py
 # @Created:   2021-02-13 09:04:37
-# @Modified:  2022-03-30 11:12:52
+# @Modified:  2022-03-30 19:56:28
 
 import os
 import re
@@ -27,7 +27,7 @@ from up2b.up2b_lib.custom_types import (
 from up2b.up2b_lib.errors import MissingAuth
 from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract
 from up2b.up2b_lib.utils import check_image_exists, child_logger
-from up2b.up2b_lib.constants import CONF_FILE, ImageBedCode
+from up2b.up2b_lib.constants import ImageBedCode
 
 logger = child_logger(__name__)
 
@@ -46,9 +46,8 @@ class Imgtu(Base, ImageBedAbstract):
         self,
         auto_compress: bool = False,
         add_watermark: bool = False,
-        conf_file: str = CONF_FILE,
     ):
-        super().__init__(auto_compress, add_watermark, conf_file)
+        super().__init__(auto_compress, add_watermark)
 
         self.cookie: Optional[str] = None
         self.token: Optional[str] = None

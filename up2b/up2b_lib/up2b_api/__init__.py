@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-03-30 13:00:48
+# @Modified:  2022-03-30 20:06:50
 
 import os
 import time
@@ -112,9 +112,15 @@ class Base:
 
     def check_login(self):
         if not self.auth_info:
+            cmd = (
+                "`-l` or `--login`"
+                if self.image_bed_type == ImageBedType.common
+                else "`-lg` or `--login-git`"
+            )
             logger.fatal(
-                "you have not logged in yet, please use the `-l` or `--login` parameter to log in"
+                "you have not logged in yet, please use the %s parameter to log in"
                 + " first, and the current image bed is : code=%d, name='%s'.",
+                cmd,
                 self.image_bed_code,
                 self,
             )
@@ -126,10 +132,12 @@ class Base:
 
         assert isinstance(auth_data, list)
 
-        if len(auth_data) > len(IMAGE_BEDS_CODE):
-            logger.warning(
-                "gitee 已不支持图片外链，0.3.0 版本开始移除对 gitee 的支持，旧配置文件中仍然有 gitee 配置信息，将会自动删除其相关配置"
-            )
+        if len(auth_data) == len(IMAGE_BEDS_CODE):
+            return
+
+        logger.warning(
+            "gitee 已不支持图片外链，0.3.0 版本开始移除对 gitee 的支持，如果旧配置文件中仍然有 gitee 配置信息，将会自动删除其相关配置"
+        )
 
         del auth_data[2]  # 旧版中 gitee 配置的索引是 2
 
@@ -137,8 +145,12 @@ class Base:
         assert isinstance(selected_code, int)
 
         if selected_code == 2:
-            logger.warning("由于 gitee 被移除，重置当前图床为 sm.ms，如果想指定其他图床，请使用`-c`重新选择")
+            logger.warning(
+                "由于 gitee 被移除，你之前选择的正是 gitee，不了不影响正常使用，重置当前图床为 sm.ms，如果想指定其他图床，请使用`-c`重新选择"
+            )
             self.conf["image_bed"] = 0
+        elif selected_code > 2:
+            self.conf["image_bed"] = selected_code - 1
 
         with open(CONF_FILE, "w") as f:
             f.write(json.dumps(self.conf))
