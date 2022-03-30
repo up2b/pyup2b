@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: imgtu.py
 # @Created:   2021-02-13 09:04:37
-# @Modified:  2022-03-27 22:11:58
+# @Modified:  2022-03-30 10:54:04
 
 import os
 import re
@@ -141,6 +141,11 @@ class Imgtu(Base, ImageBedAbstract):
 
     def __upload(self, image: ImageType, retries=0) -> Union[str, UploadErrorResponse]:
         self.check_login()
+
+        image = self._compress_image(image)
+
+        if isinstance(image, str):
+            image = self._add_watermark(image)
 
         url = self._url("json")
         filename_with_suffix = os.path.basename(str(image))

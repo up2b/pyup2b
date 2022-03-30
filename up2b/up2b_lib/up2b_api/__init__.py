@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-03-27 22:08:35
+# @Modified:  2022-03-30 10:54:36
 
 import os
 import time
@@ -172,6 +172,9 @@ class Base:
                     )
 
     def _compress_image(self, image: ImageType) -> ImageType:
+        if not self.auto_compress:
+            return image
+
         try:
             from PIL import Image
         except ModuleNotFoundError:
@@ -232,19 +235,20 @@ class Base:
         return image
 
     def _add_watermark(self, image_path: str) -> str:
-        if self.add_watermark:
-            from up2b.up2b_lib.watermark import AddWatermark, TypeFont
+        if not self.add_watermark:
+            return image_path
 
-            conf = self.conf["watermark"]
+        from up2b.up2b_lib.watermark import AddWatermark, TypeFont
 
-            assert isinstance(conf, dict)
+        conf = self.conf["watermark"]
 
-            aw = AddWatermark(conf["x"], conf["y"], conf["opacity"])
-            return aw.add_text_watermark(
-                image_path,
-                [TypeFont(conf["text"], conf["size"], conf["font"], (0, 0, 0))],
-            )
-        return image_path
+        assert isinstance(conf, dict)
+
+        aw = AddWatermark(conf["x"], conf["y"], conf["opacity"])
+        return aw.add_text_watermark(
+            image_path,
+            [TypeFont(conf["text"], conf["size"], conf["font"], (0, 0, 0))],
+        )
 
     def _clear_cache(self):
         if os.path.exists(CACHE_PATH):
