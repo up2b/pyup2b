@@ -4,34 +4,41 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created:   2021-02-08 15:43:32
-# @Modified:  2022-03-30 20:26:02
+# @Modified:  2022-04-03 11:44:38
 
 import os
+import shutil
 import sys
 import json
 import argparse
 
-from typing import Dict, List, Optional, Type, Union
-
+from typing import Dict, Optional, Type, Union
+from pprint import pprint
 from colort import DisplayStyle
+from up2b.up2b_lib.custom_types import AuthData
 from up2b.up2b_lib.i18n import read_i18n
 from up2b.up2b_lib.up2b_api import choose_image_bed
+from up2b.up2b_lib.up2b_api.coding import Coding
 from up2b.up2b_lib.up2b_api.sm import SM
 from up2b.up2b_lib.up2b_api.imgtu import Imgtu
 from up2b.up2b_lib.up2b_api.github import Github
 from up2b.up2b_lib.constants import (
     CONF_FILE,
+    IS_WINDOWS,
     ImageBedCode,
     IMAGE_BEDS_CODE,
 )
 from up2b.up2b_lib.utils import logger, read_conf
 
-__version__ = "0.3.1"
+__version__ = "0.4.0"
 
-IMAGE_BEDS: Dict[ImageBedCode, Union[Type[SM], Type[Imgtu], Type[Github]]] = {
+IMAGE_BEDS: Dict[
+    ImageBedCode, Union[Type[SM], Type[Imgtu], Type[Github], Type[Coding]]
+] = {
     ImageBedCode.SM_MS: SM,
     ImageBedCode.IMGTU: Imgtu,
     ImageBedCode.GITHUB: Github,
+    ImageBedCode.CODING: Coding,
 }
 
 
@@ -92,6 +99,14 @@ def _BuildParser():
         type=str,
     )
     group.add_argument(
+        "-lc",
+        "--login-coding",
+        nargs=5,
+        metavar=("ACCESS_TOKEN", "USERNAME", "PROJECT", "REPO", "FOLDER"),
+        help=locale["save the authentication information of coding"],
+        type=str,
+    )
+    group.add_argument(
         "--config-text-watermark",
         nargs=6,
         metavar=("X", "Y", "OPACITY", "TEXT", "FONT_PATH", "SIZE"),
@@ -115,10 +130,48 @@ def _BuildParser():
     return parser
 
 
+def _is_old_config_file(conf):
+    if not conf.get("auth_data") or isinstance(conf["auth_data"], dict):
+        return False
+
+    print("!!!注意!!!")
+    print()
+    print(
+        """
+    由于 gitee 出乎我意料地停止了图床功能，我也无法保证现在的图床都能继续使用，最初设计配置文件时没有考虑到这一点。
+    为了不影响以后对支持图床的增删，需要对配置文件进行重新设计，接下来的操作将会删除旧配置文件，如有需要请备份下面的配置信息，后面登录时会用到。
+    """
+    )
+    print()
+    print("配置信息（此消息仅显示一次）：")
+    print("*" * 20)
+    pprint(conf)
+    print("*" * 20)
+    return True
+
+
+def _move_to_desktop():
+    if IS_WINDOWS:
+        home = os.environ["USERPROFILE"]
+    else:
+        home = os.environ["HOME"]
+
+    dst = os.path.join(home, "Desktop")
+    if os.path.exists(dst):
+        dst = home
+
+    shutil.move(CONF_FILE, os.path.join(dst, "up2b-backup.json"))
+
+
 def _read_image_bed(
     auto_compress: bool, add_watermark: bool
-) -> Union[SM, Imgtu, Github]:
+) -> Union[SM, Imgtu, Github, Coding]:
     conf = read_conf()
+
+    if _is_old_config_file(conf):
+        _move_to_desktop()
+        logger.warning("旧配置文件已移动到桌面（桌面不存在时移动到主目录），请重新选择图床并登录")
+        sys.exit(0)
 
     selected_code = conf["image_bed"]
     assert isinstance(selected_code, int)
@@ -173,7 +226,7 @@ def _config_text_watermark(
 
 def print_list(ds: DisplayStyle) -> int:
     conf = read_conf()
-    auth_data: Optional[List[Dict[str, str]]] = conf.get("auth_data")  # type: ignore
+    auth_data: Optional[AuthData] = conf.get("auth_data")  # type: ignore
 
     if not auth_data:
         selected_code = conf.get("image_bed", -1)
@@ -200,8 +253,8 @@ def print_list(ds: DisplayStyle) -> int:
         )
         return 0
 
-    for i in range(len(auth_data)):
-        if auth_data[i]:
+    for i in ImageBedCode:
+        if auth_data.get(str(i)):
             print(
                 ds.format_with_one_style(" " + chr(10003), ds.foreground_color.green),
                 i,
@@ -218,8 +271,6 @@ def print_list(ds: DisplayStyle) -> int:
 
 def main() -> int:
     args = _BuildParser().parse_args()
-
-    ib = _read_image_bed(args.aac, args.add_watermark)
 
     ds = DisplayStyle()
 
@@ -255,15 +306,33 @@ def main() -> int:
         )
         return 0
 
+    ib = _read_image_bed(args.aac, args.add_watermark)
+
     if args.login:
         if isinstance(ib, Github):
             logger.fatal(
                 "you have chosen `github` as the image bed, please login with `-lg`"
             )
+        if isinstance(ib, Coding):
+            logger.fatal(
+                "you have chosen `coding` as the image bed, please login with `-lc`"
+            )
 
         logger.debug("current image bed: %s", ib)
 
         ok = ib.login(*args.login)
+        if not ok:
+            logger.fatal("username or password incorrect")
+
+        return 0
+
+    if args.login_coding:
+        if not isinstance(ib, Coding):
+            logger.fatal("you have not chosen `coding` as the image bed")
+
+        logger.debug("current image bed: %s", ib)
+
+        ok = ib.login(*args.login_coding)
         if not ok:
             logger.fatal("username or password incorrect")
 

@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: constants.py
 # @Created:   2021-02-13 09:17:07
-# @Modified:  2022-03-30 11:11:52
+# @Modified:  2022-04-02 22:34:44
 
 import sys
 import os
@@ -18,6 +18,13 @@ class ImageBedCode(IntEnum):
     SM_MS = 0
     IMGTU = 1
     GITHUB = 2
+    CODING = 3
+
+    def __repr__(self) -> str:
+        return str(self.value)
+
+    def __str__(self) -> str:
+        return str(self.value)
 
 
 DEFAULT_TIMEOUT = 10.0
@@ -27,6 +34,7 @@ IMAGE_BEDS_CODE = {
     "sm.ms":      ImageBedCode.SM_MS,
     "imgtu.com":  ImageBedCode.IMGTU,
     "github.com": ImageBedCode.GITHUB,
+    "coding.net": ImageBedCode.CODING,
 }
 # fmt: on
 

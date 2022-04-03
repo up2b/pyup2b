@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-03-30 20:06:50
+# @Modified:  2022-04-03 15:55:18
 
 import os
 import time
@@ -15,6 +15,7 @@ import requests
 from io import BytesIO
 from abc import ABC, abstractmethod
 from typing import Optional, List, Tuple, Dict, Union
+from functools import cached_property
 from up2b.up2b_lib.custom_types import (
     ConfigFile,
     ErrorResponse,
@@ -24,11 +25,11 @@ from up2b.up2b_lib.custom_types import (
     ImageType,
     AuthInfo,
     UploadErrorResponse,
+    WaterMarkConfig,
 )
 from up2b.up2b_lib.utils import child_logger, check_image_exists, read_conf, timeout
 from up2b.up2b_lib.errors import UnsupportedType, OverSizeError
 from up2b.up2b_lib.constants import (
-    IMAGE_BEDS_CODE,
     CONF_FILE,
     CACHE_PATH,
     ImageBedCode,
@@ -37,20 +38,20 @@ from up2b.up2b_lib.constants import (
 logger = child_logger(__name__)
 
 
-def choose_image_bed(image_bed_code: int, conf_file: str = CONF_FILE):
+def choose_image_bed(image_bed_code: int):
     if type(image_bed_code) != int:
         raise TypeError(
             "image bed code must be an integer, not %s" % str(type(image_bed_code))
         )
     try:
-        with open(conf_file, "r+") as f:
+        with open(CONF_FILE, "r+") as f:
             conf = json.loads(f.read())
             f.seek(0, 0)
             conf["image_bed"] = image_bed_code
             f.write(json.dumps(conf))
             f.truncate()
     except FileNotFoundError:
-        with open(conf_file, "w") as f:
+        with open(CONF_FILE, "w") as f:
             f.write(json.dumps({"image_bed": image_bed_code}))
 
 
@@ -98,9 +99,6 @@ class Base:
     ):
         self.conf = read_conf()
 
-        # 未来版本会删除此功能
-        self.__remove_gitee()
-
         self.auth_info: Optional[AuthInfo] = self._read_auth_info()
         self.add_watermark: bool = add_watermark
         if self.add_watermark:
@@ -125,46 +123,18 @@ class Base:
                 self,
             )
 
-    def __remove_gitee(self):
-        auth_data = self.conf.get("auth_data")
-        if not auth_data:
-            return
-
-        assert isinstance(auth_data, list)
-
-        if len(auth_data) == len(IMAGE_BEDS_CODE):
-            return
-
-        logger.warning(
-            "gitee 已不支持图片外链，0.3.0 版本开始移除对 gitee 的支持，如果旧配置文件中仍然有 gitee 配置信息，将会自动删除其相关配置"
-        )
-
-        del auth_data[2]  # 旧版中 gitee 配置的索引是 2
-
-        selected_code = self.conf["image_bed"]
-        assert isinstance(selected_code, int)
-
-        if selected_code == 2:
-            logger.warning(
-                "由于 gitee 被移除，你之前选择的正是 gitee，不了不影响正常使用，重置当前图床为 sm.ms，如果想指定其他图床，请使用`-c`重新选择"
-            )
-            self.conf["image_bed"] = 0
-        elif selected_code > 2:
-            self.conf["image_bed"] = selected_code - 1
-
-        with open(CONF_FILE, "w") as f:
-            f.write(json.dumps(self.conf))
-
-        logger.warning("已保存移除 gitee 后的新配置文件")
-
     def _read_auth_info(self) -> Optional[AuthInfo]:
         auth_data = self.conf.get("auth_data")
         if not auth_data:
             return
 
-        assert isinstance(auth_data, list)
+        assert isinstance(auth_data, dict)
 
-        return auth_data[self.image_bed_code]
+        auth_info = auth_data.get(str(self.image_bed_code))
+
+        assert auth_info is None or isinstance(auth_info, dict)
+
+        return auth_info
 
     def _save_auth_info(self, auth_info: Dict[str, str]):
         logger.debug("current image bed code: %d", self.image_bed_code)
@@ -174,7 +144,7 @@ class Base:
                 try:
                     conf["auth_data"][self.image_bed_code] = auth_info
                 except KeyError:
-                    conf["auth_data"] = [{}] * len(IMAGE_BEDS_CODE)
+                    conf["auth_data"] = {}
                     conf["auth_data"][self.image_bed_code] = auth_info
                 f.seek(0, 0)
                 f.write(json.dumps(conf))
@@ -283,7 +253,7 @@ class Base:
 
         from up2b.up2b_lib.watermark import AddWatermark, TypeFont
 
-        conf = self.conf["watermark"]
+        conf: WaterMarkConfig = self.conf["watermark"]  # type: ignore
 
         assert isinstance(conf, dict)
 
@@ -457,7 +427,7 @@ class GitBase(Base, ImageBedAbstract):
                 failed["sha"] = result
         return failed
 
-    @property
+    @cached_property
     def base_url(self) -> str:
         return "%s/repos/%s/%s/contents/%s/" % (
             self.api_url,

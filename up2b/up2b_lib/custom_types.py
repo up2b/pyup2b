@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: custom_types.py
 # @Created:   2021-02-09 11:27:21
-# @Modified:  2022-03-30 11:53:35
+# @Modified:  2022-04-03 15:46:35
 
 from enum import IntEnum
 from typing import Any, Dict, List, Union
@@ -26,21 +26,26 @@ class ImageStream:
         return self.filename
 
 
-ConfigFile = Dict[str, Union[int, List[Dict[str, str]], Dict[str, int]]]
 ImagePath = str
-AuthInfo = Dict[str, str]
+AuthInfo = Dict[str, Any]
+AuthData = Dict[str, AuthInfo]
+WaterMarkConfig = Dict[str, int]
+ConfigFile = Dict[str, Union[int, AuthData, WaterMarkConfig]]
 DeletedResponse = Dict[str, Union[bool, str]]
 ImageType = Union[ImagePath, ImageStream]
 Images = List[ImageType]
 
 
 @dataclass
-class ErrorResponse:
+class BaseResponse:
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class ErrorResponse(BaseResponse):
     status_code: int
     error: Union[str, Dict[str, Any]]
-
-    def to_dict(self) -> Dict[str, Union[str, int]]:
-        return asdict(self)
 
 
 @dataclass
@@ -49,33 +54,30 @@ class UploadErrorResponse(ErrorResponse):
 
 
 @dataclass
-class GitGetAllImagesResponse:
+class GitGetAllImagesResponse(BaseResponse):
     url: str
     sha: str
     delete_url: str
 
-    def to_dict(self) -> Dict[str, str]:
-        return asdict(self)
-
 
 @dataclass
-class SMMSResponse:
+class SMMSResponse(BaseResponse):
     url: str
     delete_url: str
     width: int
     height: int
 
-    def to_dict(self):
-        return asdict(self)
+
+@dataclass
+class CodingResponse(BaseResponse):
+    url: str
+    filename: str
 
 
 @dataclass
-class ImgtuResponse:
+class ImgtuResponse(BaseResponse):
     id: str
     url: str
     display_url: str
     width: int
     height: int
-
-    def to_dict(self):
-        return asdict(self)

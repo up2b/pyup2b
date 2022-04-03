@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: i18n.py
 # @Created:   2022-01-09 11:17:23
-# @Modified:  2022-03-30 12:00:50
+# @Modified:  2022-04-02 22:51:15
 
 import json
 import os
@@ -36,6 +36,7 @@ _i18ns: Dict[LangType, Locale] = {
         "configure the text watermark": "configure the text watermark",
         "upload only one picture": "upload only one picture",
         "upload multiple pictures, the maximum is 10 pictures, use spaces to separate each image path": "upload multiple pictures, the maximum is 10 pictures, use spaces to separate each image path",
+        "save the authentication information of coding": "save the authentication information of coding",
     },
     "zh_CN": {
         "A package that can upload images to the image bed.": "一个能将本地图片压缩、加水印或原图上传到图床的包",
@@ -49,6 +50,7 @@ _i18ns: Dict[LangType, Locale] = {
         "configure the text watermark": "配置要添加的文字水印",
         "upload only one picture": "上传一张图片",
         "upload multiple pictures, the maximum is 10 pictures, use spaces to separate each image path": "上传多张图片。多张图片路径之间以空格分隔，最多能上传 10 张",
+        "save the authentication information of coding": "保存 Coding 的认证信息",
     },
 }
 

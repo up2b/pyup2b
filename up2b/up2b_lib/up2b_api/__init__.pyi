@@ -15,7 +15,7 @@ from up2b.up2b_lib.custom_types import (
 )
 
 
-def choose_image_bed(image_bed_code: int, conf_file: str = ...) -> None:
+def choose_image_bed(image_bed_code: int) -> None:
     ...
 
 
