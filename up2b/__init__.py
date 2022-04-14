@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created:   2021-02-08 15:43:32
-# @Modified:  2022-04-03 11:44:38
+# @Modified:  2022-04-14 10:08:09
 
 import os
 import shutil
@@ -157,7 +157,7 @@ def _move_to_desktop():
         home = os.environ["HOME"]
 
     dst = os.path.join(home, "Desktop")
-    if os.path.exists(dst):
+    if not os.path.exists(dst):
         dst = home
 
     shutil.move(CONF_FILE, os.path.join(dst, "up2b-backup.json"))
