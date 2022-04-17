@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: coding.py
 # @Created:   2022-04-01 21:59:20
-# @Modified:  2022-04-03 17:43:18
+# @Modified:  2022-04-17 17:19:44
 
 import os
 import time
@@ -144,7 +144,7 @@ class Coding(Base, ImageBedAbstract):
         return resp["Response"]["Commits"][0]["Sha"]
 
     def _image_url(self, filename: str) -> str:
-        return f"https://{self.username}.coding.net/p/{self.project}/d/{self.repo}/git/raw/master/test/{filename}?download=false"
+        return f"https://{self.username}.coding.net/p/{self.project}/d/{self.repo}/git/raw/master/{self.folder}/{filename}?download=false"
 
     def _upload(self, image: ImageType, message_filename: Optional[str] = None):
         self.check_login()

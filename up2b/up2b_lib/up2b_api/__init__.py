@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-04-03 15:55:18
+# @Modified:  2022-04-17 17:17:26
 
 import os
 import time
@@ -142,10 +142,10 @@ class Base:
             with open(CONF_FILE, "r+") as f:
                 conf = json.loads(f.read())
                 try:
-                    conf["auth_data"][self.image_bed_code] = auth_info
+                    conf["auth_data"][str(self.image_bed_code.value)] = auth_info
                 except KeyError:
                     conf["auth_data"] = {}
-                    conf["auth_data"][self.image_bed_code] = auth_info
+                    conf["auth_data"][str(self.image_bed_code.value)] = auth_info
                 f.seek(0, 0)
                 f.write(json.dumps(conf))
                 f.truncate()
