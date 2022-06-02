@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: imgtu.py
 # @Created:   2021-02-13 09:04:37
-# @Modified:  2022-03-30 19:56:28
+# @Modified:  2022-06-02 11:48:02
 
 import os
 import re
@@ -183,7 +183,7 @@ class Imgtu(Base, ImageBedAbstract):
         }
 
         resp = requests.post(
-            url, headers=self.headers, data=data, files=files, timeout=self.timeout
+            url, headers=self.headers, data=data, files=files, timeout=self.timeout  # type: ignore
         )
         resp.encoding = "utf-8"
 

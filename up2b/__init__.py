@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created:   2021-02-08 15:43:32
-# @Modified:  2022-04-14 10:08:09
+# @Modified:  2022-06-02 11:02:16
 
 import os
 import shutil
@@ -30,7 +30,7 @@ from up2b.up2b_lib.constants import (
 )
 from up2b.up2b_lib.utils import logger, read_conf
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
 IMAGE_BEDS: Dict[
     ImageBedCode, Union[Type[SM], Type[Imgtu], Type[Github], Type[Coding]]

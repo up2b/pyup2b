@@ -8,8 +8,6 @@ A package that can upload images to the image bed in the terminal.
 
 It supports **windows**, **linux** and **macOS** system. 
 
-![Peek 2021-02-13 13-10](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1613401533109.png)
-
 # Features
 
 Support the automatic upload of pictures of the following image bed:
@@ -17,6 +15,7 @@ Support the automatic upload of pictures of the following image bed:
 - sm.ms
 - imgtu.com
 - github.com
+- coding.net
 
 Support automatic compression of `jpeg/jpg` and `png` format images.
 
@@ -32,7 +31,7 @@ Usage Options:
 
 ```
 usage: test.py [-h] [-v] [-aac] [-aw]
-               [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
+               [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com', 3: 'coding.net'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
 
 A package that can upload pictures to the image bed in Typora.
 
@@ -43,7 +42,7 @@ optional arguments:
   -aw, --add-watermark  whether to add text watermark to the images to be uploaded
   --current             show the image bed in use
   --list                list all configured image beds
-  -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com'}
+  -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com', 3: 'coding.net'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com', 3: 'coding.net'}
                         choose the image bed you want to use and exit
   -l USERNAME PASSWORD, --login USERNAME PASSWORD
                         save the user authentication token after successful login. You must enter the username and password after `-l` or `--login`
@@ -66,10 +65,13 @@ When using for the first time, you must first select a image bed. The available 
   - imgtu.com
 - 2
   - github.com
+- 3
+  - coding.net
+
 
 ```shell
 # if you want to choose github:
-up2b -c 3
+up2b -c 2
 ```
 #### 2 Save authentication information
 
@@ -135,19 +137,3 @@ And you shoud config watermark first, like:
 ```bash
 up2b --config-text-watermark -50 -50 50 'test watermark' '/home/thepoy/.local/share/fonts/simkai.ttf' 48
 ```
-
-Configure in `Typora` on **windows / linux**:
-
-![截屏2021-04-03 11.04.21](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1617419183417.png)
-
-If you want to use it in the **macOS** system, you need to find the absolute path of the up2b command:
-
-![截屏2021-04-03 11.04.48](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1617419270287.png)
-
-Image with watermark:
-
-![2022-01-08_00-24](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1641573280046.jpg)
-
-# End
-
-Now, when you add a picture to `Typora`, it will be automatically uploaded to the picture bed.

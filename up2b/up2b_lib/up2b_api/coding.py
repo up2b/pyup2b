@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: coding.py
 # @Created:   2022-04-01 21:59:20
-# @Modified:  2022-04-17 17:19:44
+# @Modified:  2022-06-02 11:49:52
 
 import os
 import time
@@ -12,7 +12,19 @@ import requests
 
 from base64 import b64encode
 from typing import Dict, List, Optional, Union
-from functools import cache, cached_property
+from up2b.up2b_lib.constants import PYTHON_VERSION, ImageBedCode
+
+if PYTHON_VERSION >= (3, 9):
+    from functools import cache
+else:
+    from functools import lru_cache
+
+    cache = lru_cache(maxsize=32)
+
+if PYTHON_VERSION >= (3, 8):
+    from functools import cached_property
+else:
+    cached_property = property
 
 from up2b.up2b_lib import errors
 from up2b.up2b_lib.custom_types import (
@@ -24,7 +36,6 @@ from up2b.up2b_lib.custom_types import (
     UploadErrorResponse,
 )
 from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract
-from up2b.up2b_lib.constants import ImageBedCode
 from up2b.up2b_lib.utils import check_image_exists, child_logger
 
 logger = child_logger(__name__)

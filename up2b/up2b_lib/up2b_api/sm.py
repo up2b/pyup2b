@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: sm.py
 # @Created:   2021-02-13 09:04:07
-# @Modified:  2022-03-30 19:47:48
+# @Modified:  2022-06-02 11:48:17
 
 import re
 import requests
@@ -105,7 +105,7 @@ class SM(Base, ImageBedAbstract):
         )
 
         resp = requests.post(
-            url, headers=self.headers, files=files, timeout=self.timeout
+            url, headers=self.headers, files=files, timeout=self.timeout  # type: ignore
         ).json()
         if resp["success"]:
             uploaded_url: str = resp["data"]["url"]

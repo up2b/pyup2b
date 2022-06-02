@@ -10,8 +10,6 @@
 
 支持linux、macOS和windows。
 
-![Peek 2021-02-13 13-10](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1613400034436.png)
-
 # 特点
 
 支持以下图床自动上传:
@@ -19,6 +17,7 @@
 - sm.ms
 - imgtu.com(原域名imgchr.com)
 - github.com
+- coding.net
 
 成功上传到`github`后会返回`jsdelivr`的CDN链接，加快在中国境内对图片的访问速度。
 
@@ -36,7 +35,7 @@ pip install up2b
 
 ```
 usage: up2b [-h] [-v] [-aac] [-aw] [--current] [--list]
-            [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
+            [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com', 3: 'coding.net'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
 
 一个能将本地图片压缩、加水印或原图上传到图床的包
 
@@ -47,12 +46,14 @@ optional arguments:
   -aw, --add-watermark  对要上传的图片添加文字水印
   --current             显示正在使用的图床
   --list                列出所有已配置的图床
-  -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com'}
+  -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com', 3: 'coding.net'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com', 3: 'coding.net'}
                         选择要使用的图床
   -l USERNAME PASSWORD, --login USERNAME PASSWORD
                         保存认证信息。你需要在`-l`或`--login`后输入账名和密码
   -lg ACCESS_TOKEN USERNAME REPO FOLDER, --login-git ACCESS_TOKEN USERNAME REPO FOLDER
                         保存 git 类型图床的认证信息，如github
+  -lc ACCESS_TOKEN USERNAME PROJECT REPO FOLDER, --login-coding ACCESS_TOKEN USERNAME PROJECT REPO FOLDER
+                        保存 Coding 的认证信息
   --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE
                         配置要添加的文字水印
   -p IMAGE_PATH, --image-path IMAGE_PATH
@@ -73,6 +74,9 @@ optional arguments:
   - imgtu.com
 - 2
   - github.com
+- 3
+  - coding.net
+
 
 ```shell
 # 如果你想选择sm.ms
@@ -137,15 +141,3 @@ up2b -aw -ps
 ```bash
 up2b --config-text-watermark -50 -50 50 'test watermark' '/home/thepoy/.local/share/fonts/simkai.ttf' 48
 ```
-
-下面这张图就是自动上传的：
-
-![截屏2021-04-03 10.52.12](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1620902616449.png)
-
-macOS 系统中，因环境变量原因，typora无法调用user下的bin中的命令，需要使用`where up2b`查找`up2b`命令的具体位置，用绝对路径填写。如下图：
-
-![截屏2021-04-03 11.00.22](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1620902667868.png)
-
-将 github 个人主页作为水印添加到图片中的效果：
-
-![2022-01-08_00-24](https://cdn.jsdelivr.net/gh/thep0y/image-bed/md/1641573280046.jpg)

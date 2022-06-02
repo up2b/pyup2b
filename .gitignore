@@ -13,3 +13,6 @@ dist/
 *.spec
 ._README.zh_CN.md
 ._README.md
+.tox
+.pytest_cache
+Pipfile*

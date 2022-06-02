@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-04-17 17:17:26
+# @Modified:  2022-06-02 11:11:40
 
 import os
 import time
@@ -15,7 +15,18 @@ import requests
 from io import BytesIO
 from abc import ABC, abstractmethod
 from typing import Optional, List, Tuple, Dict, Union
-from functools import cached_property
+from up2b.up2b_lib.constants import (
+    CONF_FILE,
+    CACHE_PATH,
+    PYTHON_VERSION,
+    ImageBedCode,
+)
+
+if PYTHON_VERSION >= (3, 8):
+    from functools import cached_property
+else:
+    cached_property = property
+
 from up2b.up2b_lib.custom_types import (
     ConfigFile,
     ErrorResponse,
@@ -29,11 +40,6 @@ from up2b.up2b_lib.custom_types import (
 )
 from up2b.up2b_lib.utils import child_logger, check_image_exists, read_conf, timeout
 from up2b.up2b_lib.errors import UnsupportedType, OverSizeError
-from up2b.up2b_lib.constants import (
-    CONF_FILE,
-    CACHE_PATH,
-    ImageBedCode,
-)
 
 logger = child_logger(__name__)
 
@@ -350,12 +356,6 @@ class GitBase(Base, ImageBedAbstract):
                 result = self.upload_image_stream(img)
 
             image_urls.append(result)
-
-        if hasattr(self, "cdn_url") and callable(getattr(self, "cdn_url")):
-            for idx in range(len(image_urls)):
-                item = image_urls[idx]
-                if isinstance(item, str):
-                    image_urls[idx] = self.cdn_url(item)  # type: ignore
 
         if to_console:
             for iu in image_urls:
