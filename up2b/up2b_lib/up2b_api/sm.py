@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: sm.py
 # @Created:   2021-02-13 09:04:07
-# @Modified:  2022-06-02 11:48:17
+# @Modified:  2022-09-17 21:05:43
 
 import re
 import requests
@@ -30,7 +30,7 @@ logger = child_logger(__name__)
 class SM(Base, ImageBedAbstract):
     image_bed_type = ImageBedType.common
     image_bed_code = ImageBedCode.SM_MS
-    base_url = "https://sm.ms/api/v2/"
+    base_url = "https://smms.app/api/v2/"
     max_size = 5 * 1024 * 1024
 
     def __init__(

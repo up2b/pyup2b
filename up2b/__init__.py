@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created:   2021-02-08 15:43:32
-# @Modified:  2022-06-02 11:02:16
+# @Modified:  2022-09-17 21:08:27
 
 import os
 import shutil
@@ -18,7 +18,6 @@ from colort import DisplayStyle
 from up2b.up2b_lib.custom_types import AuthData
 from up2b.up2b_lib.i18n import read_i18n
 from up2b.up2b_lib.up2b_api import choose_image_bed
-from up2b.up2b_lib.up2b_api.coding import Coding
 from up2b.up2b_lib.up2b_api.sm import SM
 from up2b.up2b_lib.up2b_api.imgtu import Imgtu
 from up2b.up2b_lib.up2b_api.github import Github
@@ -30,15 +29,12 @@ from up2b.up2b_lib.constants import (
 )
 from up2b.up2b_lib.utils import logger, read_conf
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
-IMAGE_BEDS: Dict[
-    ImageBedCode, Union[Type[SM], Type[Imgtu], Type[Github], Type[Coding]]
-] = {
+IMAGE_BEDS: Dict[ImageBedCode, Union[Type[SM], Type[Imgtu], Type[Github]]] = {
     ImageBedCode.SM_MS: SM,
     ImageBedCode.IMGTU: Imgtu,
     ImageBedCode.GITHUB: Github,
-    ImageBedCode.CODING: Coding,
 }
 
 
@@ -96,14 +92,6 @@ def _BuildParser():
         help=locale[
             "save the authentication information of the git website, such as github"
         ],
-        type=str,
-    )
-    group.add_argument(
-        "-lc",
-        "--login-coding",
-        nargs=5,
-        metavar=("ACCESS_TOKEN", "USERNAME", "PROJECT", "REPO", "FOLDER"),
-        help=locale["save the authentication information of coding"],
         type=str,
     )
     group.add_argument(
@@ -165,7 +153,7 @@ def _move_to_desktop():
 
 def _read_image_bed(
     auto_compress: bool, add_watermark: bool
-) -> Union[SM, Imgtu, Github, Coding]:
+) -> Union[SM, Imgtu, Github]:
     conf = read_conf()
 
     if _is_old_config_file(conf):
@@ -313,26 +301,10 @@ def main() -> int:
             logger.fatal(
                 "you have chosen `github` as the image bed, please login with `-lg`"
             )
-        if isinstance(ib, Coding):
-            logger.fatal(
-                "you have chosen `coding` as the image bed, please login with `-lc`"
-            )
 
         logger.debug("current image bed: %s", ib)
 
         ok = ib.login(*args.login)
-        if not ok:
-            logger.fatal("username or password incorrect")
-
-        return 0
-
-    if args.login_coding:
-        if not isinstance(ib, Coding):
-            logger.fatal("you have not chosen `coding` as the image bed")
-
-        logger.debug("current image bed: %s", ib)
-
-        ok = ib.login(*args.login_coding)
         if not ok:
             logger.fatal("username or password incorrect")
 

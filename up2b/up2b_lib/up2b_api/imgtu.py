@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # @Author:    thepoy
 # @Email:     thepoy@163.com
-# @File Name: imgtu.py
+# @File Name: imgse.py
 # @Created:   2021-02-13 09:04:37
-# @Modified:  2022-06-02 11:48:02
+# @Modified:  2022-09-17 21:05:01
 
 import os
 import re
@@ -36,7 +36,7 @@ class Imgtu(Base, ImageBedAbstract):
     image_bed_type = ImageBedType.common
     image_bed_code = ImageBedCode.IMGTU
     max_size = 10 * 1024 * 1024
-    base_url = "https://imgtu.com/"
+    base_url = "https://imgse.com/"
     __headers = {
         "Accept": "application/json",
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",

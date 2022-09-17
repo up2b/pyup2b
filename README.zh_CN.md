@@ -1,7 +1,5 @@
 [English](https://github.com/thep0y/up2b)
 
-[电报群](https://t.me/py_up2b)
-
 > 命令行管理太麻烦？试试[up2b-gui](https://github.com/thep0y/up2b-gui)吧！
 
 # up2b
@@ -14,12 +12,9 @@
 
 支持以下图床自动上传:
 
-- ~~sm.ms~~
-- ~~imgtu.com~~
+- sm.ms
+- imgse.com(原imgtu.com)
 - github.com
-- ~~coding.net~~
-
-> 上述有删除线的图床都代表**已凉**，已凉的可能性有两种，一是不可达（被和谐），一是反盗链（访问原文件需登录认证）。
 
 成功上传到`github`后会返回`jsdelivr`的CDN链接，加快在中国境内对图片的访问速度。
 
@@ -37,7 +32,7 @@ pip install up2b
 
 ```
 usage: up2b [-h] [-v] [-aac] [-aw] [--current] [--list]
-            [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com', 3: 'coding.net'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
+                   [-c {0: 'sm.ms', 1: 'imgse.com', 2: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
 
 一个能将本地图片压缩、加水印或原图上传到图床的包
 
@@ -48,14 +43,12 @@ optional arguments:
   -aw, --add-watermark  对要上传的图片添加文字水印
   --current             显示正在使用的图床
   --list                列出所有已配置的图床
-  -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com', 3: 'coding.net'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com', 3: 'coding.net'}
+  -c {0: 'sm.ms', 1: 'imgse.com', 2: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgse.com', 2: 'github.com'}
                         选择要使用的图床
   -l USERNAME PASSWORD, --login USERNAME PASSWORD
                         保存认证信息。你需要在`-l`或`--login`后输入账名和密码
   -lg ACCESS_TOKEN USERNAME REPO FOLDER, --login-git ACCESS_TOKEN USERNAME REPO FOLDER
-                        保存 git 类型图床的认证信息，如github
-  -lc ACCESS_TOKEN USERNAME PROJECT REPO FOLDER, --login-coding ACCESS_TOKEN USERNAME PROJECT REPO FOLDER
-                        保存 Coding 的认证信息
+                        保存 git 类型图床的认证信息，如 github
   --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE
                         配置要添加的文字水印
   -p IMAGE_PATH, --image-path IMAGE_PATH
@@ -73,11 +66,9 @@ optional arguments:
 - 0
   - sm.ms
 - 1
-  - imgtu.com
+  - imgse.com
 - 2
   - github.com
-- 3
-  - coding.net
 
 
 ```shell

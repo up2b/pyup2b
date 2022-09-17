@@ -1,7 +1,5 @@
 [简体中文](https://github.com/thep0y/up2b/blob/main/README.zh_CN.md)
 
-[Telegram](https://t.me/py_up2b)
-
 # UP2B
 
 A package that can upload images to the image bed in the terminal.
@@ -13,9 +11,8 @@ It supports **windows**, **linux** and **macOS** system.
 Support the automatic upload of pictures of the following image bed:
 
 - sm.ms
-- imgtu.com
+- imgse.com -> imgtu.com
 - github.com
-- coding.net
 
 Support automatic compression of `jpeg/jpg` and `png` format images.
 
@@ -31,7 +28,7 @@ Usage Options:
 
 ```
 usage: test.py [-h] [-v] [-aac] [-aw]
-               [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com', 3: 'coding.net'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
+               [-c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com'} | -l USERNAME PASSWORD | -lg ACCESS_TOKEN USERNAME REPO FOLDER | --config-text-watermark X Y OPACITY TEXT FONT_PATH SIZE | -p IMAGE_PATH | -ps IMAGE_PATH [IMAGE_PATH ...]]
 
 A package that can upload pictures to the image bed in Typora.
 
@@ -42,7 +39,7 @@ optional arguments:
   -aw, --add-watermark  whether to add text watermark to the images to be uploaded
   --current             show the image bed in use
   --list                list all configured image beds
-  -c {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com', 3: 'coding.net'}, --choose-site {0: 'sm.ms', 1: 'imgtu.com', 2: 'github.com', 3: 'coding.net'}
+  -c {0: 'sm.ms', 1: 'imgse.com', 2: 'github.com'}, --choose-site {0: 'sm.ms', 1: 'imgse.com', 2: 'github.com'}
                         choose the image bed you want to use and exit
   -l USERNAME PASSWORD, --login USERNAME PASSWORD
                         save the user authentication token after successful login. You must enter the username and password after `-l` or `--login`
@@ -62,11 +59,9 @@ When using for the first time, you must first select a image bed. The available 
 - 0
   - sm.ms
 - 1
-  - imgtu.com
+  - imgse.com
 - 2
   - github.com
-- 3
-  - coding.net
 
 
 ```shell
