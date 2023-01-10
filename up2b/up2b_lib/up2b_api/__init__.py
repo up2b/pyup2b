@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2022-06-02 11:11:40
+# @Modified:  2023-01-10 13:56:48
 
 import os
 import time
@@ -88,6 +88,11 @@ class ImageBedAbstract(ABC):
 
     @abstractmethod
     def delete_images(self, *args, **kwargs) -> Dict[str, ErrorResponse]:
+        pass
+
+    @property
+    @abstractmethod
+    def description(self) -> str:
         pass
 
 

@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: sm.py
 # @Created:   2021-02-13 09:04:07
-# @Modified:  2022-09-17 21:05:43
+# @Modified:  2023-01-10 14:00:34
 
 import re
 import requests
@@ -275,3 +275,7 @@ class SM(Base, ImageBedAbstract):
 
     def __repr__(self):
         return "sm.ms"
+
+    @property
+    def description(self):
+        return "中国大陆访问可能不太稳定"

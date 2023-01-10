@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created:   2021-02-08 15:43:32
-# @Modified:  2022-09-17 21:08:27
+# @Modified:  2023-01-10 14:07:09
 
 import os
 import shutil
@@ -21,6 +21,7 @@ from up2b.up2b_lib.up2b_api import choose_image_bed
 from up2b.up2b_lib.up2b_api.sm import SM
 from up2b.up2b_lib.up2b_api.imgtu import Imgtu
 from up2b.up2b_lib.up2b_api.github import Github
+from up2b.up2b_lib.up2b_api.imgtg import Imgtg
 from up2b.up2b_lib.constants import (
     CONF_FILE,
     IS_WINDOWS,
@@ -29,12 +30,15 @@ from up2b.up2b_lib.constants import (
 )
 from up2b.up2b_lib.utils import logger, read_conf
 
-__version__ = "0.4.2"
+__version__ = "0.5.0"
 
-IMAGE_BEDS: Dict[ImageBedCode, Union[Type[SM], Type[Imgtu], Type[Github]]] = {
+IMAGE_BEDS: Dict[
+    ImageBedCode, Union[Type[SM], Type[Imgtu], Type[Github], Type[Imgtg]]
+] = {
     ImageBedCode.SM_MS: SM,
     ImageBedCode.IMGTU: Imgtu,
     ImageBedCode.GITHUB: Github,
+    ImageBedCode.IMGTG: Imgtg,
 }
 
 
@@ -153,7 +157,7 @@ def _move_to_desktop():
 
 def _read_image_bed(
     auto_compress: bool, add_watermark: bool
-) -> Union[SM, Imgtu, Github]:
+) -> Union[SM, Imgtu, Imgtg, Github]:
     conf = read_conf()
 
     if _is_old_config_file(conf):
@@ -241,19 +245,18 @@ def print_list(ds: DisplayStyle) -> int:
         )
         return 0
 
+    def print_item(symbol, color, idx):
+        ib = IMAGE_BEDS[ImageBedCode(idx)]()
+        print(
+            ds.format_with_one_style(" " + symbol, color), idx, ib, ": ", ib.description
+        )
+
     for i in ImageBedCode:
         if auth_data.get(str(i)):
-            print(
-                ds.format_with_one_style(" " + chr(10003), ds.foreground_color.green),
-                i,
-                IMAGE_BEDS[ImageBedCode(i)](),
-            )
+            print_item(chr(10003), ds.fc.green, i)
         else:
-            print(
-                ds.format_with_one_style(" " + chr(10007), ds.foreground_color.red),
-                i,
-                IMAGE_BEDS[ImageBedCode(i)](),
-            )
+            print_item(chr(10007), ds.fc.red, i)
+
     return 0
 
 

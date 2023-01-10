@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: utils.py
 # @Created:   2021-02-09 15:17:32
-# @Modified:  2022-03-30 19:41:47
+# @Modified:  2023-01-10 13:50:57
 
 import json
 import os
@@ -30,7 +30,7 @@ show = True
 if is_debug():
     log_file_path = os.path.join(CONFIG_FOLDER_PATH, "up2b.log")
     print_position = True
-    show = False
+    show = True
 
 logger = get_logger(
     "up2b",

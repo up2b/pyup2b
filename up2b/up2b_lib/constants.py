@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: constants.py
 # @Created:   2021-02-13 09:17:07
-# @Modified:  2022-09-17 21:07:33
+# @Modified:  2023-01-10 13:37:04
 
 import sys
 import os
@@ -19,6 +19,7 @@ class ImageBedCode(IntEnum):
     IMGTU = 1
     GITHUB = 2
     # CODING = 3 # 废弃
+    IMGTG = 4
 
     def __repr__(self) -> str:
         return str(self.value)
@@ -34,6 +35,7 @@ IMAGE_BEDS_CODE = {
     "sm.ms":      ImageBedCode.SM_MS,
     "imgse.com":  ImageBedCode.IMGTU,
     "github.com": ImageBedCode.GITHUB,
+    "imgtg.com": ImageBedCode.IMGTG,
 }
 # fmt: on
 

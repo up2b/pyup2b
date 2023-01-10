@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: github.py
 # @Created:   2021-02-13 09:10:14
-# @Modified:  2022-03-30 19:56:34
+# @Modified:  2023-01-10 14:00:03
 
 import os
 import requests
@@ -77,3 +77,7 @@ class Github(GitBase):
 
     def __repr__(self):
         return "github.com"
+
+    @property
+    def description(self):
+        return "不适合中国大陆使用"

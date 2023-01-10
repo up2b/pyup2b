@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # @Author:    thepoy
 # @Email:     thepoy@163.com
-# @File Name: imgtu.py
-# @Created:   2021-02-13 09:04:37
-# @Modified:  2023-01-10 14:00:28
+# @File Name: imgtg.py
+# @Created:   2023-01-10 13:39:51
+# @Modified:  2023-01-10 14:14:00
 
 import os
 import re
@@ -32,14 +32,14 @@ from up2b.up2b_lib.constants import ImageBedCode
 logger = child_logger(__name__)
 
 
-class Imgtu(Base, ImageBedAbstract):
+class Imgtg(Base, ImageBedAbstract):
     image_bed_type = ImageBedType.common
-    image_bed_code = ImageBedCode.IMGTU
-    max_size = 10 * 1024 * 1024
-    base_url = "https://imgse.com/"
+    image_bed_code = ImageBedCode.IMGTG
+    max_size = 5 * 1024 * 1024
+    base_url = "https://imgtg.com/"
     __headers = {
         "Accept": "application/json",
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0",
     }
 
     def __init__(
@@ -331,82 +331,17 @@ class Imgtu(Base, ImageBedAbstract):
         return result
 
     def delete_image(self, img_id: str, retries=0) -> Optional[ErrorResponse]:
-        self.check_login()
-
-        url = self._url("json")
-        data = {
-            "auth_token": self.token,
-            "action": "delete",
-            "single": "true",
-            "delete": "image",
-            "deleting[id]": img_id,
-        }
-        resp = requests.post(
-            url, headers=self.__headers, data=data, timeout=self.timeout
-        )
-        if resp.status_code == 400:
-            if resp.json()["error"]["message"] == "请求被拒绝 (auth_token)":
-                if retries >= 3:
-                    return ErrorResponse(
-                        resp.status_code, resp.json()["error"]["message"]
-                    )
-
-                logger.warn(
-                    "`auth_token` has expired, the program will try to update `auth_token` automatically, number of retries: %d",
-                    retries + 1,
-                )
-                self._update_auth_token()
-                return self.delete_image(img_id, retries + 1)
-
-        if resp.status_code == 200:
-            return None
-
-        return ErrorResponse(resp.status_code, resp.json()["error"]["message"])
+        logger.fatal("%s 不支持删除图片", self)
 
     def delete_images(self, imgs_id: List[str], retries=0) -> Dict[str, ErrorResponse]:
-        self.check_login()
-
-        url = self._url("json")
-        data = {
-            "auth_token": self.token,
-            "action": "delete",
-            "from": "list",
-            "multiple": "true",
-            "delete": "images",
-            "deleting[ids][]": imgs_id,
-        }
-        resp = requests.post(
-            url, headers=self.__headers, data=data, timeout=self.timeout
-        )
-        json_resp = resp.json()
-        if resp.status_code == 400:
-            if json_resp["error"]["message"] == "请求被拒绝 (auth_token)":
-                if retries >= 3:
-                    # 删除多张图片时如果重试3次仍无法成功响应则退出程序
-                    logger.fatal(
-                        "authentication information is invalid: %s",
-                        resp.json()["error"]["message"],
-                    )
-
-                logger.warn(
-                    "`auth_token` has expired, the program will try to update `auth_token` automatically, number of retries: %d",
-                    retries + 1,
-                )
-                self._update_auth_token()
-                return self.delete_images(imgs_id, retries + 1)
-            elif json_resp["error"]["code"] == 106:
-                # imgtu 只有删除的所有 id 都无效时才会返回这个错误
-                # 只要有一个有效 id，就会返回 200
-                return {img_id: ErrorResponse(404, "服务器中无此图片") for img_id in imgs_id}
-
-        return {}
+        logger.fatal("%s 不支持删除图片", self)
 
     def _url(self, path: str) -> str:
         return self.base_url + path
 
     def __repr__(self):
-        return "imgtu.com"
+        return "imgtg.com"
 
     @property
     def description(self):
-        return "中国大陆访问可能不太稳定"
+        return "更适合中国大陆使用，但不支持删除图片"

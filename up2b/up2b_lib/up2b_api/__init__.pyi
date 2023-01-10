@@ -73,6 +73,11 @@ class ImageBedAbstract(ABC):
     ) -> Dict[str, ErrorResponse]:
         ...
 
+    @property
+    @abstractmethod
+    def description(self) -> str:
+        ...
+
 
 class Base:
     image_bed_code: int

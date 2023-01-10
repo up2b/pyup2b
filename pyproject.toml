@@ -1,8 +1,8 @@
 [tool.black]
 line-length = 88
-target-version = ['py36', 'py37', 'py38', 'py39']
+target-version = ['py36', 'py37', 'py38', 'py39', 'py310']
 include = '\.pyi?$'
 
 [tool.pyright]
-pythonVersion = '3.9'
+pythonVersion = '3.10'
 venv = 'dev'
