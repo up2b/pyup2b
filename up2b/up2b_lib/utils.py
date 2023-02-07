@@ -9,19 +9,22 @@
 import json
 import os
 import locale
+import requests
 
 from functools import wraps, partial
+from pathlib import Path
 from colorful_logger import get_logger, child_logger as cl
 from colorful_logger.logger import is_debug
-
+from urllib.parse import urlparse
 from up2b.up2b_lib.constants import (
     CONF_FILE,
     CONFIG_FOLDER_PATH,
     DEFAULT_TIMEOUT,
     IS_MACOS,
     PYTHON_VERSION,
+    CACHE_PATH,
 )
-from up2b.up2b_lib.custom_types import ImageType, ConfigFile
+from up2b.up2b_lib.custom_types import ImageType, ConfigFile, ErrorResponse
 
 log_file_path = None
 print_position = False
@@ -114,3 +117,44 @@ def get_default_language() -> str:
         lang = sys_locale[0]
 
     return lang if lang else "en_US"
+
+
+def is_url(path: str) -> bool:
+    if not path.startswith("http"):
+        return False
+
+    try:
+        urlparse(path)
+        return True
+    except ValueError:
+        return False
+
+
+def download_online_image(url: str):
+    logger.debug("下载在线图片：%s", url)
+
+    resp = requests.get(url)
+    if resp.status_code != 200:
+        logger.error("在线图片下载失败，状态码：%d，响应体：%s", resp.status_code, resp.text)
+        return ErrorResponse(resp.status_code, resp.text)
+
+    filename = os.path.basename(url)
+
+    cache_path = CACHE_PATH / filename
+
+    with cache_path.open("wb") as fb:
+        fb.write(resp.content)
+
+    logger.debug("在线图片已保存到缓存目录：%s", cache_path)
+
+    return cache_path
+
+
+def check_path(path: str):
+    if not is_url(path):
+        logger.debug("'%s' 不是在线图片", path)
+        return Path(path)
+
+    logger.info("'%s' 是在线图片", path)
+
+    return download_online_image(path)

@@ -10,6 +10,7 @@ import sys
 import os
 
 from enum import IntEnum
+from pathlib import Path
 
 PYTHON_VERSION = sys.version_info
 
@@ -44,12 +45,12 @@ IS_WINDOWS = sys.platform == "win32"
 IS_MACOS = sys.platform == "darwin"
 
 if IS_WINDOWS:
-    CONFIG_FOLDER_PATH = os.path.join(os.environ["APPDATA"], "up2b")
+    CONFIG_FOLDER_PATH = Path(os.environ["APPDATA"]) / "up2b"
 else:
-    CONFIG_FOLDER_PATH = os.path.join(os.environ["HOME"], ".config", "up2b")
+    CONFIG_FOLDER_PATH = Path(os.environ["HOME"]) / ".config" / "up2b"
 
-if not os.path.exists(CONFIG_FOLDER_PATH):
-    os.makedirs(os.path.join(CONFIG_FOLDER_PATH, "conf"), 0o755)
+if not CONFIG_FOLDER_PATH.exists():
+    os.makedirs(CONFIG_FOLDER_PATH / "conf", 0o755)
 
-CONF_FILE = os.path.join(CONFIG_FOLDER_PATH, "conf", "conf.up2b.json")
-CACHE_PATH = os.path.join(CONFIG_FOLDER_PATH, "cache")
+CONF_FILE = CONFIG_FOLDER_PATH / "conf" / "conf.up2b.json"
+CACHE_PATH = CONFIG_FOLDER_PATH / "cache"

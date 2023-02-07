@@ -15,7 +15,7 @@ import argparse
 from typing import Dict, Optional, Type, Union
 from pprint import pprint
 from colort import DisplayStyle
-from up2b.up2b_lib.custom_types import AuthData
+from up2b.up2b_lib.custom_types import AuthData, ErrorResponse
 from up2b.up2b_lib.i18n import read_i18n
 from up2b.up2b_lib.up2b_api import choose_image_bed
 from up2b.up2b_lib.up2b_api.sm import SM
@@ -28,9 +28,9 @@ from up2b.up2b_lib.constants import (
     ImageBedCode,
     IMAGE_BEDS_CODE,
 )
-from up2b.up2b_lib.utils import logger, read_conf
+from up2b.up2b_lib.utils import check_path, logger, read_conf
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 IMAGE_BEDS: Dict[
     ImageBedCode, Union[Type[SM], Type[Imgtu], Type[Github], Type[Imgtg]]
@@ -322,13 +322,20 @@ def main() -> int:
         ib.login(*args.login_git)
 
     if args.image_path:
-        if not os.path.exists(args.image_path):
-            raise FileNotFoundError(f"{args.image_path}")
+        # TODO: 检查在线并下载
+        path = check_path(args.image_path)
+        if isinstance(path, ErrorResponse):
+            return 1
 
-        ib.upload_image(args.image_path)
+        if not path.exists():
+            raise FileNotFoundError(path)
+
+        ib.upload_image(path)
         return 0
 
     if args.images_path:
+        # TODO: 检查在线并下载
+
         ib.upload_images(*args.images_path)
         return 0
 

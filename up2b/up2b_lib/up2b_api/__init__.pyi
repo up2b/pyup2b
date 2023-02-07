@@ -1,8 +1,8 @@
 import requests
 
-from typing import overload
 from abc import ABC, abstractmethod
-from typing import Optional, List, Tuple, Dict, Union
+from pathlib import Path
+from typing import overload, Optional, List, Tuple, Dict, Union
 from up2b.up2b_lib.custom_types import (
     ConfigFile,
     ErrorResponse,
@@ -24,9 +24,15 @@ class ImageBedAbstract(ABC):
     def get_all_images(self) -> Union[List[GitGetAllImagesResponse], ErrorResponse]:
         ...
 
+    @overload
     @abstractmethod
     def upload_image(self, image_path: str) -> Union[str, UploadErrorResponse]:
         ...
+
+    @overload
+    @abstractmethod
+    def upload_image(self, image_path: Path) -> Union[str, UploadErrorResponse]:
+        pass
 
     @abstractmethod
     def upload_image_stream(

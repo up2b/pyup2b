@@ -1,8 +1,47 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "up2b"
+authors = [
+    {name = "thep0y", email = "thepoy@163.com"},
+]
+description = "上传图片到图床"
+readme = "README.md"
+requires-python = ">=3"
+license = {file = "LICENSE"}
+classifiers = ["Programming Language :: Python :: 3"]
+keywords = ["typora", "image bed", "upload"]
+dependencies = [
+    "requests",
+    "colorful-logger>=0.1.5",
+]
+dynamic = ["version"]
+
+[project.urls]
+homepage = "https://github.com/thep0y/up2b"
+repository = "https://github.com/thep0y/up2b"
+
+[project.optional-dependencies]
+mark = ["pillow"]
+
+[project.scripts]
+up2b = "up2b:run_main"
+
+[tool.setuptools]
+packages = ["up2b", "up2b.up2b_lib", "up2b.up2b_lib.up2b_api"]
+
+[tool.setuptools.package-data]
+up2b = ["py.typed"]
+"up2b.up2b_lib" = ["py.typed"]
+"up2b.up2b_lib.up2b_api" = ["py.typed", "__init__.pyi"]
+
 [tool.black]
 line-length = 88
-target-version = ['py36', 'py37', 'py38', 'py39', 'py310']
+target-version = ['py36', 'py37', 'py38', 'py39', 'py310', 'py311']
 include = '\.pyi?$'
 
 [tool.pyright]
-pythonVersion = '3.10'
+pythonVersion = '3.11'
 venv = 'dev'
