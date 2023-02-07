@@ -37,6 +37,9 @@ up2b = ["py.typed"]
 "up2b.up2b_lib" = ["py.typed"]
 "up2b.up2b_lib.up2b_api" = ["py.typed", "__init__.pyi"]
 
+# 即使为空也必须有这个 section 才能使用 setuptools_scm
+[tool.setuptools_scm]
+
 [tool.black]
 line-length = 88
 target-version = ['py36', 'py37', 'py38', 'py39', 'py310', 'py311']
