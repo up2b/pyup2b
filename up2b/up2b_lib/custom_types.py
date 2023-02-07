@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: custom_types.py
 # @Created:   2021-02-09 11:27:21
-# @Modified:  2023-02-07 09:24:34
+# @Modified:  2023-02-07 10:31:01
 
 from enum import IntEnum
 from typing import Any, Dict, List, Union
@@ -47,6 +47,11 @@ class BaseResponse:
 class ErrorResponse(BaseResponse):
     status_code: int
     error: Union[str, Dict[str, Any]]
+
+
+@dataclass
+class DownloadErrorResponse(ErrorResponse):
+    pass
 
 
 @dataclass

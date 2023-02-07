@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: sm.py
 # @Created:   2021-02-13 09:04:07
-# @Modified:  2023-02-07 09:45:05
+# @Modified:  2023-02-07 10:39:04
 
 import re
 import requests
@@ -12,6 +12,7 @@ import requests
 from typing import BinaryIO, List, Optional, Dict, Any, Tuple, Union
 from pathlib import Path
 from up2b.up2b_lib.custom_types import (
+    DownloadErrorResponse,
     ErrorResponse,
     ImageBedType,
     ImagePath,
@@ -152,38 +153,6 @@ class SM(Base, ImageBedAbstract):
 
     def upload_image_stream(self, image: ImageStream):
         return self.__upload(image)
-
-    def upload_images(
-        self, *images: ImageType, to_console=True
-    ) -> List[Union[str, UploadErrorResponse]]:
-        self.check_login()
-
-        if len(images) > 10:
-            raise errors.OverSizeError(
-                "You can only upload up to 10 pictures, but you uploaded %d pictures."
-                % len(images)
-            )
-
-        check_image_exists(*images)
-
-        self._check_images_valid(*images)
-
-        images_url: List[Union[str, UploadErrorResponse]] = []
-        for img in images:
-            if isinstance(img, Path):
-                result = self.upload_image(img)
-            else:
-                result = self.upload_image_stream(img)
-
-            images_url.append(result)
-
-        if to_console:
-            for i in images_url:
-                print(i)
-
-        self._clear_cache()
-
-        return images_url
 
     def history(self) -> Dict[str, Any]:
         """

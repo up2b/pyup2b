@@ -4,15 +4,17 @@
 # @Email: thepoy@163.com
 # @File Name: __init__.py
 # @Created:  2021-06-18 11:08:30
-# @Modified:  2022-06-02 11:54:38
+# @Modified:  2023-02-07 10:50:30
 
 import os
 
+from pathlib import Path
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
+IMAGES_DIR = BASE_DIR / "images"
 
 IMAGES = [
-    os.path.join(BASE_DIR, "images", "1.png"),
-    os.path.join(BASE_DIR, "images", "2.jpeg"),
-    os.path.join(BASE_DIR, "images", "3.jpeg"),
+    IMAGES_DIR / "1.png",
+    IMAGES_DIR / "2.jpeg",
+    IMAGES_DIR / "3.jpeg",
 ]

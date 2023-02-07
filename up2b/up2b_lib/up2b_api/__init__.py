@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2023-02-07 09:56:31
+# @Modified:  2023-02-07 10:38:25
 
 import os
 import time
@@ -30,6 +30,7 @@ else:
 
 from up2b.up2b_lib.custom_types import (
     ConfigFile,
+    DownloadErrorResponse,
     ErrorResponse,
     GitGetAllImagesResponse,
     ImageBedType,
@@ -79,12 +80,6 @@ class ImageBedAbstract(ABC):
         pass
 
     @abstractmethod
-    def upload_images(
-        self, *images: ImageType, to_console=True
-    ) -> List[Union[str, UploadErrorResponse]]:
-        pass
-
-    @abstractmethod
     def delete_image(self, *args, **kwargs) -> Optional[ErrorResponse]:
         pass
 
@@ -98,7 +93,7 @@ class ImageBedAbstract(ABC):
         pass
 
 
-class Base:
+class Base(ImageBedAbstract):
     image_bed_code: ImageBedCode
     max_size: int
     conf: ConfigFile
@@ -169,23 +164,34 @@ class Base:
         except Exception as e:
             logger.fatal(e)
 
-    def _exceed_max_size(self, *images: ImageType) -> Tuple[bool, Optional[str]]:
+    def _exceed_max_size(
+        self, images: Tuple[Union[ImageType, DownloadErrorResponse]]
+    ) -> Tuple[bool, Optional[str]]:
         for img in images:
+            if isinstance(img, DownloadErrorResponse):
+                continue
+
             size = os.path.getsize(img) if isinstance(img, Path) else len(img.stream)
             if size > self.max_size:
                 return True, str(img) if isinstance(img, Path) else img.filename
+
         return False, None
 
-    def _check_images_valid(self, *images: ImageType):
+    def _check_images_valid(
+        self, images: Tuple[Union[ImageType, DownloadErrorResponse]]
+    ):
         """
         Check if all images exceed the max size or can be compressed
         """
         if not self.auto_compress:
-            exceeded, img = self._exceed_max_size(*images)
+            exceeded, img = self._exceed_max_size(images)
             if exceeded:
                 raise OverSizeError(img)
         else:
             for _img in images:
+                if isinstance(_img, DownloadErrorResponse):
+                    continue
+
                 mime_type = (
                     _img.suffix.lower() if isinstance(_img, Path) else _img.mime_type
                 )
@@ -281,8 +287,35 @@ class Base:
 
             logger.info("cache folder has been cleared: %s", CACHE_PATH)
 
+    def upload_images(
+        self, *images: Union[ImageType, DownloadErrorResponse], to_console=True
+    ) -> List[Union[str, DownloadErrorResponse, UploadErrorResponse]]:
+        self.check_login()
 
-class GitBase(Base, ImageBedAbstract):
+        check_image_exists(images)
+
+        self._check_images_valid(images)
+
+        image_urls: List[Union[str, DownloadErrorResponse, UploadErrorResponse]] = []
+        for img in images:
+            if isinstance(img, DownloadErrorResponse):
+                result = img
+            elif isinstance(img, Path):
+                result = self.upload_image(img)
+            else:
+                result = self.upload_image_stream(img)
+
+            image_urls.append(result)
+
+        if to_console:
+            for iu in image_urls:
+                print(iu)
+
+        self._clear_cache()
+        return image_urls
+
+
+class GitBase(Base):
     headers: Dict[str, str]
     api_url: str
 
@@ -345,17 +378,19 @@ class GitBase(Base, ImageBedAbstract):
             return UploadErrorResponse(resp.status_code, error, str(image))
 
     def upload_images(
-        self, *images: ImageType, to_console=True
-    ) -> List[Union[str, UploadErrorResponse]]:
+        self, *images: Union[ImageType, DownloadErrorResponse], to_console=True
+    ) -> List[Union[str, DownloadErrorResponse, UploadErrorResponse]]:
         self.check_login()
 
-        check_image_exists(*images)
+        check_image_exists(images)
 
-        self._check_images_valid(*images)
+        self._check_images_valid(images)
 
-        image_urls: List[Union[str, UploadErrorResponse]] = []
+        image_urls: List[Union[str, DownloadErrorResponse, UploadErrorResponse]] = []
         for img in images:
-            if isinstance(img, Path):
+            if isinstance(img, DownloadErrorResponse):
+                result = img
+            elif isinstance(img, Path):
                 result = self.upload_image(img)
             else:
                 result = self.upload_image_stream(img)

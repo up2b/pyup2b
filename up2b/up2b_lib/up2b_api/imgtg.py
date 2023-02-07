@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: imgtg.py
 # @Created:   2023-01-10 13:39:51
-# @Modified:  2023-02-07 09:58:04
+# @Modified:  2023-02-07 10:38:44
 
 import os
 from pathlib import Path
@@ -17,6 +17,7 @@ import requests
 from urllib import parse
 from typing import List, Optional, Tuple, Union
 from up2b.up2b_lib.custom_types import (
+    DownloadErrorResponse,
     ErrorResponse,
     ImageBedType,
     ImageType,
@@ -243,31 +244,6 @@ class Imgtg(Base, ImageBedAbstract):
             new_image = image
 
         return self.__upload(new_image)
-
-    def upload_images(
-        self, *images: ImageType, to_console=True
-    ) -> List[Union[str, UploadErrorResponse]]:
-        self.check_login()
-
-        check_image_exists(*images)
-
-        self._check_images_valid(*images)
-
-        image_urls: List[Union[str, UploadErrorResponse]] = []
-        for img in images:
-            if isinstance(img, Path):
-                result = self.upload_image(img)
-            else:
-                result = self.upload_image_stream(img)
-
-            image_urls.append(result)
-
-        if to_console:
-            for i in image_urls:
-                print(i)
-
-        self._clear_cache()
-        return image_urls
 
     def get_all_images(self) -> Union[List[ImgtuResponse], ErrorResponse]:
         self.check_login()

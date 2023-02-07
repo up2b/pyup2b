@@ -4,15 +4,17 @@
 # @Email:     thepoy@163.com
 # @File Name: utils.py
 # @Created:   2021-02-09 15:17:32
-# @Modified:  2023-01-10 13:50:57
+# @Modified:  2023-02-07 10:42:47
 
 import json
 import os
 import locale
+from typing import List, Tuple, Union
 import requests
 
 from functools import wraps, partial
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from colorful_logger import get_logger, child_logger as cl
 from colorful_logger.logger import is_debug
 from urllib.parse import urlparse
@@ -24,7 +26,12 @@ from up2b.up2b_lib.constants import (
     PYTHON_VERSION,
     CACHE_PATH,
 )
-from up2b.up2b_lib.custom_types import ImageType, ConfigFile, ErrorResponse
+from up2b.up2b_lib.custom_types import (
+    DownloadErrorResponse,
+    ImageType,
+    ConfigFile,
+    ErrorResponse,
+)
 
 log_file_path = None
 print_position = False
@@ -58,9 +65,9 @@ def child_logger(name: str):
     return cl(name, logger)
 
 
-def check_image_exists(*images: ImageType):
+def check_image_exists(images: Tuple[Union[ImageType, DownloadErrorResponse]]):
     for image in images:
-        if isinstance(image, str) and not os.path.exists(image):
+        if isinstance(image, Path) and not image.exists():
             raise FileNotFoundError(image)
 
 
@@ -136,7 +143,7 @@ def download_online_image(url: str):
     resp = requests.get(url)
     if resp.status_code != 200:
         logger.error("在线图片下载失败，状态码：%d，响应体：%s", resp.status_code, resp.text)
-        return ErrorResponse(resp.status_code, resp.text)
+        return DownloadErrorResponse(resp.status_code, resp.text)
 
     filename = os.path.basename(url)
 
@@ -158,3 +165,22 @@ def check_path(path: str):
     logger.info("'%s' 是在线图片", path)
 
     return download_online_image(path)
+
+
+def check_paths(paths: List[str]):
+    if len(paths) == 1:
+        return [check_path(paths[0])]
+
+    new_paths: List[Union[Path, DownloadErrorResponse]] = [Path()] * len(paths)
+    logger.info("使用线程池上传多张图片...")
+    with ThreadPoolExecutor(4) as pool:
+        futures = {pool.submit(check_path, paths[i]): i for i in range(len(paths))}
+
+        for future in as_completed(futures):
+            idx = futures[future]
+            data = future.result()
+            new_paths[idx] = data
+
+    logger.info("检查结果：%s => %s", paths, new_paths)
+
+    return new_paths

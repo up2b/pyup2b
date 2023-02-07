@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: imgtu.py
 # @Created:   2021-02-13 09:04:37
-# @Modified:  2023-02-07 09:53:03
+# @Modified:  2023-02-07 10:39:37
 
 import os
 from pathlib import Path
@@ -243,31 +243,6 @@ class Imgtu(Base, ImageBedAbstract):
             new_image = image
 
         return self.__upload(new_image)
-
-    def upload_images(
-        self, *images: ImageType, to_console=True
-    ) -> List[Union[str, UploadErrorResponse]]:
-        self.check_login()
-
-        check_image_exists(*images)
-
-        self._check_images_valid(*images)
-
-        image_urls: List[Union[str, UploadErrorResponse]] = []
-        for img in images:
-            if isinstance(img, Path):
-                result = self.upload_image(img)
-            else:
-                result = self.upload_image_stream(img)
-
-            image_urls.append(result)
-
-        if to_console:
-            for i in image_urls:
-                print(i)
-
-        self._clear_cache()
-        return image_urls
 
     def get_all_images(self) -> Union[List[ImgtuResponse], ErrorResponse]:
         self.check_login()

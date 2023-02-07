@@ -4,13 +4,14 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: constants.py
 # @Created:   2021-02-13 09:17:07
-# @Modified:  2023-01-10 13:37:04
+# @Modified:  2023-02-07 10:05:05
 
 import sys
 import os
 
 from enum import IntEnum
 from pathlib import Path
+from tempfile import gettempdir
 
 PYTHON_VERSION = sys.version_info
 
@@ -53,4 +54,4 @@ if not CONFIG_FOLDER_PATH.exists():
     os.makedirs(CONFIG_FOLDER_PATH / "conf", 0o755)
 
 CONF_FILE = CONFIG_FOLDER_PATH / "conf" / "conf.up2b.json"
-CACHE_PATH = CONFIG_FOLDER_PATH / "cache"
+CACHE_PATH = Path(gettempdir()) / "up2b"

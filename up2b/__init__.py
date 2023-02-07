@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created:   2021-02-08 15:43:32
-# @Modified:  2023-01-10 14:07:09
+# @Modified:  2023-02-07 10:23:17
 
 import os
 import shutil
@@ -23,12 +23,13 @@ from up2b.up2b_lib.up2b_api.imgtu import Imgtu
 from up2b.up2b_lib.up2b_api.github import Github
 from up2b.up2b_lib.up2b_api.imgtg import Imgtg
 from up2b.up2b_lib.constants import (
+    CACHE_PATH,
     CONF_FILE,
     IS_WINDOWS,
     ImageBedCode,
     IMAGE_BEDS_CODE,
 )
-from up2b.up2b_lib.utils import check_path, logger, read_conf
+from up2b.up2b_lib.utils import check_path, check_paths, logger, read_conf
 
 __version__ = "0.6.0"
 
@@ -297,6 +298,11 @@ def main() -> int:
         )
         return 0
 
+    if not CACHE_PATH.exists():
+        logger.debug("缓存目录不存在")
+        CACHE_PATH.mkdir()
+        logger.debug("已创建缓存目录：%s", CACHE_PATH)
+
     ib = _read_image_bed(args.aac, args.add_watermark)
 
     if args.login:
@@ -322,7 +328,6 @@ def main() -> int:
         ib.login(*args.login_git)
 
     if args.image_path:
-        # TODO: 检查在线并下载
         path = check_path(args.image_path)
         if isinstance(path, ErrorResponse):
             return 1
@@ -334,9 +339,9 @@ def main() -> int:
         return 0
 
     if args.images_path:
-        # TODO: 检查在线并下载
+        paths = check_paths(args.images_path)
 
-        ib.upload_images(*args.images_path)
+        ib.upload_images(*paths)
         return 0
 
     return 1

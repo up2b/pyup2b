@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import overload, Optional, List, Tuple, Dict, Union
 from up2b.up2b_lib.custom_types import (
     ConfigFile,
+    DownloadErrorResponse,
     ErrorResponse,
     GitGetAllImagesResponse,
     ImageBedType,
@@ -39,12 +40,6 @@ class ImageBedAbstract(ABC):
     def upload_image_stream(
         self, image: ImageStream
     ) -> Union[str, UploadErrorResponse]:
-        ...
-
-    @abstractmethod
-    def upload_images(
-        self, *images: ImageType, to_console: bool = ...
-    ) -> List[Union[str, UploadErrorResponse]]:
         ...
 
     @overload
@@ -114,10 +109,12 @@ class Base:
     def _save_auth_info(self, auth_info: Dict[str, str]) -> None:
         ...
 
-    def _exceed_max_size(self, *images: ImageType) -> Tuple[bool, Optional[str]]:
+    def _exceed_max_size(
+        self, *images: Union[ImageType, DownloadErrorResponse]
+    ) -> Tuple[bool, Optional[str]]:
         ...
 
-    def _check_images_valid(self, *images: ImageType):
+    def _check_images_valid(self, *images: Union[ImageType, DownloadErrorResponse]):
         ...
 
     def _compress_image(self, image: ImageType) -> ImageType:
@@ -127,6 +124,11 @@ class Base:
         ...
 
     def _clear_cache(self) -> None:
+        ...
+
+    def upload_images(
+        self, *images: Union[ImageType, DownloadErrorResponse], to_console: bool = ...
+    ) -> List[Union[str, UploadErrorResponse]]:
         ...
 
 
@@ -153,11 +155,6 @@ class GitBase(Base, ImageBedAbstract):
     def _upload(
         self, image: ImageType, data: Dict[str, str], request_method: str = ...
     ) -> Union[str, UploadErrorResponse]:
-        ...
-
-    def upload_images(
-        self, *images: ImageType, to_console: bool = ...
-    ) -> List[Union[str, UploadErrorResponse]]:
         ...
 
     @abstractmethod
