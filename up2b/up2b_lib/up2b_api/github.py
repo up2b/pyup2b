@@ -4,14 +4,19 @@
 # @Email:     thepoy@163.com
 # @File Name: github.py
 # @Created:   2021-02-13 09:10:14
-# @Modified:  2023-01-10 14:00:03
+# @Modified:  2023-02-07 09:28:29
 
 import os
 import requests
 
 from base64 import b64encode
 from typing import Optional
-from up2b.up2b_lib.custom_types import ImageBedType, ImageStream, ErrorResponse
+from up2b.up2b_lib.custom_types import (
+    ImageBedType,
+    ImagePath,
+    ImageStream,
+    ErrorResponse,
+)
 from up2b.up2b_lib.up2b_api import GitBase
 from up2b.up2b_lib.constants import ImageBedCode
 from up2b.up2b_lib.utils import child_logger
@@ -38,7 +43,7 @@ class Github(GitBase):
                 "Authorization": "token " + self.token,
             }
 
-    def upload_image(self, image_path: str):
+    def upload_image(self, image_path: ImagePath):
         basename = os.path.basename(image_path)
         logger.debug("uploading: %s", basename)
         with open(image_path, "rb") as fb:
@@ -56,9 +61,7 @@ class Github(GitBase):
         }
         return self._upload(image, data)
 
-    def _get_all_images_in_image_bed(
-        self,
-    ):
+    def _get_all_images_in_image_bed(self):
         resp = requests.get(self.base_url, headers=self.headers, timeout=self.timeout)
 
         return resp

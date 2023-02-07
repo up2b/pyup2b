@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2023-01-10 13:56:48
+# @Modified:  2023-02-07 09:56:31
 
 import os
 import time
@@ -15,6 +15,7 @@ import requests
 from io import BytesIO
 from abc import ABC, abstractmethod
 from typing import Optional, List, Tuple, Dict, Union
+from pathlib import Path
 from up2b.up2b_lib.constants import (
     CONF_FILE,
     CACHE_PATH,
@@ -32,6 +33,7 @@ from up2b.up2b_lib.custom_types import (
     ErrorResponse,
     GitGetAllImagesResponse,
     ImageBedType,
+    ImagePath,
     ImageStream,
     ImageType,
     AuthInfo,
@@ -63,11 +65,11 @@ def choose_image_bed(image_bed_code: int):
 
 class ImageBedAbstract(ABC):
     @abstractmethod
-    def get_all_images(self) -> Union[List[GitGetAllImagesResponse], ErrorResponse]:
+    def get_all_images(self):
         pass
 
     @abstractmethod
-    def upload_image(self, image_path: str) -> Union[str, UploadErrorResponse]:
+    def upload_image(self, image_path: ImagePath) -> Union[str, UploadErrorResponse]:
         pass
 
     @abstractmethod
@@ -169,9 +171,9 @@ class Base:
 
     def _exceed_max_size(self, *images: ImageType) -> Tuple[bool, Optional[str]]:
         for img in images:
-            size = os.path.getsize(img) if isinstance(img, str) else len(img.stream)
+            size = os.path.getsize(img) if isinstance(img, Path) else len(img.stream)
             if size > self.max_size:
-                return True, img if isinstance(img, str) else img.filename
+                return True, str(img) if isinstance(img, Path) else img.filename
         return False, None
 
     def _check_images_valid(self, *images: ImageType):
@@ -185,9 +187,7 @@ class Base:
         else:
             for _img in images:
                 mime_type = (
-                    _img.split(".")[-1].lower()
-                    if isinstance(_img, str)
-                    else _img.mime_type
+                    _img.suffix.lower() if isinstance(_img, Path) else _img.mime_type
                 )
                 if mime_type not in ["jpg", "png", "jpeg"]:
                     raise UnsupportedType(
@@ -207,13 +207,13 @@ class Base:
             )
 
         raw_size = (
-            os.path.getsize(image) if isinstance(image, str) else len(image.stream)
+            os.path.getsize(image) if isinstance(image, Path) else len(image.stream)
         )
         if raw_size > self.max_size:
             filename = os.path.basename(str(image)).split(".")[0]
 
             scale = self.max_size / raw_size
-            img = Image.open(image if isinstance(image, str) else image.stream)
+            img = Image.open(image if isinstance(image, Path) else image.stream)
 
             def compress(img: Image.Image, scale: float) -> BytesIO:
                 format = img.format
@@ -250,15 +250,15 @@ class Base:
             if not os.path.exists(CACHE_PATH):
                 os.mkdir(CACHE_PATH)
 
-            img_cache_path = os.path.join(CACHE_PATH, filename)
-            with open(img_cache_path, "wb") as f:
+            img_cache_path = CACHE_PATH / filename
+            with img_cache_path.open("wb") as f:
                 f.write(img_io.getbuffer())
 
             return img_cache_path
 
         return image
 
-    def _add_watermark(self, image_path: str) -> str:
+    def _add_watermark(self, image_path: ImagePath) -> ImagePath:
         if not self.add_watermark:
             return image_path
 
@@ -317,7 +317,7 @@ class GitBase(Base, ImageBedAbstract):
         self.check_login()
 
         image = self._compress_image(image)
-        if isinstance(image, str):
+        if isinstance(image, Path):
             image = self._add_watermark(image)
 
         suffix = os.path.splitext(str(image))[-1]
@@ -355,7 +355,7 @@ class GitBase(Base, ImageBedAbstract):
 
         image_urls: List[Union[str, UploadErrorResponse]] = []
         for img in images:
-            if isinstance(img, str):
+            if isinstance(img, Path):
                 result = self.upload_image(img)
             else:
                 result = self.upload_image_stream(img)

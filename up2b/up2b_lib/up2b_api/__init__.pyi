@@ -1,16 +1,18 @@
 import requests
 
 from abc import ABC, abstractmethod
-from pathlib import Path
 from typing import overload, Optional, List, Tuple, Dict, Union
 from up2b.up2b_lib.custom_types import (
     ConfigFile,
     ErrorResponse,
     GitGetAllImagesResponse,
     ImageBedType,
+    ImagePath,
     ImageStream,
     ImageType,
     AuthInfo,
+    ImgtuResponse,
+    SMMSResponse,
     UploadErrorResponse,
 )
 
@@ -19,19 +21,18 @@ def choose_image_bed(image_bed_code: int) -> None:
     ...
 
 
+AllImagesResponse = (
+    List[GitGetAllImagesResponse] | List[SMMSResponse] | List[ImgtuResponse]
+)
+
+
 class ImageBedAbstract(ABC):
     @abstractmethod
-    def get_all_images(self) -> Union[List[GitGetAllImagesResponse], ErrorResponse]:
+    def get_all_images(self) -> Union[AllImagesResponse, ErrorResponse]:
         ...
 
-    @overload
     @abstractmethod
-    def upload_image(self, image_path: str) -> Union[str, UploadErrorResponse]:
-        ...
-
-    @overload
-    @abstractmethod
-    def upload_image(self, image_path: Path) -> Union[str, UploadErrorResponse]:
+    def upload_image(self, image_path: ImagePath) -> Union[str, UploadErrorResponse]:
         pass
 
     @abstractmethod
@@ -122,7 +123,7 @@ class Base:
     def _compress_image(self, image: ImageType) -> ImageType:
         ...
 
-    def _add_watermark(self, image_path: str) -> str:
+    def _add_watermark(self, image_path: ImagePath) -> ImagePath:
         ...
 
     def _clear_cache(self) -> None:

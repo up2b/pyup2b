@@ -4,9 +4,10 @@
 # @Email:     thepoy@163.com
 # @File Name: imgtg.py
 # @Created:   2023-01-10 13:39:51
-# @Modified:  2023-01-10 14:14:00
+# @Modified:  2023-02-07 09:58:04
 
 import os
+from pathlib import Path
 import re
 import time
 import json
@@ -14,7 +15,7 @@ import mimetypes
 import requests
 
 from urllib import parse
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 from up2b.up2b_lib.custom_types import (
     ErrorResponse,
     ImageBedType,
@@ -143,13 +144,13 @@ class Imgtg(Base, ImageBedAbstract):
 
         image = self._compress_image(image)
 
-        if isinstance(image, str):
+        if isinstance(image, Path):
             image = self._add_watermark(image)
 
         url = self._url("json")
         filename_with_suffix = os.path.basename(str(image))
         filename_without_suffix, suffix = os.path.splitext(filename_with_suffix)
-        if isinstance(image, str):
+        if isinstance(image, Path):
             if suffix.lower() == ".apng":
                 suffix = ".png"
             filename = filename_without_suffix + suffix
@@ -158,13 +159,13 @@ class Imgtg(Base, ImageBedAbstract):
 
         mime_type = (
             mimetypes.guess_type(image)[0]
-            if isinstance(image, str)
+            if isinstance(image, Path)
             else image.mime_type
         )
 
         timestamp = int(time.time() * 1000)
 
-        if isinstance(image, str):
+        if isinstance(image, Path):
             with open(image, "rb") as fb:
                 img_buffer = fb.read()
         else:
@@ -254,7 +255,7 @@ class Imgtg(Base, ImageBedAbstract):
 
         image_urls: List[Union[str, UploadErrorResponse]] = []
         for img in images:
-            if isinstance(img, str):
+            if isinstance(img, Path):
                 result = self.upload_image(img)
             else:
                 result = self.upload_image_stream(img)
@@ -268,7 +269,7 @@ class Imgtg(Base, ImageBedAbstract):
         self._clear_cache()
         return image_urls
 
-    def get_all_images(self):
+    def get_all_images(self) -> Union[List[ImgtuResponse], ErrorResponse]:
         self.check_login()
 
         url = self._url(self.username)
@@ -330,10 +331,10 @@ class Imgtg(Base, ImageBedAbstract):
 
         return result
 
-    def delete_image(self, img_id: str, retries=0) -> Optional[ErrorResponse]:
+    def delete_image(self, img_id: str, retries=0):
         logger.fatal("%s 不支持删除图片", self)
 
-    def delete_images(self, imgs_id: List[str], retries=0) -> Dict[str, ErrorResponse]:
+    def delete_images(self, imgs_id: List[str], retries=0):
         logger.fatal("%s 不支持删除图片", self)
 
     def _url(self, path: str) -> str:

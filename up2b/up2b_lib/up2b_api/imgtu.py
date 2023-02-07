@@ -4,9 +4,10 @@
 # @Email:     thepoy@163.com
 # @File Name: imgtu.py
 # @Created:   2021-02-13 09:04:37
-# @Modified:  2023-01-10 14:00:28
+# @Modified:  2023-02-07 09:53:03
 
 import os
+from pathlib import Path
 import re
 import time
 import json
@@ -143,13 +144,13 @@ class Imgtu(Base, ImageBedAbstract):
 
         image = self._compress_image(image)
 
-        if isinstance(image, str):
+        if isinstance(image, Path):
             image = self._add_watermark(image)
 
         url = self._url("json")
         filename_with_suffix = os.path.basename(str(image))
         filename_without_suffix, suffix = os.path.splitext(filename_with_suffix)
-        if isinstance(image, str):
+        if isinstance(image, Path):
             if suffix.lower() == ".apng":
                 suffix = ".png"
             filename = filename_without_suffix + suffix
@@ -158,13 +159,13 @@ class Imgtu(Base, ImageBedAbstract):
 
         mime_type = (
             mimetypes.guess_type(image)[0]
-            if isinstance(image, str)
+            if isinstance(image, Path)
             else image.mime_type
         )
 
         timestamp = int(time.time() * 1000)
 
-        if isinstance(image, str):
+        if isinstance(image, Path):
             with open(image, "rb") as fb:
                 img_buffer = fb.read()
         else:
@@ -254,7 +255,7 @@ class Imgtu(Base, ImageBedAbstract):
 
         image_urls: List[Union[str, UploadErrorResponse]] = []
         for img in images:
-            if isinstance(img, str):
+            if isinstance(img, Path):
                 result = self.upload_image(img)
             else:
                 result = self.upload_image_stream(img)
@@ -268,7 +269,7 @@ class Imgtu(Base, ImageBedAbstract):
         self._clear_cache()
         return image_urls
 
-    def get_all_images(self):
+    def get_all_images(self) -> Union[List[ImgtuResponse], ErrorResponse]:
         self.check_login()
 
         url = self._url(self.username)

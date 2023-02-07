@@ -4,9 +4,11 @@
 # @Email:     thepoy@163.com
 # @File Name: watermark.py
 # @Created:   2021-02-09 15:17:32
-# @Modified:  2022-03-24 20:05:42
+# @Modified:  2023-02-07 09:27:16
 
 import os
+from pathlib import Path
+from up2b.up2b_lib.custom_types import ImagePath
 
 from up2b.up2b_lib.utils import child_logger
 
@@ -97,7 +99,7 @@ class AddWatermark:
 
     def __image_watermark_postion_handler(
         self, img: Image.Image, mark: Image.Image
-    ) -> Tuple[float, int]:
+    ) -> Tuple[int, int]:
         """设置图片水印的位置
 
         水印坐标(x, y)（水印的参考点为左上角）
@@ -134,7 +136,7 @@ class AddWatermark:
                 offset += size
         return offset
 
-    def __convert_image_to_rgba(self, image_path: str) -> Image.Image:
+    def __convert_image_to_rgba(self, image_path: ImagePath) -> Image.Image:
         img = Image.open(image_path)
         return img.convert("RGBA")
 
@@ -148,9 +150,9 @@ class AddWatermark:
 
     def add_text_watermark(
         self,
-        image_path: str,
+        image_path: ImagePath,
         texts: List[TypeFont],
-    ) -> str:
+    ) -> Path:
         img = self.__convert_image_to_rgba(image_path)
 
         watermark = Image.new("RGBA", img.size, (0, 0, 0, 0))  # 字体图层
@@ -167,19 +169,19 @@ class AddWatermark:
         combined = combined.convert("RGB")
         filename = os.path.splitext(os.path.basename(image_path))[0] + ".jpg"
 
-        if not os.path.exists(CACHE_PATH):
-            os.mkdir(CACHE_PATH)
+        if not CACHE_PATH.exists():
+            CACHE_PATH.mkdir()
 
-        new_path = os.path.join(CACHE_PATH, filename)
+        new_path = CACHE_PATH / filename
 
-        combined.save(os.path.join(CACHE_PATH, filename))
+        combined.save(new_path)
 
         return new_path
 
     def add_image_watermark(
         self,
-        image_path: str,
-        image_watermark_path: str,
+        image_path: Path,
+        image_watermark_path: Path,
         resize: int = 100,
     ):
         """添加图片水印

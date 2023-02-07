@@ -4,11 +4,12 @@
 # @Email:     thepoy@163.com
 # @File Name: custom_types.py
 # @Created:   2021-02-09 11:27:21
-# @Modified:  2022-04-03 15:46:35
+# @Modified:  2023-02-07 09:24:34
 
 from enum import IntEnum
 from typing import Any, Dict, List, Union
 from dataclasses import dataclass, asdict
+from pathlib import Path
 
 
 class ImageBedType(IntEnum):
@@ -26,7 +27,7 @@ class ImageStream:
         return self.filename
 
 
-ImagePath = str
+ImagePath = Path
 AuthInfo = Dict[str, Any]
 AuthData = Dict[str, AuthInfo]
 WaterMarkConfig = Dict[str, int]

@@ -4,12 +4,13 @@
 # @Email:     thepoy@163.com
 # @File Name: sm.py
 # @Created:   2021-02-13 09:04:07
-# @Modified:  2023-01-10 14:00:34
+# @Modified:  2023-02-07 09:45:05
 
 import re
 import requests
 
 from typing import BinaryIO, List, Optional, Dict, Any, Tuple, Union
+from pathlib import Path
 from up2b.up2b_lib.custom_types import (
     ErrorResponse,
     ImageBedType,
@@ -93,14 +94,14 @@ class SM(Base, ImageBedAbstract):
 
         image = self._compress_image(image)
 
-        if isinstance(image, str):
+        if isinstance(image, Path):
             image = self._add_watermark(image)
 
         # sm.ms不管出不出错，返回的状态码都是200
         url = self._url("upload")
         files: Dict[str, Union[Tuple[str, bytes, str], BinaryIO]] = (
             {"smfile": open(image, "rb")}
-            if isinstance(image, str)
+            if isinstance(image, Path)
             else {"smfile": (image.filename, image.stream, image.mime_type)}
         )
 
@@ -169,7 +170,7 @@ class SM(Base, ImageBedAbstract):
 
         images_url: List[Union[str, UploadErrorResponse]] = []
         for img in images:
-            if isinstance(img, str):
+            if isinstance(img, Path):
                 result = self.upload_image(img)
             else:
                 result = self.upload_image_stream(img)
@@ -216,7 +217,7 @@ class SM(Base, ImageBedAbstract):
                 return ErrorResponse(0, resp)
         return resp["data"]
 
-    def get_all_images(self):
+    def get_all_images(self) -> Union[ErrorResponse, List[SMMSResponse]]:
         self.check_login()
 
         images: List[SMMSResponse] = []
