@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: __init__.py
 # @Created:   2021-02-13 09:02:21
-# @Modified:  2023-02-07 10:38:25
+# @Modified:  2023-02-07 16:52:26
 
 import os
 import time
@@ -41,7 +41,8 @@ from up2b.up2b_lib.custom_types import (
     UploadErrorResponse,
     WaterMarkConfig,
 )
-from up2b.up2b_lib.utils import child_logger, check_image_exists, read_conf, timeout
+from up2b.up2b_lib.log import child_logger
+from up2b.up2b_lib.utils import check_image_exists, read_conf, timeout
 from up2b.up2b_lib.errors import UnsupportedType, OverSizeError
 
 logger = child_logger(__name__)
@@ -367,7 +368,7 @@ class GitBase(Base):
         )
         if resp.status_code == 201:
             uploaded_url: str = resp.json()["content"]["download_url"]
-            logger.debug("uploaded: '%s' => '%s'", image, uploaded_url)
+            logger.info("uploaded: '%s' => '%s'", image, uploaded_url)
             if hasattr(self, "cdn_url") and callable(getattr(self, "cdn_url")):
                 return self.cdn_url(uploaded_url)  # type: ignore
 

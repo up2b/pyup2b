@@ -4,7 +4,7 @@
 # @Email:     thepoy@aliyun.com
 # @File Name: __init__.py
 # @Created:   2021-02-08 15:43:32
-# @Modified:  2023-02-07 10:23:17
+# @Modified:  2023-02-07 16:52:00
 
 import os
 import shutil
@@ -29,7 +29,8 @@ from up2b.up2b_lib.constants import (
     ImageBedCode,
     IMAGE_BEDS_CODE,
 )
-from up2b.up2b_lib.utils import check_path, check_paths, logger, read_conf
+from up2b.up2b_lib.utils import check_path, check_paths, read_conf
+from up2b.up2b_lib.log import logger
 
 __version__ = "0.6.0"
 
@@ -301,7 +302,7 @@ def main() -> int:
     if not CACHE_PATH.exists():
         logger.debug("缓存目录不存在")
         CACHE_PATH.mkdir()
-        logger.debug("已创建缓存目录：%s", CACHE_PATH)
+        logger.info("已创建缓存目录：%s", CACHE_PATH)
 
     ib = _read_image_bed(args.aac, args.add_watermark)
 
@@ -311,7 +312,7 @@ def main() -> int:
                 "you have chosen `github` as the image bed, please login with `-lg`"
             )
 
-        logger.debug("current image bed: %s", ib)
+        logger.info("current image bed: %s", ib)
 
         ok = ib.login(*args.login)
         if not ok:

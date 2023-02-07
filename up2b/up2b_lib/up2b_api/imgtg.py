@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: imgtg.py
 # @Created:   2023-01-10 13:39:51
-# @Modified:  2023-02-07 10:38:44
+# @Modified:  2023-02-07 16:52:56
 
 import os
 from pathlib import Path
@@ -17,7 +17,6 @@ import requests
 from urllib import parse
 from typing import List, Optional, Tuple, Union
 from up2b.up2b_lib.custom_types import (
-    DownloadErrorResponse,
     ErrorResponse,
     ImageBedType,
     ImageType,
@@ -27,14 +26,14 @@ from up2b.up2b_lib.custom_types import (
     UploadErrorResponse,
 )
 from up2b.up2b_lib.errors import MissingAuth
-from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract
-from up2b.up2b_lib.utils import check_image_exists, child_logger
+from up2b.up2b_lib.up2b_api import Base
+from up2b.up2b_lib.log import child_logger
 from up2b.up2b_lib.constants import ImageBedCode
 
 logger = child_logger(__name__)
 
 
-class Imgtg(Base, ImageBedAbstract):
+class Imgtg(Base):
     image_bed_type = ImageBedType.common
     image_bed_code = ImageBedCode.IMGTG
     max_size = 5 * 1024 * 1024
@@ -196,7 +195,7 @@ class Imgtg(Base, ImageBedAbstract):
 
         try:
             uploaded_url: str = json_resp["image"]["image"]["url"]
-            logger.debug(
+            logger.info(
                 "uploaded url: '%s' => '%s'",
                 image,
                 uploaded_url,

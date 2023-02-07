@@ -4,23 +4,20 @@
 # @Email:     thepoy@163.com
 # @File Name: utils.py
 # @Created:   2021-02-09 15:17:32
-# @Modified:  2023-02-07 10:42:47
+# @Modified:  2023-02-07 17:20:37
 
 import json
 import os
 import locale
-from typing import List, Tuple, Union
 import requests
 
+from typing import List, Tuple, Union
 from functools import wraps, partial
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from colorful_logger import get_logger, child_logger as cl
-from colorful_logger.logger import is_debug
 from urllib.parse import urlparse
 from up2b.up2b_lib.constants import (
     CONF_FILE,
-    CONFIG_FOLDER_PATH,
     DEFAULT_TIMEOUT,
     IS_MACOS,
     PYTHON_VERSION,
@@ -30,24 +27,11 @@ from up2b.up2b_lib.custom_types import (
     DownloadErrorResponse,
     ImageType,
     ConfigFile,
-    ErrorResponse,
 )
+from up2b.up2b_lib.log import child_logger
 
-log_file_path = None
-print_position = False
-show = True
 
-if is_debug():
-    log_file_path = os.path.join(CONFIG_FOLDER_PATH, "up2b.log")
-    print_position = True
-    show = True
-
-logger = get_logger(
-    "up2b",
-    show=show,
-    file_path=log_file_path,
-    print_position=print_position,
-)
+logger = child_logger(__name__)
 
 
 def timeout() -> float:
@@ -61,27 +45,25 @@ def timeout() -> float:
         return DEFAULT_TIMEOUT
 
 
-def child_logger(name: str):
-    return cl(name, logger)
-
-
 def check_image_exists(images: Tuple[Union[ImageType, DownloadErrorResponse]]):
     for image in images:
         if isinstance(image, Path) and not image.exists():
             raise FileNotFoundError(image)
 
 
-def read_conf() -> ConfigFile:
+def read_conf() -> ConfigFile:  # type: ignore
     try:
         with open(CONF_FILE) as f:
-            conf = json.loads(f.read())
-
-            return conf
+            conf: ConfigFile = json.loads(f.read())
     except FileNotFoundError:
         logger.fatal(
             "the configuration file is not found, "
             + "you need to use `--choose-site` or `-c` to select the image bed first."
         )
+    except Exception as e:
+        logger.fatal("unkown error: %s", e)
+    else:
+        return conf
 
 
 class Login:

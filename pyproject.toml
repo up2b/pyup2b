@@ -15,7 +15,7 @@ classifiers = ["Programming Language :: Python :: 3"]
 keywords = ["typora", "image bed", "upload"]
 dependencies = [
     "requests",
-    "colorful-logger>=0.1.5",
+    "colorful-logger>=0.1.8",
 ]
 dynamic = ["version"]
 

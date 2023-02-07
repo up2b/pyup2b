@@ -141,6 +141,39 @@ up2b --config-text-watermark -50 -50 50 'test watermark' '/home/thepoy/.local/sh
 
 ![配置示例](https://i.imgtg.com/2023/01/10/GjNvx.png)
 
+## 自行打包
+
+如果此项目中更新了某些特性对你来说很有用，但尚未发布新的 release，那么你可以自行打包安装。
+
+### 创建虚拟环境
+
+如果你不担心对环境中的其他包产生影响，也不介意自己的 Python 库中多一些可能永远用不到的包，则可以忽略此步。
+
+> 如果你使用的环境管理工具为 pthon 内置的 venv，请自行创建环境，这里不多介绍。
+
+```bash
+conda create -n up2b-temp python=3.10
+conda activate up2b-temp
+```
+
+### 安装依赖
+
+```bash
+pip install build
+```
+
+### 打包
+
+```bash
+python -m build
+```
+
+会在项目的根目录创建`dist`目录，里面就有打包好的`whl`文件，安装即可：
+
+```
+pip install -U dist/up2b-*-py3-none-any.whl
+```
+
 ## TODO
 
 鉴于图床网站凉的速度超乎想象，所以在下个大版本中我不打算再对任何图床进行支持，而是使用配置文件的方式由用户自行添加图床，并添加检测图床可用性的功能。

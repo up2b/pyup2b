@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: i18n.py
 # @Created:   2022-01-09 11:17:23
-# @Modified:  2022-04-02 22:51:15
+# @Modified:  2023-02-07 12:18:23
 
 import json
 import os
@@ -12,7 +12,8 @@ from typing import Dict
 
 
 from up2b.up2b_lib.constants import CONFIG_FOLDER_PATH
-from up2b.up2b_lib.utils import get_default_language, child_logger
+from up2b.up2b_lib.utils import get_default_language
+from up2b.up2b_lib.log import child_logger
 
 logger = child_logger(__name__)
 

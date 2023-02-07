@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: github.py
 # @Created:   2021-02-13 09:10:14
-# @Modified:  2023-02-07 09:28:29
+# @Modified:  2023-02-07 12:17:05
 
 import os
 import requests
@@ -19,7 +19,7 @@ from up2b.up2b_lib.custom_types import (
 )
 from up2b.up2b_lib.up2b_api import GitBase
 from up2b.up2b_lib.constants import ImageBedCode
-from up2b.up2b_lib.utils import child_logger
+from up2b.up2b_lib.log import child_logger
 
 logger = child_logger(__name__)
 

@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: sm.py
 # @Created:   2021-02-13 09:04:07
-# @Modified:  2023-02-07 10:39:04
+# @Modified:  2023-02-07 16:53:22
 
 import re
 import requests
@@ -12,7 +12,6 @@ import requests
 from typing import BinaryIO, List, Optional, Dict, Any, Tuple, Union
 from pathlib import Path
 from up2b.up2b_lib.custom_types import (
-    DownloadErrorResponse,
     ErrorResponse,
     ImageBedType,
     ImagePath,
@@ -21,15 +20,14 @@ from up2b.up2b_lib.custom_types import (
     SMMSResponse,
     UploadErrorResponse,
 )
-from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract
-from up2b.up2b_lib import errors
+from up2b.up2b_lib.up2b_api import Base
 from up2b.up2b_lib.constants import ImageBedCode
-from up2b.up2b_lib.utils import check_image_exists, child_logger
+from up2b.up2b_lib.log import child_logger
 
 logger = child_logger(__name__)
 
 
-class SM(Base, ImageBedAbstract):
+class SM(Base):
     image_bed_type = ImageBedType.common
     image_bed_code = ImageBedCode.SM_MS
     base_url = "https://smms.app/api/v2/"
@@ -111,7 +109,7 @@ class SM(Base, ImageBedAbstract):
         ).json()
         if resp["success"]:
             uploaded_url: str = resp["data"]["url"]
-            logger.debug(
+            logger.info(
                 "uploaded: '%s' => '%s'",
                 image,
                 uploaded_url,

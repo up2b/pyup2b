@@ -4,7 +4,7 @@
 # @Email:     thepoy@163.com
 # @File Name: imgtu.py
 # @Created:   2021-02-13 09:04:37
-# @Modified:  2023-02-07 10:39:37
+# @Modified:  2023-02-07 16:53:09
 
 import os
 from pathlib import Path
@@ -26,14 +26,14 @@ from up2b.up2b_lib.custom_types import (
     UploadErrorResponse,
 )
 from up2b.up2b_lib.errors import MissingAuth
-from up2b.up2b_lib.up2b_api import Base, ImageBedAbstract
-from up2b.up2b_lib.utils import check_image_exists, child_logger
+from up2b.up2b_lib.up2b_api import Base
 from up2b.up2b_lib.constants import ImageBedCode
+from up2b.up2b_lib.log import child_logger
 
 logger = child_logger(__name__)
 
 
-class Imgtu(Base, ImageBedAbstract):
+class Imgtu(Base):
     image_bed_type = ImageBedType.common
     image_bed_code = ImageBedCode.IMGTU
     max_size = 10 * 1024 * 1024
@@ -195,7 +195,7 @@ class Imgtu(Base, ImageBedAbstract):
 
         try:
             uploaded_url: str = json_resp["image"]["image"]["url"]
-            logger.debug(
+            logger.info(
                 "uploaded url: '%s' => '%s'",
                 image,
                 uploaded_url,

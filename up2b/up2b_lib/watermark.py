@@ -4,13 +4,13 @@
 # @Email:     thepoy@163.com
 # @File Name: watermark.py
 # @Created:   2021-02-09 15:17:32
-# @Modified:  2023-02-07 09:27:16
+# @Modified:  2023-02-07 12:18:38
 
 import os
 from pathlib import Path
 from up2b.up2b_lib.custom_types import ImagePath
 
-from up2b.up2b_lib.utils import child_logger
+from up2b.up2b_lib.log import child_logger
 
 logger = child_logger(__name__)
 
