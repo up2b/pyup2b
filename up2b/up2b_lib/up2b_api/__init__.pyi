@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 import requests
 
 from abc import ABC, abstractmethod
@@ -114,7 +115,9 @@ class Base:
     ) -> Tuple[bool, Optional[str]]:
         ...
 
-    def _check_images_valid(self, *images: Union[ImageType, DownloadErrorResponse]):
+    def _check_images_valid(
+        self, images: Sequence[Union[ImageType, DownloadErrorResponse]]
+    ):
         ...
 
     def _compress_image(self, image: ImageType) -> ImageType:

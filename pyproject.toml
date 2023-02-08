@@ -41,6 +41,20 @@ up2b = ["py.typed"]
 [tool.setuptools_scm]
 write_to = "up2b/version.py"
 
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py37,py38,py39,py310,py311
+skipsdist = True
+
+[testenv]
+setenv =
+    PIP_INDEX_URL = https://mirrors.bfsu.edu.cn/pypi/web/simple
+deps = -rrequirements.txt
+passenv = HOME
+commands = pytest
+"""
+
 [tool.black]
 line-length = 88
 target-version = ['py36', 'py37', 'py38', 'py39', 'py310', 'py311']
