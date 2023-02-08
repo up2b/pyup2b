@@ -15,4 +15,5 @@ dist/
 ._README.md
 .tox
 .pytest_cache
+.mypy_cache
 Pipfile*
