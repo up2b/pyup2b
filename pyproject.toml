@@ -39,6 +39,7 @@ up2b = ["py.typed"]
 
 # 即使为空也必须有这个 section 才能使用 setuptools_scm
 [tool.setuptools_scm]
+write_to = "up2b/version.py"
 
 [tool.black]
 line-length = 88
