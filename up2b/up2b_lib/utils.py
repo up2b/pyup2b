@@ -93,6 +93,11 @@ def is_ascii(char: str):
 
 
 def get_default_language() -> str:
+    """默认使用中文，反正也没老外用。
+
+    :returns: 语言标识
+    :rtype: str
+    """
     if IS_MACOS and PYTHON_VERSION < (3, 7, 5):
         logger.warning(
             f"the version [ {PYTHON_VERSION} ] below 3.7.5 on the macOS platform cannot obtain the system locale, and [ en_US ] is used by default."
@@ -105,7 +110,8 @@ def get_default_language() -> str:
 
         lang = sys_locale[0]
 
-    return lang if lang else "en_US"
+    # return lang if lang else "en_US"
+    return lang if lang else "zh_CN"
 
 
 def is_url(path: str) -> bool:
