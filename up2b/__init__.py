@@ -31,7 +31,7 @@ from up2b.up2b_lib.constants import (
 )
 from up2b.up2b_lib.utils import check_path, check_paths, read_conf
 from up2b.up2b_lib.log import logger
-from up2b.version import __version__
+from up2b.version import __version__  # Automatically create version.py after building
 
 IMAGE_BEDS: Dict[
     ImageBedCode, Union[Type[SM], Type[Imgtu], Type[Github], Type[Imgtg]]
@@ -333,7 +333,7 @@ def main() -> int:
             return 1
 
         if not path.exists():
-            raise FileNotFoundError(path)
+            logger.fatal("file not found: %s", path)
 
         ib.upload_image(path)
         return 0
