@@ -1,4 +1,4 @@
 requests
 pytest
-colorful_logger
+colorful-logger>=0.1.8
 requests_toolbelt
