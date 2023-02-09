@@ -83,4 +83,4 @@ class Github(GitBase):
 
     @property
     def description(self):
-        return "不适合中国大陆使用"
+        return "不适合中国大陆使用。访问图片可以用 cdn，但上传图片比较困难。"
