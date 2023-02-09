@@ -160,7 +160,7 @@ def check_paths(paths: List[str]):
         return [check_path(paths[0])]
 
     new_paths: List[Union[Path, DownloadErrorResponse]] = [Path()] * len(paths)
-    logger.info("使用线程池上传多张图片...")
+    logger.info("使用线程池下载多张图片...")
     with ThreadPoolExecutor(4) as pool:
         futures = {pool.submit(check_path, paths[i]): i for i in range(len(paths))}
 
