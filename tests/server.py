@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   server.py
 # @Created At:  2023-02-08 14:18:22
-# @Modified At: 2023-02-21 13:19:56
+# @Modified At: 2023-02-21 13:20:55
 # @Modified By: thepoy
 
 import socketserver
@@ -104,7 +104,7 @@ def check_server():
 
     while True:
         try:
-            sk.connect(("10.32.243.70", 1000))
+            sk.connect(("localhost", 8080))
             break
         except Exception:
             continue
