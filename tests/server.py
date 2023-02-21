@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   server.py
 # @Created At:  2023-02-08 14:18:22
-# @Modified At: 2023-02-21 13:20:55
+# @Modified At: 2023-02-21 13:56:43
 # @Modified By: thepoy
 
 import socketserver
@@ -104,7 +104,7 @@ def check_server():
 
     while True:
         try:
-            sk.connect(("localhost", 8080))
+            sk.connect(("localhost", PORT))
             break
         except Exception:
             continue
@@ -113,7 +113,7 @@ def check_server():
 
 
 def run_server():
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
+    with socketserver.TCPServer(("localhost", PORT), Handler) as httpd:
         print("serving at port", PORT)
         httpd.serve_forever()
 
