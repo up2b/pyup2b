@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@163.com
-# @File Name: server.py
-# @Created:   2023-02-08 14:18:22
-# @Modified:  2023-02-08 17:34:15
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   server.py
+# @Created At:  2023-02-08 14:18:22
+# @Modified At: 2023-02-21 12:59:58
+# @Modified By: thepoy
 
 import socketserver
 import json
@@ -18,6 +19,9 @@ from requests_toolbelt.multipart import decoder
 
 
 filename_ptn = re.compile(rb'filename="(.+?)"')
+
+
+PORT = 8080
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -82,7 +86,7 @@ class Handler(BaseHTTPRequestHandler):
 
         resp = {
             "status": "ok",
-            "url": "http://localhost:8000/images/" + filename,
+            "url": f"http://localhost:{PORT}/images/{filename}",
         }
 
         self.send_response(200)
@@ -93,8 +97,6 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def run_server():
-    PORT = 8000
-
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print("serving at port", PORT)
         httpd.serve_forever()

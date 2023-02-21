@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@163.com
-# @File Name: test_utils.py
-# @Created:   2023-02-07 10:48:08
-# @Modified:  2023-02-07 10:59:28
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   test_utils.py
+# @Created At:  2023-02-07 10:48:08
+# @Modified At: 2023-02-21 12:59:45
+# @Modified By: thepoy
 
 from tests import IMAGES
 from up2b.up2b_lib import utils

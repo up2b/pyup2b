@@ -16,6 +16,7 @@ keywords = ["typora", "image bed", "upload"]
 dependencies = [
     "requests",
     "colorful-logger>=0.1.12",
+    "typing_extensions; python_version<'3.8'"
 ]
 dynamic = ["version"]
 

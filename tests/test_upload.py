@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@163.com
-# @File Name: test_upload.py
-# @Created:   2022-09-02 09:17:46
-# @Modified:  2023-02-08 17:46:09
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   test_upload.py
+# @Created At:  2022-09-02 09:17:46
+# @Modified At: 2023-02-21 12:59:31
+# @Modified By: thepoy
 
 import os
 import json
@@ -33,7 +34,7 @@ class ImageBed(Base):
     image_bed_type = ImageBedType.common
     image_bed_code = ImageBedCode.IMGTG
     max_size = 50 * 1024
-    base_url = "http://localhost:8000/"
+    base_url = "http://localhost:8080/"
 
     def __upload(self, image: ImageType, retries=0) -> Union[str, UploadErrorResponse]:
         image = self._compress_image(image)
@@ -121,7 +122,7 @@ class TestUpload:
 
     def test_upload(self):
         resp = self.ib.upload_image(IMAGES[0])
-        assert resp == "http://localhost:8000/images/1.png"
+        assert resp == "http://localhost:8080/images/1.png"
 
     def test_check_images(self):
         with pytest.raises(OverSizeError):
