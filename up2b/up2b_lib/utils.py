@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   utils.py
 # @Created At:  2021-02-09 15:17:32
-# @Modified At: 2023-02-21 12:39:37
+# @Modified At: 2023-02-21 12:46:50
 # @Modified By: thepoy
 
 import json
@@ -139,6 +139,9 @@ def download_online_image(url: str):
         return DownloadErrorResponse(resp.status_code, resp.text)
 
     filename = os.path.basename(url)
+
+    if not CACHE_PATH.exists():
+        CACHE_PATH.mkdir()
 
     cache_path = CACHE_PATH / filename
 
