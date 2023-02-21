@@ -4,18 +4,21 @@
 # @Email:       thepoy@163.com
 # @File Name:   test_upload.py
 # @Created At:  2022-09-02 09:17:46
-# @Modified At: 2023-02-21 13:06:57
+# @Modified At: 2023-02-21 13:13:13
 # @Modified By: thepoy
 
+import sys
 import os
 import json
 import mimetypes
+import time
 import requests
 import pytest
 
 from typing import Union
 from multiprocessing import Process
 from pathlib import Path
+
 from tests import IMAGES
 from up2b.up2b_lib.errors import OverSizeError
 from up2b.up2b_lib.up2b_api import Base
@@ -119,6 +122,9 @@ class TestUpload:
         t = Process(target=run_server)
         t.daemon = True
         t.start()
+
+        if sys.platform == "darwin":
+            time.sleep(3)
 
         resp = self.ib.upload_image(IMAGES[0])
         assert resp == "http://localhost:8080/images/1.png"
