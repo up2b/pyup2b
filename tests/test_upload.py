@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   test_upload.py
 # @Created At:  2022-09-02 09:17:46
-# @Modified At: 2023-02-21 12:59:31
+# @Modified At: 2023-02-21 13:06:57
 # @Modified By: thepoy
 
 import os
@@ -112,15 +112,14 @@ class ImageBed(Base):
         return ""
 
 
-t = Process(target=run_server)
-t.daemon = True
-t.start()
-
-
 class TestUpload:
     ib = ImageBed()
 
     def test_upload(self):
+        t = Process(target=run_server)
+        t.daemon = True
+        t.start()
+
         resp = self.ib.upload_image(IMAGES[0])
         assert resp == "http://localhost:8080/images/1.png"
 
