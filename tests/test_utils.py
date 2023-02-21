@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   test_utils.py
 # @Created At:  2023-02-07 10:48:08
-# @Modified At: 2023-02-21 12:59:45
+# @Modified At: 2023-02-21 13:31:06
 # @Modified By: thepoy
 
 from tests import IMAGES
@@ -18,15 +18,21 @@ class TestUtils:
         yes = utils.is_url(str(IMAGES[0]))
         assert yes == False
 
-        yes = utils.is_url("https://i.imgtg.com/2023/01/17/test.png")
+        yes = utils.is_url(
+            "https://raw.githubusercontent.com/thep0y/image-bed/main/test/test.jpg"
+        )
         assert yes == True
 
     def test_check_path(self):
         path = utils.check_path(str(IMAGES[0]))
         assert IMAGES[0] == path
 
-        path = utils.check_path("https://i.imgtg.com/2023/01/17/Qs1Vp.png")
-        assert CACHE_PATH / "Qs1Vp.png" == path
+        path = utils.check_path(
+            "https://raw.githubusercontent.com/thep0y/image-bed/main/test/1647607453268.jpg"
+        )
+        assert CACHE_PATH / "1647607453268.jpg" == path
 
-        path = utils.check_path("https://i.imgtg.com/2023/01/17/test.png")
+        path = utils.check_path(
+            "https://raw.githubusercontent.com/thep0y/image-bed/main/test/test.jpg"
+        )
         assert isinstance(path, DownloadErrorResponse)
