@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   server.py
 # @Created At:  2023-02-08 14:18:22
-# @Modified At: 2023-02-21 12:59:58
+# @Modified At: 2023-02-21 13:19:56
 # @Modified By: thepoy
 
 import socketserver
@@ -94,6 +94,22 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps(resp).encode())
         return
+
+
+def check_server():
+    import socket
+
+    sk = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sk.settimeout(1)
+
+    while True:
+        try:
+            sk.connect(("10.32.243.70", 1000))
+            break
+        except Exception:
+            continue
+
+    sk.close()
 
 
 def run_server():

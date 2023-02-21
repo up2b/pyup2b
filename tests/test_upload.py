@@ -4,14 +4,13 @@
 # @Email:       thepoy@163.com
 # @File Name:   test_upload.py
 # @Created At:  2022-09-02 09:17:46
-# @Modified At: 2023-02-21 13:13:13
+# @Modified At: 2023-02-21 13:20:12
 # @Modified By: thepoy
 
 import sys
 import os
 import json
 import mimetypes
-import time
 import requests
 import pytest
 
@@ -30,7 +29,7 @@ from up2b.up2b_lib.custom_types import (
     UploadErrorResponse,
 )
 from up2b.up2b_lib.constants import ImageBedCode
-from tests.server import run_server
+from tests.server import check_server, run_server
 
 
 class ImageBed(Base):
@@ -124,7 +123,8 @@ class TestUpload:
         t.start()
 
         if sys.platform == "darwin":
-            time.sleep(3)
+            # macOS 多进程启动服务器有点慢，需要 sleep
+            check_server()
 
         resp = self.ib.upload_image(IMAGES[0])
         assert resp == "http://localhost:8080/images/1.png"
