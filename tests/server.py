@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   server.py
 # @Created At:  2023-02-08 14:18:22
-# @Modified At: 2023-02-21 13:56:43
+# @Modified At: 2023-02-21 14:02:33
 # @Modified By: thepoy
 
 import socketserver
@@ -21,7 +21,9 @@ from requests_toolbelt.multipart import decoder
 filename_ptn = re.compile(rb'filename="(.+?)"')
 
 
+HOST = "127.0.0.1"
 PORT = 8080
+ADDR = (HOST, PORT)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -86,7 +88,7 @@ class Handler(BaseHTTPRequestHandler):
 
         resp = {
             "status": "ok",
-            "url": f"http://localhost:{PORT}/images/{filename}",
+            "url": f"http://{HOST}:{PORT}/images/{filename}",
         }
 
         self.send_response(200)
@@ -104,7 +106,7 @@ def check_server():
 
     while True:
         try:
-            sk.connect(("localhost", PORT))
+            sk.connect(ADDR)
             break
         except Exception:
             continue
@@ -113,7 +115,7 @@ def check_server():
 
 
 def run_server():
-    with socketserver.TCPServer(("localhost", PORT), Handler) as httpd:
+    with socketserver.TCPServer(ADDR, Handler) as httpd:
         print("serving at port", PORT)
         httpd.serve_forever()
 

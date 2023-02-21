@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   test_upload.py
 # @Created At:  2022-09-02 09:17:46
-# @Modified At: 2023-02-21 13:44:42
+# @Modified At: 2023-02-21 14:03:04
 # @Modified By: thepoy
 
 import sys
@@ -29,14 +29,14 @@ from up2b.up2b_lib.custom_types import (
     UploadErrorResponse,
 )
 from up2b.up2b_lib.constants import ImageBedCode
-from tests.server import check_server, run_server, PORT
+from tests.server import HOST, check_server, run_server, PORT
 
 
 class ImageBed(Base):
     image_bed_type = ImageBedType.common
     image_bed_code = ImageBedCode.IMGTG
     max_size = 50 * 1024
-    base_url = f"http://localhost:{PORT}/"
+    base_url = f"http://{HOST}:{PORT}/"
 
     def __upload(self, image: ImageType, retries=0) -> Union[str, UploadErrorResponse]:
         image = self._compress_image(image)
@@ -127,7 +127,7 @@ class TestUpload:
             check_server()
 
         resp = self.ib.upload_image(IMAGES[0])
-        assert resp == f"http://localhost:{PORT}/images/1.png"
+        assert resp == f"http://{HOST}:{PORT}/images/1.png"
 
         t.terminate()
 
