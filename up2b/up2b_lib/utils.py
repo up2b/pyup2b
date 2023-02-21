@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@163.com
-# @File Name: utils.py
-# @Created:   2021-02-09 15:17:32
-# @Modified:  2023-02-07 17:20:37
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   utils.py
+# @Created At:  2021-02-09 15:17:32
+# @Modified At: 2023-02-21 12:39:37
+# @Modified By: thepoy
 
 import json
 import os
@@ -52,14 +53,18 @@ def check_image_exists(images: Tuple[Union[ImageType, DownloadErrorResponse]]):
 
 
 def read_conf() -> ConfigFile:  # type: ignore
-    try:
-        with open(CONF_FILE) as f:
-            conf: ConfigFile = json.loads(f.read())
-    except FileNotFoundError:
+    if os.getenv("UP2B_TEST"):
+        return {}
+
+    if not CONF_FILE.exists():
         logger.fatal(
             "the configuration file is not found, "
             + "you need to use `--choose-site` or `-c` to select the image bed first."
         )
+
+    try:
+        with CONF_FILE.open(encoding="utf-8") as f:
+            conf: ConfigFile = json.loads(f.read())
     except Exception as e:
         logger.fatal("unkown error: %s", e)
     else:

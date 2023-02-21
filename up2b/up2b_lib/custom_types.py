@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@163.com
-# @File Name: custom_types.py
-# @Created:   2021-02-09 11:27:21
-# @Modified:  2023-02-07 10:31:01
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   custom_types.py
+# @Created At:  2021-02-09 11:27:21
+# @Modified At: 2023-02-21 12:41:21
+# @Modified By: thepoy
 
 from enum import IntEnum
 from typing import Any, Dict, List, Union

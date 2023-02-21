@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@aliyun.com
-# @File Name: __init__.py
-# @Created:   2021-02-08 15:43:32
-# @Modified:  2023-02-08 14:07:52
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   __init__.py
+# @Created At:  2021-02-08 15:43:32
+# @Modified At: 2023-02-21 12:43:27
+# @Modified By: thepoy
 
 import os
 import shutil

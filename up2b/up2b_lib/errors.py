@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@163.com
-# @File Name: errors.py
-# @Created:   2021-02-08 17:04:25
-# @Modified:  2022-03-18 15:53:01
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   errors.py
+# @Created At:  2021-02-08 17:04:25
+# @Modified At: 2023-02-21 12:41:08
+# @Modified By: thepoy
 
 
 class UploadFailed(Exception):

@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@163.com
-# @File Name: imgtg.py
-# @Created:   2023-01-10 13:39:51
-# @Modified:  2023-02-07 16:52:56
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   imgtg.py
+# @Created At:  2023-01-10 13:39:51
+# @Modified At: 2023-02-21 12:42:34
+# @Modified By: thepoy
 
 import os
 from pathlib import Path

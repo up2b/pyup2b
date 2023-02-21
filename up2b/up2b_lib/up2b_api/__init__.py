@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@163.com
-# @File Name: __init__.py
-# @Created:   2021-02-13 09:02:21
-# @Modified:  2023-02-07 16:52:26
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   __init__.py
+# @Created At:  2021-02-13 09:02:21
+# @Modified At: 2023-02-21 12:43:08
+# @Modified By: thepoy
 
 import os
 import time

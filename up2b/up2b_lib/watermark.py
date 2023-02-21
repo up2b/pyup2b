@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@163.com
-# @File Name: watermark.py
-# @Created:   2021-02-09 15:17:32
-# @Modified:  2023-02-07 12:18:38
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   watermark.py
+# @Created At:  2021-02-09 15:17:32
+# @Modified At: 2023-02-21 12:40:20
+# @Modified By: thepoy
 
 import os
 from pathlib import Path

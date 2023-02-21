@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@163.com
-# @File Name: sm.py
-# @Created:   2021-02-13 09:04:07
-# @Modified:  2023-02-07 16:53:22
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   sm.py
+# @Created At:  2021-02-13 09:04:07
+# @Modified At: 2023-02-21 12:42:08
+# @Modified By: thepoy
 
 import re
 import requests

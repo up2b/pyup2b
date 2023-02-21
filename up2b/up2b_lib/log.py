@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@163.com
-# @File Name: log.py
-# @Created:   2023-02-07 12:13:41
-# @Modified:  2023-02-07 16:50:50
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   log.py
+# @Created At:  2023-02-07 12:13:41
+# @Modified At: 2023-02-21 12:40:41
+# @Modified By: thepoy
 
 from colorful_logger import get_logger, child_logger as cl
 from colorful_logger.logger import is_debug

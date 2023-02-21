@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@aliyun.com
-# @File Name: __main__.py
-# @Created:   2021-02-08 15:47:06
-# @Modified:  2022-03-18 15:53:42
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   __main__.py
+# @Created At:  2021-02-08 15:47:06
+# @Modified At: 2023-02-21 12:43:38
+# @Modified By: thepoy
 
 import up2b
 

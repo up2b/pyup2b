@@ -1,10 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author:    thepoy
-# @Email:     thepoy@163.com
-# @File Name: i18n.py
-# @Created:   2022-01-09 11:17:23
-# @Modified:  2023-02-07 12:18:23
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Author:      thepoy
+# @Email:       thepoy@163.com
+# @File Name:   i18n.py
+# @Created At:  2022-01-09 11:17:23
+# @Modified At: 2023-02-21 12:40:54
+# @Modified By: thepoy
 
 import json
 import os
