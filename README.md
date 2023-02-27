@@ -4,9 +4,13 @@
 
 # up2b
 
+<p align="center">
+	<a href="https://pepy.tech/project/up2b"><img alt="Downloads" src="https://static.pepy.tech/badge/up2b"></a>
+</p>
+
 一个能在终端中将图片上传到图床的包。
 
-支持linux、macOS和windows。
+支持 Linux、macOS 和 Windows。
 
 ## 特点
 
