@@ -2,7 +2,7 @@
 
 > 命令行管理太麻烦？试试[up2b-gui](https://github.com/thep0y/up2b-gui)吧！
 
-# up2b
+<h1 align="center">UP2B</h1>
 
 <p align="center">
 	<a href="https://pepy.tech/project/up2b"><img alt="Downloads" src="https://static.pepy.tech/badge/up2b"></a>
