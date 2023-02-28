@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   constants.py
 # @Created At:  2021-02-13 09:17:07
-# @Modified At: 2023-02-21 12:41:33
+# @Modified At: 2023-02-28 23:04:47
 # @Modified By: thepoy
 
 import sys
@@ -43,6 +43,9 @@ IMAGE_BEDS_CODE = {
 # fmt: on
 
 
+IMAGE_BEDS_NAME = {v: k for k, v in IMAGE_BEDS_CODE.items()}
+
+
 IS_WINDOWS = sys.platform == "win32"
 IS_MACOS = sys.platform == "darwin"
 
@@ -56,3 +59,4 @@ if not CONFIG_FOLDER_PATH.exists():
 
 CONF_FILE = CONFIG_FOLDER_PATH / "conf" / "conf.up2b.json"
 CACHE_PATH = Path(gettempdir()) / "up2b"
+CACHE_DATABASE = CONFIG_FOLDER_PATH / "cache.db"

@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   __init__.py
 # @Created At:  2021-02-13 09:02:21
-# @Modified At: 2023-02-21 12:43:08
+# @Modified At: 2023-02-28 23:15:35
 # @Modified By: thepoy
 
 import os
@@ -17,9 +17,11 @@ from io import BytesIO
 from abc import ABC, abstractmethod
 from typing import Optional, List, Tuple, Dict, Union
 from pathlib import Path
+from up2b.up2b_lib.cache import Cache
 from up2b.up2b_lib.constants import (
     CONF_FILE,
     CACHE_PATH,
+    IMAGE_BEDS_NAME,
     PYTHON_VERSION,
     ImageBedCode,
 )
@@ -117,6 +119,8 @@ class Base(ImageBedAbstract):
                     "you have enabled the function of adding watermark, but the watermark is not configured, please configure the text watermark through `--config-text-watermark`"
                 )
         self.auto_compress: bool = auto_compress
+
+        self.cache = Cache()
 
     def check_login(self):
         if not self.auth_info:
@@ -303,7 +307,22 @@ class Base(ImageBedAbstract):
             if isinstance(img, DownloadErrorResponse):
                 result = img
             elif isinstance(img, Path):
-                result = self.upload_image(img)
+                url, md5 = self.cache.chech_cache_of_image_bed(
+                    img, IMAGE_BEDS_NAME[self.image_bed_code]
+                )
+
+                logger.debug("缓存查询结果：url=%s, md5=%s", url, md5)
+
+                if url:
+                    logger.info("缓存中找到图片链接：%s", url)
+                    result = url
+                else:
+                    result = self.upload_image(img)
+
+                    if isinstance(result, str):
+                        self.cache.save(
+                            md5, IMAGE_BEDS_NAME[self.image_bed_code], result  # type: ignore
+                        )
             else:
                 result = self.upload_image_stream(img)
 
