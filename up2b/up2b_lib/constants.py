@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   constants.py
 # @Created At:  2021-02-13 09:17:07
-# @Modified At: 2023-02-28 23:04:47
+# @Modified At: 2023-03-01 20:10:33
 # @Modified By: thepoy
 
 import sys
@@ -44,6 +44,8 @@ IMAGE_BEDS_CODE = {
 
 
 IMAGE_BEDS_NAME = {v: k for k, v in IMAGE_BEDS_CODE.items()}
+
+IMAGE_BEDS_HELP_MESSAGE = "\n\n".join([f"{v}: {k}" for k, v in IMAGE_BEDS_CODE.items()])
 
 
 IS_WINDOWS = sys.platform == "win32"
