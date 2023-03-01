@@ -4,16 +4,23 @@
 # @Email:       thepoy@163.com
 # @File Name:   cache.py
 # @Created At:  2023-02-28 22:16:22
-# @Modified At: 2023-02-28 23:24:38
+# @Modified At: 2023-03-01 19:22:10
 # @Modified By: thepoy
 
 import sqlite3
 import hashlib
 
+from up2b.up2b_lib.constants import CACHE_DATABASE, PYTHON_VERSION
+
+if PYTHON_VERSION >= (3, 9):
+    from functools import cache
+else:
+    from functools import lru_cache
+
+    cache = lru_cache(maxsize=None)
+
 from typing import Any, Optional, Tuple, Union
-from functools import cache
 from pathlib import Path
-from up2b.up2b_lib.constants import CACHE_DATABASE
 from up2b.up2b_lib.log import child_logger
 
 
