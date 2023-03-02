@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   __init__.py
 # @Created At:  2021-02-08 15:43:32
-# @Modified At: 2023-03-02 19:18:00
+# @Modified At: 2023-03-02 23:28:10
 # @Modified By: thepoy
 
 import os
@@ -13,10 +13,11 @@ import sys
 import json
 import click
 
-from typing import Any, Dict, Optional, Type, Union
+from typing import Any, Dict, Optional, Tuple, Type, Union
 from pprint import pprint
 from colort import display_style as ds, DisplayStyle
 from up2b.up2b_lib.custom_types import AuthData, ErrorResponse
+from up2b.up2b_lib.errors import OverSizeError
 from up2b.up2b_lib.i18n import read_i18n
 from up2b.up2b_lib.up2b_api import choose_image_bed
 from up2b.up2b_lib.up2b_api.sm import SM
@@ -58,7 +59,10 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     __version__, "-v", "--version", message="%(version)s", help="显示版本信息"
 )
 def cli():
-    pass
+    if not CACHE_PATH.exists():
+        logger.debug("缓存目录不存在")
+        CACHE_PATH.mkdir()
+        logger.info("已创建缓存目录：%s", CACHE_PATH)
 
 
 @cli.command(help="显示正在使用的图床")
@@ -105,7 +109,21 @@ def choose(code: int):
     type=str,
 )
 def login(username: str, password: str):
-    print(username, password)
+    ib = _read_image_bed()
+    if isinstance(ib, Github):
+        logger.fatal(
+            "you have chosen `github` as the image bed, please login with `-lg`"
+        )
+
+    logger.info("current image bed: %s", ib)
+
+    echo("正在验证账号，请耐心等待...")
+
+    ok = ib.login(username, password)
+    if not ok:
+        logger.fatal("username or password incorrect")
+
+    echo("账号验证通过")
 
 
 @cli.command(help="保存 git 登录信息")
@@ -131,7 +149,13 @@ def login(username: str, password: str):
     type=str,
 )
 def login_git(access_token: str, username: str, repository: str, path: str):
-    pass
+    ib = _read_image_bed()
+    if not isinstance(ib, Github):
+        logger.fatal(
+            "the image bed you choose is not `github`, , please login with `-l`"
+        )
+
+    ib.login(access_token, username, repository, path)
 
 
 @cli.command(help="上传一张图片")
@@ -143,19 +167,49 @@ def login_git(access_token: str, username: str, repository: str, path: str):
 @click.option(
     "-aw",
     "--add-watermark",
-    type=bool,
+    is_flag=True,
+    show_default=True,
     default=False,
     help="对要上传的图片添加文字水印",
 )
 @click.option(
     "-ac",
     "--auto-compress",
-    type=bool,
+    is_flag=True,
+    show_default=True,
     default=False,
     help="允许自动压缩图片",
 )
-def upload(image_path: str, add_watermark: bool, auto_compress: bool):
-    print(type(image_path), add_watermark, auto_compress)
+@click.option(
+    "-ic",
+    "--ignore-cache",
+    is_flag=True,
+    show_default=True,
+    default=False,
+    help="忽略数据库缓存，强制上传图片",
+)
+def upload(
+    image_path: str, add_watermark: bool, auto_compress: bool, ignore_cache: bool
+):
+    ib = _read_image_bed(add_watermark=add_watermark, auto_compress=auto_compress)
+
+    path = check_path(image_path)
+    if isinstance(path, ErrorResponse):
+        return
+
+    if not path.exists():
+        logger.fatal("file not found: %s", path)
+
+    if not auto_compress:
+        exceeded, img = ib._exceed_max_size((path,))
+        if exceeded:
+            logger.fatal("oversize: '%s'", img)
+
+    res = ib.upload_image(path)
+    if isinstance(res, ErrorResponse):
+        logger.fatal("upload failed: %s", res)
+
+    echo(res)
 
 
 @cli.command(help="上传多张片")
@@ -168,19 +222,38 @@ def upload(image_path: str, add_watermark: bool, auto_compress: bool):
 @click.option(
     "-aw",
     "--add-watermark",
-    type=bool,
+    is_flag=True,
+    show_default=True,
     default=False,
     help="对要上传的图片添加文字水印",
 )
 @click.option(
     "-ac",
     "--auto-compress",
-    type=bool,
+    is_flag=True,
+    show_default=True,
     default=False,
     help="允许自动压缩图片",
 )
-def upload_images(image_paths: str, add_watermark: bool, auto_compress: bool):
-    print(type(image_paths), add_watermark, auto_compress)
+@click.option(
+    "-ic",
+    "--ignore-cache",
+    is_flag=True,
+    show_default=True,
+    default=False,
+    help="忽略数据库缓存，强制上传图片",
+)
+def upload_images(
+    image_paths: Tuple[str],
+    add_watermark: bool,
+    auto_compress: bool,
+    ignore_cache: bool,
+):
+    ib = _read_image_bed(add_watermark=add_watermark, auto_compress=auto_compress)
+
+    paths = check_paths(image_paths)
+
+    ib.upload_images(*paths)
 
 
 def _is_old_config_file(conf):
@@ -217,7 +290,7 @@ def _move_to_desktop():
 
 
 def _read_image_bed(
-    auto_compress: bool, add_watermark: bool
+    auto_compress: bool = False, add_watermark: bool = False
 ) -> Union[SM, Imgtu, Imgtg, Github]:
     conf = read_conf()
 
