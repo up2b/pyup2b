@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   __init__.py
 # @Created At:  2021-02-08 15:43:32
-# @Modified At: 2023-03-01 20:15:00
+# @Modified At: 2023-03-02 19:18:00
 # @Modified By: thepoy
 
 import os
@@ -90,6 +90,97 @@ def choose(code: int):
         ds.format_with_one_style(" ==>", ds.foreground_color.cyan),
         IMAGE_BEDS[ImageBedCode(code)](),
     )
+
+
+@cli.command(help="保存图床登录信息")
+@click.help_option("-h", "--help", help="显示本帮助信息")
+@click.argument(
+    "username",
+    nargs=1,
+    type=str,
+)
+@click.argument(
+    "password",
+    nargs=1,
+    type=str,
+)
+def login(username: str, password: str):
+    print(username, password)
+
+
+@cli.command(help="保存 git 登录信息")
+@click.help_option("-h", "--help", help="显示本帮助信息")
+@click.argument(
+    "access_token",
+    nargs=1,
+    type=str,
+)
+@click.argument(
+    "username",
+    nargs=1,
+    type=str,
+)
+@click.argument(
+    "repository",
+    nargs=1,
+    type=str,
+)
+@click.argument(
+    "path",
+    nargs=1,
+    type=str,
+)
+def login_git(access_token: str, username: str, repository: str, path: str):
+    pass
+
+
+@cli.command(help="上传一张图片")
+@click.argument(
+    "image_path",
+    nargs=1,
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+)
+@click.option(
+    "-aw",
+    "--add-watermark",
+    type=bool,
+    default=False,
+    help="对要上传的图片添加文字水印",
+)
+@click.option(
+    "-ac",
+    "--auto-compress",
+    type=bool,
+    default=False,
+    help="允许自动压缩图片",
+)
+def upload(image_path: str, add_watermark: bool, auto_compress: bool):
+    print(type(image_path), add_watermark, auto_compress)
+
+
+@cli.command(help="上传多张片")
+@click.argument(
+    "image_paths",
+    nargs=-1,
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+    metavar="[IMAGE_PATH]...",
+)
+@click.option(
+    "-aw",
+    "--add-watermark",
+    type=bool,
+    default=False,
+    help="对要上传的图片添加文字水印",
+)
+@click.option(
+    "-ac",
+    "--auto-compress",
+    type=bool,
+    default=False,
+    help="允许自动压缩图片",
+)
+def upload_images(image_paths: str, add_watermark: bool, auto_compress: bool):
+    print(type(image_paths), add_watermark, auto_compress)
 
 
 def _is_old_config_file(conf):
