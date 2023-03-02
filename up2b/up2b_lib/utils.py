@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   utils.py
 # @Created At:  2021-02-09 15:17:32
-# @Modified At: 2023-02-21 12:46:50
+# @Modified At: 2023-03-02 23:04:25
 # @Modified By: thepoy
 
 import json
@@ -12,7 +12,7 @@ import os
 import locale
 import requests
 
-from typing import List, Tuple, Union
+from typing import List, Sequence, Tuple, Union
 from functools import wraps, partial
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -163,7 +163,7 @@ def check_path(path: str):
     return download_online_image(path)
 
 
-def check_paths(paths: List[str]):
+def check_paths(paths: Sequence[str]):
     if len(paths) == 1:
         return [check_path(paths[0])]
 

@@ -3,6 +3,8 @@ import requests
 
 from abc import ABC, abstractmethod
 from typing import overload, Optional, List, Tuple, Dict, Union
+from up2b.up2b_lib.cache import Cache
+from up2b.up2b_lib.constants import ImageBedCode
 from up2b.up2b_lib.custom_types import (
     ConfigFile,
     DownloadErrorResponse,
@@ -83,7 +85,7 @@ class ImageBedAbstract(ABC):
 
 
 class Base:
-    image_bed_code: int
+    image_bed_code: ImageBedCode
     max_size: int
     conf: ConfigFile
     image_bed_type: ImageBedType
@@ -92,6 +94,7 @@ class Base:
     add_watermark: bool
     auto_compress: bool
     timeout: float
+    cache: Cache
 
     def __init__(
         self,
@@ -111,12 +114,12 @@ class Base:
         ...
 
     def _exceed_max_size(
-        self, *images: Union[ImageType, DownloadErrorResponse]
+        self, images: Tuple[Union[ImageType, DownloadErrorResponse]]
     ) -> Tuple[bool, Optional[str]]:
         ...
 
     def _check_images_valid(
-        self, images: Sequence[Union[ImageType, DownloadErrorResponse]]
+        self, images: Tuple[Union[ImageType, DownloadErrorResponse]]
     ):
         ...
 

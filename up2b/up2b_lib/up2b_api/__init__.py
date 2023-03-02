@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   __init__.py
 # @Created At:  2021-02-13 09:02:21
-# @Modified At: 2023-02-28 23:15:35
+# @Modified At: 2023-03-02 23:39:48
 # @Modified By: thepoy
 
 import os
@@ -103,6 +103,7 @@ class Base(ImageBedAbstract):
     conf: ConfigFile
     image_bed_type: ImageBedType
     timeout = timeout()
+    cache = Cache()
 
     def __init__(
         self,
@@ -119,8 +120,6 @@ class Base(ImageBedAbstract):
                     "you have enabled the function of adding watermark, but the watermark is not configured, please configure the text watermark through `--config-text-watermark`"
                 )
         self.auto_compress: bool = auto_compress
-
-        self.cache = Cache()
 
     def check_login(self):
         if not self.auth_info:
@@ -211,6 +210,8 @@ class Base(ImageBedAbstract):
         if not self.auto_compress:
             return image
 
+        logger.debug("compressing image: %s", image)
+
         try:
             from PIL import Image
         except ModuleNotFoundError:
@@ -265,6 +266,8 @@ class Base(ImageBedAbstract):
             img_cache_path = CACHE_PATH / filename
             with img_cache_path.open("wb") as f:
                 f.write(img_io.getbuffer())
+
+            logger.debug("image compression complete: %s", img_cache_path)
 
             return img_cache_path
 

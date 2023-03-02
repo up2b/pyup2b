@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   imgtu.py
 # @Created At:  2021-02-13 09:04:37
-# @Modified At: 2023-02-21 12:42:20
+# @Modified At: 2023-03-02 23:42:13
 # @Modified By: thepoy
 
 import os
@@ -28,7 +28,7 @@ from up2b.up2b_lib.custom_types import (
 )
 from up2b.up2b_lib.errors import MissingAuth
 from up2b.up2b_lib.up2b_api import Base
-from up2b.up2b_lib.constants import ImageBedCode
+from up2b.up2b_lib.constants import IMAGE_BEDS_NAME, ImageBedCode
 from up2b.up2b_lib.log import child_logger
 
 logger = child_logger(__name__)
@@ -141,6 +141,17 @@ class Imgtu(Base):
         self._save_auth_info(self.auth_info)
 
     def __upload(self, image: ImageType, retries=0) -> Union[str, UploadErrorResponse]:
+        url, md5 = self.cache.chech_cache_of_image_bed(
+            image, IMAGE_BEDS_NAME[self.image_bed_code]  # type: ignore
+        )
+
+        logger.debug("缓存查询结果：url=%s, md5=%s", url, md5)
+
+        if url:
+            logger.info("缓存中找到图片链接：%s", url)
+
+            return url
+
         self.check_login()
 
         image = self._compress_image(image)
@@ -202,6 +213,10 @@ class Imgtu(Base):
                 uploaded_url,
             )
 
+            self.cache.save(
+                md5, IMAGE_BEDS_NAME[self.image_bed_code], uploaded_url  # type: ignore
+            )
+
             return uploaded_url
         except KeyError:
             if json_resp["error"]["message"] == "请求被拒绝 (auth_token)":
@@ -225,12 +240,6 @@ class Imgtu(Base):
     def upload_image(self, image_path: ImagePath) -> Union[str, UploadErrorResponse]:
         logger.debug("uploading: %s", image_path)
 
-        image_path = self._add_watermark(image_path)
-
-        if self.auto_compress:
-            # 输入的是路径，返回的也必然是路径，忽略 pyright 的错误提示
-            image_path = self._compress_image(image_path)  # type: ignore
-
         return self.__upload(image_path)
 
     def upload_image_stream(
@@ -238,12 +247,7 @@ class Imgtu(Base):
     ) -> Union[str, UploadErrorResponse]:
         logger.debug("uploading: %s", image.filename)
 
-        if self.auto_compress:
-            new_image = self._compress_image(image)
-        else:
-            new_image = image
-
-        return self.__upload(new_image)
+        return self.__upload(image)
 
     def get_all_images(self) -> Union[List[ImgtuResponse], ErrorResponse]:
         self.check_login()

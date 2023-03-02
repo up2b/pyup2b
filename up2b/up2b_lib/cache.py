@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   cache.py
 # @Created At:  2023-02-28 22:16:22
-# @Modified At: 2023-03-01 19:22:10
+# @Modified At: 2023-03-02 23:43:22
 # @Modified By: thepoy
 
 import sqlite3
@@ -108,7 +108,7 @@ class Cache:
 
         md5 = file_md5(filepath)
 
-        logger.debug("%s md5: %s", filepath, md5)
+        logger.debug("md5: '%s' -> '%s'", filepath, md5)
 
         url = self.is_exists(md5, image_bed)
         if url:
