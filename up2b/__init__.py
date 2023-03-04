@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   __init__.py
 # @Created At:  2021-02-08 15:43:32
-# @Modified At: 2023-03-04 21:52:56
+# @Modified At: 2023-03-04 22:06:51
 # @Modified By: thepoy
 
 import sys
@@ -151,68 +151,7 @@ def login_git(access_token: str, username: str, repository: str, path: str):
     ib.login(access_token, username, repository, path)
 
 
-@cli.command(help="上传一张图片")
-@click.argument(
-    "image_path",
-    nargs=1,
-    type=click.Path(exists=True, file_okay=True, dir_okay=False),
-)
-@click.option(
-    "-aw",
-    "--add-watermark",
-    is_flag=True,
-    show_default=True,
-    default=False,
-    help="对要上传的图片添加文字水印",
-)
-@click.option(
-    "-ac",
-    "--auto-compress",
-    is_flag=True,
-    show_default=True,
-    default=False,
-    help="允许自动压缩图片",
-)
-@click.option(
-    "-ic",
-    "--ignore-cache",
-    is_flag=True,
-    show_default=True,
-    default=False,
-    help="忽略数据库缓存，强制上传图片，上传成功后更新数据库",
-)
-def upload(
-    image_path: str,
-    add_watermark: bool,
-    auto_compress: bool,
-    ignore_cache: bool,
-):
-    ib = _read_image_bed(
-        add_watermark=add_watermark,
-        auto_compress=auto_compress,
-        ignore_cache=ignore_cache,
-    )
-
-    path = check_path(image_path)
-    if isinstance(path, ErrorResponse):
-        return
-
-    if not path.exists():
-        logger.fatal("file not found: %s", path)
-
-    if not auto_compress:
-        exceeded, img = ib._exceed_max_size((path,))
-        if exceeded:
-            logger.fatal("oversize: '%s'", img)
-
-    res = ib.upload_image(path)
-    if isinstance(res, ErrorResponse):
-        logger.fatal("upload failed: %s", res)
-
-    echo(res)
-
-
-@cli.command(help="上传多张片")
+@cli.command(help="上传图片")
 @click.argument(
     "image_paths",
     nargs=-1,
@@ -243,7 +182,7 @@ def upload(
     default=False,
     help="忽略数据库缓存，强制上传图片",
 )
-def upload_images(
+def upload(
     image_paths: Tuple[str],
     add_watermark: bool,
     auto_compress: bool,
