@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   __init__.py
 # @Created At:  2021-02-13 09:02:21
-# @Modified At: 2023-03-04 21:41:28
+# @Modified At: 2023-03-04 22:03:15
 # @Modified By: thepoy
 
 import os
@@ -265,11 +265,18 @@ class Base(ImageBedAbstract):
             if not os.path.exists(CACHE_PATH):
                 os.mkdir(CACHE_PATH)
 
+            compressed_size = img_io.tell()
+
             img_cache_path = CACHE_PATH / filename
             with img_cache_path.open("wb") as f:
                 f.write(img_io.getbuffer())
 
-            logger.debug("image compression complete: %s", img_cache_path)
+            logger.info(
+                "image compression complete: %s, %.2fk -> %.2fk",
+                img_cache_path,
+                raw_size / 1024,
+                compressed_size / 1024,
+            )
 
             return img_cache_path
 
@@ -304,7 +311,10 @@ class Base(ImageBedAbstract):
         )
 
         if ok:
-            logger.info("缓存中找到此图片链接：url=%s", url)
+            if self.ignore_cache:
+                logger.info("缓存中找到此图片链接，但用户选择忽略缓存强制上传")
+            else:
+                logger.info("缓存中找到此图片链接：url=%s", url)
 
             return (url, md5, ok)
 
