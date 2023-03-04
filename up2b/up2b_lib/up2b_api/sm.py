@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   sm.py
 # @Created At:  2021-02-13 09:04:07
-# @Modified At: 2023-02-21 12:42:08
+# @Modified At: 2023-03-04 21:39:41
 # @Modified By: thepoy
 
 import re
@@ -22,7 +22,7 @@ from up2b.up2b_lib.custom_types import (
     UploadErrorResponse,
 )
 from up2b.up2b_lib.up2b_api import Base
-from up2b.up2b_lib.constants import ImageBedCode
+from up2b.up2b_lib.constants import IMAGE_BEDS_NAME, ImageBedCode
 from up2b.up2b_lib.log import child_logger
 
 logger = child_logger(__name__)
@@ -38,8 +38,9 @@ class SM(Base):
         self,
         auto_compress: bool = False,
         add_watermark: bool = False,
+        ignore_cache: bool = False,
     ):
-        super().__init__(auto_compress, add_watermark)
+        super().__init__(auto_compress, add_watermark, ignore_cache)
 
         if self.auth_info:
             self.token: str = self.auth_info["token"]
@@ -90,6 +91,11 @@ class SM(Base):
     def __upload(self, image: ImageType, retries=0) -> Union[str, UploadErrorResponse]:
         self.check_login()
 
+        url, md5, ok = self._check_cache(image)  # type: ignore
+
+        if ok and not self.ignore_cache:
+            return url
+
         logger.debug("uploading: %s", image)
 
         image = self._compress_image(image)
@@ -114,6 +120,13 @@ class SM(Base):
                 "uploaded: '%s' => '%s'",
                 image,
                 uploaded_url,
+            )
+
+            self.cache.save(
+                md5,
+                IMAGE_BEDS_NAME[self.image_bed_code],
+                uploaded_url,
+                self.ignore_cache,
             )
             return uploaded_url
         else:

@@ -4,21 +4,16 @@
 # @Email:       thepoy@163.com
 # @File Name:   __init__.py
 # @Created At:  2021-02-08 15:43:32
-# @Modified At: 2023-03-02 23:28:10
+# @Modified At: 2023-03-04 21:52:56
 # @Modified By: thepoy
 
-import os
-import shutil
 import sys
 import json
 import click
 
 from typing import Any, Dict, Optional, Tuple, Type, Union
-from pprint import pprint
-from colort import display_style as ds, DisplayStyle
+from colort import display_style as ds
 from up2b.up2b_lib.custom_types import AuthData, ErrorResponse
-from up2b.up2b_lib.errors import OverSizeError
-from up2b.up2b_lib.i18n import read_i18n
 from up2b.up2b_lib.up2b_api import choose_image_bed
 from up2b.up2b_lib.up2b_api.sm import SM
 from up2b.up2b_lib.up2b_api.imgtu import Imgtu
@@ -28,9 +23,7 @@ from up2b.up2b_lib.constants import (
     CACHE_PATH,
     CONF_FILE,
     IMAGE_BEDS_HELP_MESSAGE,
-    IS_WINDOWS,
     ImageBedCode,
-    IMAGE_BEDS_CODE,
 )
 from up2b.up2b_lib.utils import check_path, check_paths, read_conf
 from up2b.up2b_lib.log import logger
@@ -186,12 +179,19 @@ def login_git(access_token: str, username: str, repository: str, path: str):
     is_flag=True,
     show_default=True,
     default=False,
-    help="忽略数据库缓存，强制上传图片",
+    help="忽略数据库缓存，强制上传图片，上传成功后更新数据库",
 )
 def upload(
-    image_path: str, add_watermark: bool, auto_compress: bool, ignore_cache: bool
+    image_path: str,
+    add_watermark: bool,
+    auto_compress: bool,
+    ignore_cache: bool,
 ):
-    ib = _read_image_bed(add_watermark=add_watermark, auto_compress=auto_compress)
+    ib = _read_image_bed(
+        add_watermark=add_watermark,
+        auto_compress=auto_compress,
+        ignore_cache=ignore_cache,
+    )
 
     path = check_path(image_path)
     if isinstance(path, ErrorResponse):
@@ -249,55 +249,77 @@ def upload_images(
     auto_compress: bool,
     ignore_cache: bool,
 ):
-    ib = _read_image_bed(add_watermark=add_watermark, auto_compress=auto_compress)
+    ib = _read_image_bed(
+        add_watermark=add_watermark,
+        auto_compress=auto_compress,
+        ignore_cache=ignore_cache,
+    )
 
     paths = check_paths(image_paths)
 
     ib.upload_images(*paths)
 
 
-def _is_old_config_file(conf):
-    if not conf.get("auth_data") or isinstance(conf["auth_data"], dict):
-        return False
+@cli.command(
+    short_help="配置文字水印",
+    help="""
+    参数解释：
 
-    print("!!!注意!!!")
-    print()
-    print(
-        """
-    由于 gitee 出乎我意料地停止了图床功能，我也无法保证现在的图床都能继续使用，最初设计配置文件时没有考虑到这一点。
-    为了不影响以后对支持图床的增删，需要对配置文件进行重新设计，接下来的操作将会删除旧配置文件，如有需要请备份下面的配置信息，后面登录时会用到。
-    """
-    )
-    print()
-    print("配置信息（此消息仅显示一次）：")
-    print("*" * 20)
-    pprint(conf)
-    print("*" * 20)
-    return True
-
-
-def _move_to_desktop():
-    if IS_WINDOWS:
-        home = os.environ["USERPROFILE"]
-    else:
-        home = os.environ["HOME"]
-
-    dst = os.path.join(home, "Desktop")
-    if not os.path.exists(dst):
-        dst = home
-
-    shutil.move(CONF_FILE, os.path.join(dst, "up2b-backup.json"))
+        - x 整数，横坐标
+    
+        - y 整数，纵坐标
+    
+        - opacity 整数，透明度。50 即为透明度 50%。
+    
+        - text 字符串，水印文字内容
+    
+        - font_path 字符串，字体路径
+    
+        - size 整数，字体大小
+    """,
+)
+@click.argument(
+    "x",
+    nargs=1,
+    type=int,
+)
+@click.argument(
+    "y",
+    nargs=1,
+    type=int,
+)
+@click.argument(
+    "opacity",
+    nargs=1,
+    type=int,
+)
+@click.argument(
+    "text",
+    nargs=1,
+    type=str,
+)
+@click.argument(
+    "font_path",
+    nargs=1,
+    type=str,
+)
+@click.argument(
+    "size",
+    nargs=1,
+    type=int,
+)
+def config_watermark(
+    x: int, y: int, opacity: int, text: str, font_path: str, size: int
+):
+    _config_text_watermark(x, y, opacity, text, font_path, size)
 
 
 def _read_image_bed(
-    auto_compress: bool = False, add_watermark: bool = False
+    auto_compress: bool = False,
+    add_watermark: bool = False,
+    ignore_cache: bool = False,
 ) -> Union[SM, Imgtu, Imgtg, Github]:
     conf = read_conf()
-
-    if _is_old_config_file(conf):
-        _move_to_desktop()
-        logger.warning("旧配置文件已移动到桌面（桌面不存在时移动到主目录），请重新选择图床并登录")
-        sys.exit(0)
 
     selected_code = conf["image_bed"]
     assert isinstance(selected_code, int)
@@ -306,11 +328,15 @@ def _read_image_bed(
         code = ImageBedCode(selected_code)
 
         return IMAGE_BEDS[code](
-            auto_compress=auto_compress, add_watermark=add_watermark
+            auto_compress=auto_compress,
+            add_watermark=add_watermark,
+            ignore_cache=ignore_cache,
         )
     except ValueError:
         IMAGE_BEDS[ImageBedCode.SM_MS](
-            auto_compress=auto_compress, add_watermark=add_watermark
+            auto_compress=auto_compress,
+            add_watermark=add_watermark,
+            ignore_cache=ignore_cache,
         )
         logger.fatal("未知的图床代码：%d，可能因为清除无效的 gitee 配置，请重试", selected_code)
 

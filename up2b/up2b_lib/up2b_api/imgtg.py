@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   imgtg.py
 # @Created At:  2023-01-10 13:39:51
-# @Modified At: 2023-02-21 12:42:34
+# @Modified At: 2023-03-04 21:38:59
 # @Modified By: thepoy
 
 import os
@@ -29,7 +29,7 @@ from up2b.up2b_lib.custom_types import (
 from up2b.up2b_lib.errors import MissingAuth
 from up2b.up2b_lib.up2b_api import Base
 from up2b.up2b_lib.log import child_logger
-from up2b.up2b_lib.constants import ImageBedCode
+from up2b.up2b_lib.constants import IMAGE_BEDS_NAME, ImageBedCode
 
 logger = child_logger(__name__)
 
@@ -48,8 +48,9 @@ class Imgtg(Base):
         self,
         auto_compress: bool = False,
         add_watermark: bool = False,
+        ignore_cache: bool = False,
     ):
-        super().__init__(auto_compress, add_watermark)
+        super().__init__(auto_compress, add_watermark, ignore_cache)
 
         self.cookie: Optional[str] = None
         self.token: Optional[str] = None
@@ -143,6 +144,11 @@ class Imgtg(Base):
     def __upload(self, image: ImageType, retries=0) -> Union[str, UploadErrorResponse]:
         self.check_login()
 
+        url, md5, ok = self._check_cache(image)  # type: ignore
+
+        if ok and not self.ignore_cache:
+            return url
+
         image = self._compress_image(image)
 
         if isinstance(image, Path):
@@ -200,6 +206,13 @@ class Imgtg(Base):
                 "uploaded url: '%s' => '%s'",
                 image,
                 uploaded_url,
+            )
+
+            self.cache.save(
+                md5,
+                IMAGE_BEDS_NAME[self.image_bed_code],
+                uploaded_url,
+                self.ignore_cache,
             )
 
             return uploaded_url

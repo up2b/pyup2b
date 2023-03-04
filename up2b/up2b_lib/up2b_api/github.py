@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   github.py
 # @Created At:  2021-02-13 09:10:14
-# @Modified At: 2023-02-21 12:42:50
+# @Modified At: 2023-03-04 21:40:12
 # @Modified By: thepoy
 
 import os
@@ -35,8 +35,9 @@ class Github(GitBase):
         self,
         auto_compress: bool = False,
         add_watermark: bool = False,
+        ignore_cache: bool = False,
     ):
-        super().__init__(auto_compress, add_watermark)
+        super().__init__(auto_compress, add_watermark, ignore_cache)
 
         if hasattr(self, "token"):
             self.headers = {

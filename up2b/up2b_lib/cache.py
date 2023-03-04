@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   cache.py
 # @Created At:  2023-02-28 22:16:22
-# @Modified At: 2023-03-02 23:43:22
+# @Modified At: 2023-03-04 21:52:19
 # @Modified By: thepoy
 
 import sqlite3
@@ -19,7 +19,7 @@ else:
 
     cache = lru_cache(maxsize=None)
 
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Optional, Tuple
 from pathlib import Path
 from up2b.up2b_lib.log import child_logger
 
@@ -40,10 +40,6 @@ def file_md5(filepath: Path) -> str:
             h.update(data)
 
     return h.hexdigest()
-
-
-URL = str
-MD5 = str
 
 
 class Cache:
@@ -93,9 +89,9 @@ class Cache:
         return result[0]
 
     @cache
-    def chech_cache_of_image_bed(
+    def check_cache_of_image_bed(
         self, filepath: Path, image_bed: str
-    ) -> Union[Tuple[URL, None], Tuple[None, MD5]]:
+    ) -> Tuple[str, str, bool]:
         """精准查询指定图床中是否缓存过图片
 
         :param filepath: 图片真实路径或缓存路径
@@ -103,7 +99,7 @@ class Cache:
         :param image_bed: 图床名
         :type image_bed: str
         :returns: 缓存的图片链接或文件 md5
-        :rtype: {Union[Tuple[URL, None], Tuple[None, MD5]]}
+        :rtype: Tuple[str,str, bool]
         """
 
         md5 = file_md5(filepath)
@@ -112,19 +108,19 @@ class Cache:
 
         url = self.is_exists(md5, image_bed)
         if url:
-            return (url, None)
+            return (url, md5, True)
 
-        return (None, md5)
+        return ("", md5, False)
 
     @cache
-    def chech_cache(self, filepath: Path) -> Union[Tuple[URL, None], Tuple[None, MD5]]:
+    def chech_cache(self, filepath: Path) -> Tuple[str, str, bool]:
         """模糊查询图片缓存。
 
         不论任何在图床中上传过图片，只要查询到即返回已上传的图片链接。
         :param filepath: 图片真实路径或缓存路径
         :type filepath: Path
         :returns: 缓存的图片链接或文件 md5
-        :rtype: {Union[Tuple[URL, None], Tuple[None, MD5]]}
+        :rtype: Tuple[str, str, bool]
         """
 
         md5 = file_md5(filepath)
@@ -133,9 +129,9 @@ class Cache:
 
         url = self.is_exists(md5)
         if url:
-            return (url, None)
+            return (url, md5, True)
 
-        return (None, md5)
+        return ("", md5, False)
 
     def save(self, md5: str, image_bed: str, url: str, force: bool = False):
         exists = self.is_exists(md5, image_bed)

@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   imgtu.py
 # @Created At:  2021-02-13 09:04:37
-# @Modified At: 2023-03-02 23:42:13
+# @Modified At: 2023-03-04 21:38:13
 # @Modified By: thepoy
 
 import os
@@ -48,8 +48,9 @@ class Imgtu(Base):
         self,
         auto_compress: bool = False,
         add_watermark: bool = False,
+        ignore_cache: bool = False,
     ):
-        super().__init__(auto_compress, add_watermark)
+        super().__init__(auto_compress, add_watermark, ignore_cache)
 
         self.cookie: Optional[str] = None
         self.token: Optional[str] = None
@@ -141,15 +142,9 @@ class Imgtu(Base):
         self._save_auth_info(self.auth_info)
 
     def __upload(self, image: ImageType, retries=0) -> Union[str, UploadErrorResponse]:
-        url, md5 = self.cache.chech_cache_of_image_bed(
-            image, IMAGE_BEDS_NAME[self.image_bed_code]  # type: ignore
-        )
+        url, md5, ok = self._check_cache(image)  # type: ignore
 
-        logger.debug("缓存查询结果：url=%s, md5=%s", url, md5)
-
-        if url:
-            logger.info("缓存中找到图片链接：%s", url)
-
+        if ok and not self.ignore_cache:
             return url
 
         self.check_login()
@@ -214,7 +209,10 @@ class Imgtu(Base):
             )
 
             self.cache.save(
-                md5, IMAGE_BEDS_NAME[self.image_bed_code], uploaded_url  # type: ignore
+                md5,
+                IMAGE_BEDS_NAME[self.image_bed_code],
+                uploaded_url,
+                self.ignore_cache,
             )
 
             return uploaded_url

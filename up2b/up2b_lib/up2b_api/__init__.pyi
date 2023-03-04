@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from pathlib import Path
 import requests
 
 from abc import ABC, abstractmethod
@@ -93,6 +94,7 @@ class Base:
     auth_info: Optional[AuthInfo]
     add_watermark: bool
     auto_compress: bool
+    ignore_cache: bool
     timeout: float
     cache: Cache
 
@@ -100,7 +102,7 @@ class Base:
         self,
         auto_compress: bool = ...,
         add_watermark: bool = ...,
-        conf_file: str = ...,
+        ignore_cache: bool = ...,
     ) -> None:
         ...
 
@@ -132,6 +134,9 @@ class Base:
     def _clear_cache(self) -> None:
         ...
 
+    def _check_cache(self, image: Path) -> Tuple[str, str, bool]:
+        ...
+
     def upload_images(
         self, *images: Union[ImageType, DownloadErrorResponse], to_console: bool = ...
     ) -> List[Union[str, UploadErrorResponse]]:
@@ -151,7 +156,7 @@ class GitBase(Base, ImageBedAbstract):
         self,
         auto_compress: bool = ...,
         add_watermark: bool = ...,
-        conf_file: str = ...,
+        ignore_cache: bool = ...,
     ) -> None:
         ...
 

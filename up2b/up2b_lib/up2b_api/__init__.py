@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   __init__.py
 # @Created At:  2021-02-13 09:02:21
-# @Modified At: 2023-03-02 23:39:48
+# @Modified At: 2023-03-04 21:41:28
 # @Modified By: thepoy
 
 import os
@@ -109,6 +109,7 @@ class Base(ImageBedAbstract):
         self,
         auto_compress: bool = False,
         add_watermark: bool = False,
+        ignore_cache: bool = False,
     ):
         self.conf = read_conf()
 
@@ -120,6 +121,7 @@ class Base(ImageBedAbstract):
                     "you have enabled the function of adding watermark, but the watermark is not configured, please configure the text watermark through `--config-text-watermark`"
                 )
         self.auto_compress: bool = auto_compress
+        self.ignore_cache: bool = ignore_cache
 
     def check_login(self):
         if not self.auth_info:
@@ -296,6 +298,19 @@ class Base(ImageBedAbstract):
 
             logger.info("cache folder has been cleared: %s", CACHE_PATH)
 
+    def _check_cache(self, image: Path) -> Tuple[str, str, bool]:
+        url, md5, ok = self.cache.check_cache_of_image_bed(
+            image, IMAGE_BEDS_NAME[self.image_bed_code]
+        )
+
+        if ok:
+            logger.info("缓存中找到此图片链接：url=%s", url)
+
+            return (url, md5, ok)
+
+        logger.debug("缓存中未找到此图片链接")
+        return (url, md5, ok)
+
     def upload_images(
         self, *images: Union[ImageType, DownloadErrorResponse], to_console=True
     ) -> List[Union[str, DownloadErrorResponse, UploadErrorResponse]]:
@@ -310,22 +325,7 @@ class Base(ImageBedAbstract):
             if isinstance(img, DownloadErrorResponse):
                 result = img
             elif isinstance(img, Path):
-                url, md5 = self.cache.chech_cache_of_image_bed(
-                    img, IMAGE_BEDS_NAME[self.image_bed_code]
-                )
-
-                logger.debug("缓存查询结果：url=%s, md5=%s", url, md5)
-
-                if url:
-                    logger.info("缓存中找到图片链接：%s", url)
-                    result = url
-                else:
-                    result = self.upload_image(img)
-
-                    if isinstance(result, str):
-                        self.cache.save(
-                            md5, IMAGE_BEDS_NAME[self.image_bed_code], result  # type: ignore
-                        )
+                result = self.upload_image(img)
             else:
                 result = self.upload_image_stream(img)
 
@@ -352,8 +352,9 @@ class GitBase(Base):
         self,
         auto_compress: bool = False,
         add_watermark: bool = False,
+        ignore_cache: bool = False,
     ):
-        super().__init__(auto_compress, add_watermark)
+        super().__init__(auto_compress, add_watermark, ignore_cache)
 
         if self.auth_info:
             self.token = self.auth_info["token"]
@@ -372,6 +373,11 @@ class GitBase(Base):
 
     def _upload(self, image: ImageType, data: Dict[str, str], request_method="put"):
         self.check_login()
+
+        url, md5, ok = self._check_cache(image)  # type: ignore
+
+        if ok and not self.ignore_cache:
+            return url
 
         image = self._compress_image(image)
         if isinstance(image, Path):
@@ -394,6 +400,13 @@ class GitBase(Base):
             logger.info("uploaded: '%s' => '%s'", image, uploaded_url)
             if hasattr(self, "cdn_url") and callable(getattr(self, "cdn_url")):
                 return self.cdn_url(uploaded_url)  # type: ignore
+
+            self.cache.save(
+                md5,
+                IMAGE_BEDS_NAME[self.image_bed_code],
+                uploaded_url,
+                self.ignore_cache,
+            )
 
             return uploaded_url
         else:
