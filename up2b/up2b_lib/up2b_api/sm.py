@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   sm.py
 # @Created At:  2021-02-13 09:04:07
-# @Modified At: 2023-03-04 21:39:41
+# @Modified At: 2023-03-06 20:36:38
 # @Modified By: thepoy
 
 import re
@@ -96,7 +96,7 @@ class SM(Base):
         if ok and not self.ignore_cache:
             return url
 
-        logger.debug("uploading: %s", image)
+        logger.debug("uploading", image=image)
 
         image = self._compress_image(image)
 
@@ -117,9 +117,9 @@ class SM(Base):
         if resp["success"]:
             uploaded_url: str = resp["data"]["url"]
             logger.info(
-                "uploaded: '%s' => '%s'",
-                image,
-                uploaded_url,
+                "uploaded",
+                image=image,
+                url=uploaded_url,
             )
 
             self.cache.save(
@@ -132,7 +132,7 @@ class SM(Base):
         else:
             if resp["code"] == "image_repeated":
                 # 如果图片重复，会返回重复的图片的链接，所以此处不报错
-                logger.info("repeated image: %s", resp["images"])
+                logger.info("repeated image", image=resp["images"])
                 image_url: str = resp["images"]
                 return image_url
             elif self._login_expired(resp):
@@ -154,9 +154,9 @@ class SM(Base):
             else:
                 error = resp["message"]
                 logger.error(
-                    "upload failed: img='%s', error='%s'",
-                    image,
-                    error,
+                    "upload failed",
+                    image=image,
+                    error=error,
                 )
                 return UploadErrorResponse(400, error, str(image))
 

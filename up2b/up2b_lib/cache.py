@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   cache.py
 # @Created At:  2023-02-28 22:16:22
-# @Modified At: 2023-03-04 21:52:19
+# @Modified At: 2023-03-06 20:34:24
 # @Modified By: thepoy
 
 import sqlite3
@@ -104,7 +104,7 @@ class Cache:
 
         md5 = file_md5(filepath)
 
-        logger.debug("md5: '%s' -> '%s'", filepath, md5)
+        logger.debug("the md5 of the file is calculated", file=filepath, md5=md5)
 
         url = self.is_exists(md5, image_bed)
         if url:
@@ -125,7 +125,7 @@ class Cache:
 
         md5 = file_md5(filepath)
 
-        logger.debug("%s md5: %s", filepath, md5)
+        logger.debug("the md5 of the file is calculated", file=filepath, md5=md5)
 
         url = self.is_exists(md5)
         if url:

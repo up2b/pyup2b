@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   __init__.py
 # @Created At:  2021-02-08 15:43:32
-# @Modified At: 2023-03-04 22:06:51
+# @Modified At: 2023-03-06 21:07:49
 # @Modified By: thepoy
 
 import sys
@@ -13,7 +13,7 @@ import click
 
 from typing import Any, Dict, Optional, Tuple, Type, Union
 from colort import display_style as ds
-from up2b.up2b_lib.custom_types import AuthData, ErrorResponse
+from up2b.up2b_lib.custom_types import AuthData
 from up2b.up2b_lib.up2b_api import choose_image_bed
 from up2b.up2b_lib.up2b_api.sm import SM
 from up2b.up2b_lib.up2b_api.imgtu import Imgtu
@@ -25,7 +25,7 @@ from up2b.up2b_lib.constants import (
     IMAGE_BEDS_HELP_MESSAGE,
     ImageBedCode,
 )
-from up2b.up2b_lib.utils import check_path, check_paths, read_conf
+from up2b.up2b_lib.utils import check_paths, read_conf
 from up2b.up2b_lib.log import logger
 from up2b.version import __version__  # Automatically create version.py after building
 
@@ -55,7 +55,7 @@ def cli():
     if not CACHE_PATH.exists():
         logger.debug("缓存目录不存在")
         CACHE_PATH.mkdir()
-        logger.info("已创建缓存目录：%s", CACHE_PATH)
+        logger.info("已创建缓存目录", cache_path=CACHE_PATH)
 
 
 @cli.command(help="显示正在使用的图床")
@@ -108,7 +108,7 @@ def login(username: str, password: str):
             "you have chosen `github` as the image bed, please login with `-lg`"
         )
 
-    logger.info("current image bed: %s", ib)
+    logger.info("current image bed", name=ib)
 
     echo("正在验证账号，请耐心等待...")
 
@@ -277,7 +277,7 @@ def _read_image_bed(
             add_watermark=add_watermark,
             ignore_cache=ignore_cache,
         )
-        logger.fatal("未知的图床代码：%d，可能因为清除无效的 gitee 配置，请重试", selected_code)
+        logger.fatal("未知的图床代码，可能因为清除无效的 gitee 配置，请重试", code=selected_code)
 
 
 def _config_text_watermark(
@@ -332,15 +332,13 @@ def print_list() -> int:
         code = ImageBedCode(selected_code)
 
         logger.warning(
-            "you have selected %s, but no authentication information has been configured.\n\n%s %s %s",
-            ds.format_with_multiple_styles(
-                " " + IMAGE_BEDS[code]().__str__() + " ",
+            "no authentication information has been configured",
+            image_bed=ds.format_with_multiple_styles(
+                IMAGE_BEDS[code]().__str__(),
                 ds.backgorud_color.dark_gray,
                 ds.foreground_color.white,
             ),
-            ds.format_with_one_style(" " + chr(10007), ds.foreground_color.red),
-            selected_code,
-            IMAGE_BEDS[code](),
+            code=selected_code,
         )
         return 0
 

@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   __init__.py
 # @Created At:  2021-02-13 09:02:21
-# @Modified At: 2023-03-04 22:03:15
+# @Modified At: 2023-03-06 21:01:59
 # @Modified By: thepoy
 
 import os
@@ -125,17 +125,10 @@ class Base(ImageBedAbstract):
 
     def check_login(self):
         if not self.auth_info:
-            cmd = (
-                "`-l` or `--login`"
-                if self.image_bed_type == ImageBedType.common
-                else "`-lg` or `--login-git`"
-            )
             logger.fatal(
-                "you have not logged in yet, please use the %s parameter to log in"
-                + " first, and the current image bed is : code=%d, name='%s'.",
-                cmd,
-                self.image_bed_code,
-                self,
+                "you have not logged in yet, please log in first.",
+                code=self.image_bed_code,
+                name=self,
             )
 
     def _read_auth_info(self) -> Optional[AuthInfo]:
@@ -152,7 +145,7 @@ class Base(ImageBedAbstract):
         return auth_info
 
     def _save_auth_info(self, auth_info: Dict[str, str]):
-        logger.debug("current image bed code: %d", self.image_bed_code)
+        logger.debug("current image bed code", code=self.image_bed_code)
         try:
             with open(CONF_FILE, "r+") as f:
                 conf = json.loads(f.read())
@@ -169,7 +162,7 @@ class Base(ImageBedAbstract):
                 "auth configure file is not found, please choose image bed with `--choose-site` or `-c` first."
             )
         except Exception as e:
-            logger.fatal(e)
+            logger.fatal("save auth configure failed", error=e)
 
     def _exceed_max_size(
         self, images: Tuple[Union[ImageType, DownloadErrorResponse]]
@@ -212,7 +205,7 @@ class Base(ImageBedAbstract):
         if not self.auto_compress:
             return image
 
-        logger.debug("compressing image: %s", image)
+        logger.debug("compressing image", image=image)
 
         try:
             from PIL import Image
@@ -272,10 +265,10 @@ class Base(ImageBedAbstract):
                 f.write(img_io.getbuffer())
 
             logger.info(
-                "image compression complete: %s, %.2fk -> %.2fk",
-                img_cache_path,
-                raw_size / 1024,
-                compressed_size / 1024,
+                "image compression complete",
+                image=img_cache_path,
+                raw_size=f"{raw_size / 1024}b",
+                compressed_size=f"{compressed_size / 1024}k",
             )
 
             return img_cache_path
@@ -303,7 +296,7 @@ class Base(ImageBedAbstract):
             shutil.rmtree(CACHE_PATH)
             os.mkdir(CACHE_PATH)
 
-            logger.info("cache folder has been cleared: %s", CACHE_PATH)
+            logger.info("cache folder has been cleared", cache_path=CACHE_PATH)
 
     def _check_cache(self, image: Path) -> Tuple[str, str, bool]:
         url, md5, ok = self.cache.check_cache_of_image_bed(
@@ -314,7 +307,7 @@ class Base(ImageBedAbstract):
             if self.ignore_cache:
                 logger.info("缓存中找到此图片链接，但用户选择忽略缓存强制上传")
             else:
-                logger.info("缓存中找到此图片链接：url=%s", url)
+                logger.info("缓存中找到此图片链接", url=url)
 
             return (url, md5, ok)
 
@@ -400,14 +393,14 @@ class GitBase(Base):
 
         url = self.base_url + filename
 
-        logger.debug("request headers: %s", self.headers)
+        logger.debug("request headers", headers=self.headers)
 
         resp = requests.request(
             request_method, url, headers=self.headers, json=data, timeout=self.timeout
         )
         if resp.status_code == 201:
             uploaded_url: str = resp.json()["content"]["download_url"]
-            logger.info("uploaded: '%s' => '%s'", image, uploaded_url)
+            logger.info("uploaded", image=image, url=uploaded_url)
             if hasattr(self, "cdn_url") and callable(getattr(self, "cdn_url")):
                 return self.cdn_url(uploaded_url)  # type: ignore
 
@@ -421,7 +414,7 @@ class GitBase(Base):
             return uploaded_url
         else:
             error = resp.json()["message"]
-            logger.error("upload failed: image='%s', error='%s'", image, error)
+            logger.error("upload failed", image=image, error=error)
             return UploadErrorResponse(resp.status_code, error, str(image))
 
     def upload_images(

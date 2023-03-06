@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   utils.py
 # @Created At:  2021-02-09 15:17:32
-# @Modified At: 2023-03-02 23:04:25
+# @Modified At: 2023-03-06 20:48:20
 # @Modified By: thepoy
 
 import json
@@ -66,7 +66,7 @@ def read_conf() -> ConfigFile:  # type: ignore
         with CONF_FILE.open(encoding="utf-8") as f:
             conf: ConfigFile = json.loads(f.read())
     except Exception as e:
-        logger.fatal("unkown error: %s", e)
+        logger.fatal("unkown error", err=e)
     else:
         return conf
 
@@ -86,7 +86,7 @@ class Login:
             logger.fatal(
                 "you have not logged in yet, please use the `-l` or `--login` parameter to log in"
                 + " first.\nCurrent image bed code is : `%s`.",
-                instance.image_bed_code,
+                code=instance.image_bed_code,
             )
 
         return partial(self, instance)
@@ -131,11 +131,13 @@ def is_url(path: str) -> bool:
 
 
 def download_online_image(url: str):
-    logger.debug("下载在线图片：%s", url)
+    logger.debug("下载在线图片", url=url)
 
     resp = requests.get(url)
     if resp.status_code != 200:
-        logger.error("在线图片下载失败，状态码：%d，响应体：%s", resp.status_code, resp.text)
+        logger.error(
+            "在线图片下载失败，状态码：%d，响应体：%s", status_code=resp.status_code, body=resp.text
+        )
         return DownloadErrorResponse(resp.status_code, resp.text)
 
     filename = os.path.basename(url)
@@ -148,35 +150,37 @@ def download_online_image(url: str):
     with cache_path.open("wb") as fb:
         fb.write(resp.content)
 
-    logger.debug("在线图片已保存到缓存目录：%s", cache_path)
+    logger.debug("在线图片已保存到缓存目录", cache_path=cache_path)
 
     return cache_path
 
 
-def check_path(path: str):
-    if not is_url(path):
-        logger.debug("'%s' 不是在线图片", path)
+def check_path(path: Path):
+    if not is_url(str(path)):
+        logger.debug("不是在线图片", path=path)
         return Path(path)
 
-    logger.info("'%s' 是在线图片", path)
+    logger.info("是在线图片", path=path)
 
-    return download_online_image(path)
+    return download_online_image(str(path))
 
 
 def check_paths(paths: Sequence[str]):
     if len(paths) == 1:
-        return [check_path(paths[0])]
+        return [check_path(Path(paths[0]))]
 
     new_paths: List[Union[Path, DownloadErrorResponse]] = [Path()] * len(paths)
     logger.info("使用线程池下载多张图片...")
     with ThreadPoolExecutor(4) as pool:
-        futures = {pool.submit(check_path, paths[i]): i for i in range(len(paths))}
+        futures = {
+            pool.submit(check_path, Path(paths[0])): i for i in range(len(paths))
+        }
 
         for future in as_completed(futures):
             idx = futures[future]
             data = future.result()
             new_paths[idx] = data
 
-    logger.info("检查结果：%s => %s", paths, new_paths)
+    logger.info("检查结果", original_paths=paths, new_paths=new_paths)
 
     return new_paths
