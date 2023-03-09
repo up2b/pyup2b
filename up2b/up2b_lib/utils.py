@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   utils.py
 # @Created At:  2021-02-09 15:17:32
-# @Modified At: 2023-03-09 09:57:57
+# @Modified At: 2023-03-09 10:11:26
 # @Modified By: thepoy
 
 import json
@@ -153,7 +153,7 @@ def download_online_image(url: str):
     return cache_path
 
 
-def check_path(path: Path):
+def check_path(path: Union[Path, str]):
     if not is_url(str(path)):
         logger.debug("不是在线图片", path=path)
         return Path(path)
@@ -163,7 +163,7 @@ def check_path(path: Path):
     return download_online_image(str(path))
 
 
-def check_paths(paths: Sequence[str]):
+def check_paths(paths: Union[Sequence[str], Sequence[Path]]):
     if len(paths) == 1:
         return [check_path(Path(paths[0]))]
 

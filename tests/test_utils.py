@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   test_utils.py
 # @Created At:  2023-02-07 10:48:08
-# @Modified At: 2023-03-09 09:56:58
+# @Modified At: 2023-03-09 10:11:44
 # @Modified By: thepoy
 
 from pathlib import Path
@@ -29,15 +29,11 @@ class TestUtils:
         assert IMAGES[0] == path
 
         path = utils.check_path(
-            Path(
-                "https://raw.githubusercontent.com/thep0y/image-bed/main/test/1647607453268.jpg"
-            )
+            "https://raw.githubusercontent.com/thep0y/image-bed/main/test/1647607453268.jpg"
         )
         assert CACHE_PATH / "1647607453268.jpg" == path
 
         path = utils.check_path(
-            Path(
-                "https://raw.githubusercontent.com/thep0y/image-bed/main/test/test.jpg"
-            )
+            "https://raw.githubusercontent.com/thep0y/image-bed/main/test/test.jpg"
         )
         assert isinstance(path, DownloadErrorResponse)
