@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   utils.py
 # @Created At:  2021-02-09 15:17:32
-# @Modified At: 2023-03-06 20:48:20
+# @Modified At: 2023-03-09 09:57:57
 # @Modified By: thepoy
 
 import json
@@ -135,9 +135,7 @@ def download_online_image(url: str):
 
     resp = requests.get(url)
     if resp.status_code != 200:
-        logger.error(
-            "在线图片下载失败，状态码：%d，响应体：%s", status_code=resp.status_code, body=resp.text
-        )
+        logger.error("在线图片下载失败", status_code=resp.status_code, body=resp.text)
         return DownloadErrorResponse(resp.status_code, resp.text)
 
     filename = os.path.basename(url)
