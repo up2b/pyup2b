@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   log.py
 # @Created At:  2023-02-07 12:13:41
-# @Modified At: 2023-02-21 12:40:41
+# @Modified At: 2023-04-03 20:55:06
 # @Modified By: thepoy
 
 from colorful_logger import get_logger, child_logger as cl
@@ -29,4 +29,5 @@ logger = get_logger(
     file_path=log_file_path,
     add_file_path=False,
     disable_line_number_filter=True,
+    asynchronous=False,
 )

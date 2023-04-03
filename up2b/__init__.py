@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   __init__.py
 # @Created At:  2021-02-08 15:43:32
-# @Modified At: 2023-03-06 21:07:49
+# @Modified At: 2023-04-03 20:56:38
 # @Modified By: thepoy
 
 import sys
@@ -358,8 +358,7 @@ def print_list() -> int:
 
 
 def run_main():
-    with logger:
-        sys.exit(cli())
+    sys.exit(cli())
 
 
 if __name__ == "__main__":
