@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   imgtg.py
 # @Created At:  2023-01-10 13:39:51
-# @Modified At: 2023-03-04 21:38:59
+# @Modified At: 2023-04-19 14:38:19
 # @Modified By: thepoy
 
 import os
@@ -16,7 +16,7 @@ import mimetypes
 import requests
 
 from urllib import parse
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Set, Tuple, Union
 from up2b.up2b_lib.custom_types import (
     ErrorResponse,
     ImageBedType,
@@ -111,7 +111,7 @@ class Imgtg(Base):
             resp_set_cookie = resp.headers["Set-Cookie"].split("; ")[0]
             return auth_token.group(1), resp_set_cookie
         else:
-            logger.error("response error: status_code=%d", resp.status_code)
+            logger.error("response error", status_code=resp.status_code)
             return None, None
 
     @property
@@ -141,7 +141,9 @@ class Imgtg(Base):
         self.auth_info["token"] = self.token = auth_token
         self._save_auth_info(self.auth_info)
 
-    def __upload(self, image: ImageType, retries=0) -> Union[str, UploadErrorResponse]:
+    def __upload(
+        self, image: ImageType, retries: int = 0
+    ) -> Union[str, UploadErrorResponse]:
         self.check_login()
 
         url, md5, ok = self._check_cache(image)  # type: ignore
@@ -203,9 +205,9 @@ class Imgtg(Base):
         try:
             uploaded_url: str = json_resp["image"]["image"]["url"]
             logger.info(
-                "uploaded url: '%s' => '%s'",
-                image,
-                uploaded_url,
+                "uploaded url",
+                target=image,
+                url=uploaded_url,
             )
 
             self.cache.save(
@@ -236,7 +238,7 @@ class Imgtg(Base):
                 )
 
     def upload_image(self, image_path: ImagePath) -> Union[str, UploadErrorResponse]:
-        logger.debug("uploading: %s", image_path)
+        logger.debug("uploading", image_path=image_path)
 
         image_path = self._add_watermark(image_path)
 
@@ -249,7 +251,7 @@ class Imgtg(Base):
     def upload_image_stream(
         self, image: ImageStream
     ) -> Union[str, UploadErrorResponse]:
-        logger.debug("uploading: %s", image.filename)
+        logger.debug("uploading", filename=image.filename)
 
         if self.auto_compress:
             new_image = self._compress_image(image)
@@ -264,9 +266,9 @@ class Imgtg(Base):
         url = self._url(self.username)
 
         # 集合去重
-        images = set()
+        images: Set[Tuple[str, ...]] = set()
 
-        def visit_next_page(url):
+        def visit_next_page(url: str):
             resp = requests.get(url, headers=self.__headers, timeout=self.timeout)
             resp.encoding = "utf-8"
 
@@ -320,11 +322,11 @@ class Imgtg(Base):
 
         return result
 
-    def delete_image(self, img_id: str, retries=0):
-        logger.fatal("%s 不支持删除图片", self)
+    def delete_image(self, img_id: str, retries: int = 0):
+        logger.fatal("不支持删除图片", image_bed=self)
 
-    def delete_images(self, imgs_id: List[str], retries=0):
-        logger.fatal("%s 不支持删除图片", self)
+    def delete_images(self, imgs_id: List[str], retries: int = 0):
+        logger.fatal("不支持删除图片", image_bed=self)
 
     def _url(self, path: str) -> str:
         return self.base_url + path

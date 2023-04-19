@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   constants.py
 # @Created At:  2021-02-13 09:17:07
-# @Modified At: 2023-03-01 20:10:33
+# @Modified At: 2023-04-19 14:42:31
 # @Modified By: thepoy
 
 import sys
@@ -51,10 +51,11 @@ IMAGE_BEDS_HELP_MESSAGE = "\n\n".join([f"{v}: {k}" for k, v in IMAGE_BEDS_CODE.i
 IS_WINDOWS = sys.platform == "win32"
 IS_MACOS = sys.platform == "darwin"
 
-if IS_WINDOWS:
-    CONFIG_FOLDER_PATH = Path(os.environ["APPDATA"]) / "up2b"
-else:
-    CONFIG_FOLDER_PATH = Path(os.environ["HOME"]) / ".config" / "up2b"
+CONFIG_FOLDER_PATH = (
+    Path(os.environ["APPDATA"]) / "up2b"
+    if IS_WINDOWS
+    else Path(os.environ["HOME"]) / ".config" / "up2b"
+)
 
 if not CONFIG_FOLDER_PATH.exists():
     os.makedirs(CONFIG_FOLDER_PATH / "conf", 0o755)

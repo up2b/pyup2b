@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   i18n.py
 # @Created At:  2022-01-09 11:17:23
-# @Modified At: 2023-02-27 22:47:19
+# @Modified At: 2023-04-19 14:43:52
 # @Modified By: thepoy
 
 import json
@@ -67,19 +67,18 @@ def read_i18n() -> Locale:
     lang = get_default_language()
     locale = _i18ns.get(lang)
     if locale:
-        logger.debug("the language used: [ %s ]", lang)
+        logger.debug("the language used", language=lang)
         return locale
 
     translation_file = _i18n_folder / (lang + ".json")
     if not os.path.exists(translation_file):
         logger.info(
-            "the language used is [ %s ], but no translation file for [ %s ] was found, so use [ en_US ]",
-            lang,
-            lang,
+            "the language used is [ %s ], but no translation file for [ %s ] was found, so use [ en_US ]"
+            % (lang, lang)
         )
         return _i18ns["en_US"]
 
-    logger.debug("translation file [ %s ] will be used", translation_file)
+    logger.debug("translation file will be used", file=translation_file)
 
     with translation_file.open() as f:
         return json.loads(f.read())

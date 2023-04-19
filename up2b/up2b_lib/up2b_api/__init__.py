@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   __init__.py
 # @Created At:  2021-02-13 09:02:21
-# @Modified At: 2023-03-06 21:01:59
+# @Modified At: 2023-04-19 14:41:12
 # @Modified By: thepoy
 
 import os
@@ -15,7 +15,7 @@ import requests
 
 from io import BytesIO
 from abc import ABC, abstractmethod
-from typing import Optional, List, Tuple, Dict, Union
+from typing import Callable, Optional, List, Tuple, Dict, Union
 from pathlib import Path
 from up2b.up2b_lib.cache import Cache
 from up2b.up2b_lib.constants import (
@@ -315,7 +315,7 @@ class Base(ImageBedAbstract):
         return (url, md5, ok)
 
     def upload_images(
-        self, *images: Union[ImageType, DownloadErrorResponse], to_console=True
+        self, *images: Union[ImageType, DownloadErrorResponse], to_console: bool = True
     ) -> List[Union[str, DownloadErrorResponse, UploadErrorResponse]]:
         self.check_login()
 
@@ -374,7 +374,9 @@ class GitBase(Base):
         }
         self._save_auth_info(auth_info)
 
-    def _upload(self, image: ImageType, data: Dict[str, str], request_method="put"):
+    def _upload(
+        self, image: ImageType, data: Dict[str, str], request_method: str = "put"
+    ) -> Union[str, UploadErrorResponse]:
         self.check_login()
 
         url, md5, ok = self._check_cache(image)  # type: ignore
@@ -418,7 +420,7 @@ class GitBase(Base):
             return UploadErrorResponse(resp.status_code, error, str(image))
 
     def upload_images(
-        self, *images: Union[ImageType, DownloadErrorResponse], to_console=True
+        self, *images: Union[ImageType, DownloadErrorResponse], to_console: bool = True
     ) -> List[Union[str, DownloadErrorResponse, UploadErrorResponse]]:
         self.check_login()
 
@@ -458,11 +460,12 @@ class GitBase(Base):
             return ErrorResponse(resp.status_code, resp.text)
 
         all_images_resp: List[Dict[str, str]] = resp.json()
-        images = []
+        images: List[GitGetAllImagesResponse] = []
         for file in all_images_resp:
             download_url = file["download_url"]
             if hasattr(self, "cdn_url") and callable(getattr(self, "cdn_url")):
-                download_url = self.cdn_url(file["download_url"])  # type: ignore
+                self.cdn_url: Callable[[str], str]
+                download_url: str = self.cdn_url(file["download_url"])
             images.append(
                 GitGetAllImagesResponse(
                     download_url,

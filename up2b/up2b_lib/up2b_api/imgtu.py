@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   imgtu.py
 # @Created At:  2021-02-13 09:04:37
-# @Modified At: 2023-03-04 21:38:13
+# @Modified At: 2023-04-19 14:48:44
 # @Modified By: thepoy
 
 import os
@@ -16,7 +16,7 @@ import mimetypes
 import requests
 
 from urllib import parse
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 from up2b.up2b_lib.custom_types import (
     ErrorResponse,
     ImageBedType,
@@ -111,7 +111,7 @@ class Imgtu(Base):
             resp_set_cookie = resp.headers["Set-Cookie"].split("; ")[0]
             return auth_token.group(1), resp_set_cookie
         else:
-            logger.error("response error: status_code=%d", resp.status_code)
+            logger.error("response error", status_code=resp.status_code)
             return None, None
 
     @property
@@ -141,7 +141,9 @@ class Imgtu(Base):
         self.auth_info["token"] = self.token = auth_token
         self._save_auth_info(self.auth_info)
 
-    def __upload(self, image: ImageType, retries=0) -> Union[str, UploadErrorResponse]:
+    def __upload(
+        self, image: ImageType, retries: int = 0
+    ) -> Union[str, UploadErrorResponse]:
         url, md5, ok = self._check_cache(image)  # type: ignore
 
         if ok and not self.ignore_cache:
@@ -203,9 +205,9 @@ class Imgtu(Base):
         try:
             uploaded_url: str = json_resp["image"]["image"]["url"]
             logger.info(
-                "uploaded url: '%s' => '%s'",
-                image,
-                uploaded_url,
+                "uploaded url",
+                target=image,
+                url=uploaded_url,
             )
 
             self.cache.save(
@@ -223,9 +225,9 @@ class Imgtu(Base):
                         resp.status_code, resp.json()["error"]["message"], str(image)
                     )
 
-                logger.warn(
-                    "`auth_token` has expired, the program will try to update `auth_token` automatically, number of retries: %d",
-                    retries + 1,
+                logger.warning(
+                    "`auth_token` has expired, the program will try to update `auth_token` automatically, number of retries",
+                    retries=retries + 1,
                 )
                 self._update_auth_token()
 
@@ -236,14 +238,14 @@ class Imgtu(Base):
                 )
 
     def upload_image(self, image_path: ImagePath) -> Union[str, UploadErrorResponse]:
-        logger.debug("uploading: %s", image_path)
+        logger.debug("uploading", image_path=image_path)
 
         return self.__upload(image_path)
 
     def upload_image_stream(
         self, image: ImageStream
     ) -> Union[str, UploadErrorResponse]:
-        logger.debug("uploading: %s", image.filename)
+        logger.debug("uploading:", filename=image.filename)
 
         return self.__upload(image)
 
@@ -253,9 +255,9 @@ class Imgtu(Base):
         url = self._url(self.username)
 
         # 集合去重
-        images = set()
+        images: Set[Tuple[str, ...]] = set()
 
-        def visit_next_page(url):
+        def visit_next_page(url: str):
             resp = requests.get(url, headers=self.__headers, timeout=self.timeout)
             resp.encoding = "utf-8"
 
@@ -309,7 +311,7 @@ class Imgtu(Base):
 
         return result
 
-    def delete_image(self, img_id: str, retries=0) -> Optional[ErrorResponse]:
+    def delete_image(self, img_id: str, retries: int = 0) -> Optional[ErrorResponse]:
         self.check_login()
 
         url = self._url("json")
@@ -342,7 +344,9 @@ class Imgtu(Base):
 
         return ErrorResponse(resp.status_code, resp.json()["error"]["message"])
 
-    def delete_images(self, imgs_id: List[str], retries=0) -> Dict[str, ErrorResponse]:
+    def delete_images(
+        self, imgs_id: List[str], retries: int = 0
+    ) -> Dict[str, ErrorResponse]:
         self.check_login()
 
         url = self._url("json")
@@ -363,8 +367,8 @@ class Imgtu(Base):
                 if retries >= 3:
                     # 删除多张图片时如果重试3次仍无法成功响应则退出程序
                     logger.fatal(
-                        "authentication information is invalid: %s",
-                        resp.json()["error"]["message"],
+                        "authentication information is invalid",
+                        error=resp.json()["error"]["message"],
                     )
 
                 logger.warn(

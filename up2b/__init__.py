@@ -4,7 +4,7 @@
 # @Email:       thepoy@163.com
 # @File Name:   __init__.py
 # @Created At:  2021-02-08 15:43:32
-# @Modified At: 2023-04-03 20:56:38
+# @Modified At: 2023-04-19 14:45:15
 # @Modified By: thepoy
 
 import sys
@@ -320,7 +320,7 @@ def print_list() -> int:
     auth_data: Optional[AuthData] = conf.get("auth_data")  # type: ignore
 
     if not auth_data:
-        selected_code = conf.get("image_bed", -1)
+        selected_code = conf.get("image_bed")
         if selected_code is None:
             logger.fatal(
                 "no image bed selected, "
