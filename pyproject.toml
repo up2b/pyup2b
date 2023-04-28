@@ -4,20 +4,18 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "up2b"
-authors = [
-    {name = "thep0y", email = "thepoy@163.com"},
-]
+authors = [{ name = "thep0y", email = "thepoy@163.com" }]
 description = "上传图片到图床"
 readme = "README.md"
 requires-python = ">=3"
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 classifiers = ["Programming Language :: Python :: 3"]
 keywords = ["typora", "image bed", "upload"]
 dependencies = [
     "requests",
     "click",
-    "colorful-logger>=0.2.0a4",
-    "typing_extensions; python_version<'3.8'"
+    "colorful-logger>=0.2.0b1",
+    "typing_extensions; python_version<'3.8'",
 ]
 dynamic = ["version"]
 
