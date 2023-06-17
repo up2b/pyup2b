@@ -260,7 +260,10 @@ def _read_image_bed(
 ) -> Union[SM, Imgtu, Imgtg, Github]:
     conf = read_conf()
 
-    selected_code = conf["image_bed"]
+    selected_code = conf.get("image_bed")
+    if not selected_code:
+        logger.fatal("当前图床为空，请先选择要使用的图床")
+
     assert isinstance(selected_code, int)
 
     try:
@@ -317,30 +320,28 @@ def _config_text_watermark(
 
 def print_list() -> int:
     conf = read_conf()
-    auth_data: Optional[AuthData] = conf.get("auth_data")  # type: ignore
+    auth_data: AuthData = conf.get("auth_data", {})  # type: ignore
 
     if not auth_data:
         selected_code = conf.get("image_bed")
         if selected_code is None:
-            logger.fatal(
+            logger.warning(
                 "no image bed selected, "
                 + "you need to use `--choose-site` or `-c` to select the image bed first."
             )
 
-        assert isinstance(selected_code, int)
+        if selected_code:
+            code = ImageBedCode(selected_code)
 
-        code = ImageBedCode(selected_code)
-
-        logger.warning(
-            "no authentication information has been configured",
-            image_bed=ds.format_with_multiple_styles(
-                IMAGE_BEDS[code]().__str__(),
-                ds.backgorud_color.dark_gray,
-                ds.foreground_color.white,
-            ),
-            code=selected_code,
-        )
-        return 0
+            logger.warning(
+                "no authentication information has been configured",
+                image_bed=ds.format_with_multiple_styles(
+                    IMAGE_BEDS[code]().__str__(),
+                    ds.backgorud_color.dark_gray,
+                    ds.foreground_color.white,
+                ),
+                code=selected_code,
+            )
 
     def print_item(symbol, color, idx):
         ib = IMAGE_BEDS[ImageBedCode(idx)]()

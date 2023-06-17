@@ -57,10 +57,12 @@ def read_conf() -> ConfigFile:  # type: ignore
         return {}
 
     if not CONF_FILE.exists():
-        logger.fatal(
+        logger.warning(
             "the configuration file is not found, "
             + "you need to use `--choose-site` or `-c` to select the image bed first."
         )
+
+        return {}
 
     try:
         with CONF_FILE.open(encoding="utf-8") as f:
