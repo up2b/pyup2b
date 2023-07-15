@@ -11,7 +11,7 @@ import sys
 import json
 import click
 
-from typing import Any, Dict, Optional, Tuple, Type, Union
+from typing import Any, Dict, Tuple, Type, Union
 from colort import display_style as ds
 from up2b.up2b_lib.custom_types import AuthData
 from up2b.up2b_lib.up2b_api import choose_image_bed
@@ -336,7 +336,7 @@ def print_list() -> int:
             logger.warning(
                 "no authentication information has been configured",
                 image_bed=ds.format_with_multiple_styles(
-                    IMAGE_BEDS[code]().__str__(),
+                    IMAGE_BEDS[code](conf=conf).__str__(),
                     ds.backgorud_color.dark_gray,
                     ds.foreground_color.white,
                 ),
@@ -344,7 +344,7 @@ def print_list() -> int:
             )
 
     def print_item(symbol, color, idx):
-        ib = IMAGE_BEDS[ImageBedCode(idx)]()
+        ib = IMAGE_BEDS[ImageBedCode(idx)](conf=conf)
         click.echo(
             f"""{ds.format_with_one_style(" " + symbol, color)} {idx} {ib}: {ib.description}"""
         )

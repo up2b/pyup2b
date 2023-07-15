@@ -13,6 +13,7 @@ import requests
 from base64 import b64encode
 from typing import Optional
 from up2b.up2b_lib.custom_types import (
+    ConfigFile,
     ImageBedType,
     ImagePath,
     ImageStream,
@@ -36,8 +37,9 @@ class Github(GitBase):
         auto_compress: bool = False,
         add_watermark: bool = False,
         ignore_cache: bool = False,
+        conf: Optional[ConfigFile] = None,
     ):
-        super().__init__(auto_compress, add_watermark, ignore_cache)
+        super().__init__(auto_compress, add_watermark, ignore_cache, conf)
 
         if hasattr(self, "token"):
             self.headers = {

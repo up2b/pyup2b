@@ -52,7 +52,9 @@ def check_image_exists(images: Tuple[Union[ImageType, DownloadErrorResponse]]):
             raise FileNotFoundError(image)
 
 
-def read_conf() -> ConfigFile:  # type: ignore
+def read_conf() -> ConfigFile:
+    logger.trace("reading configuration file")
+
     if os.getenv("UP2B_TEST"):
         return {}
 

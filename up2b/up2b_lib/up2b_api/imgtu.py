@@ -18,6 +18,7 @@ import requests
 from urllib import parse
 from typing import Dict, List, Optional, Set, Tuple, Union
 from up2b.up2b_lib.custom_types import (
+    ConfigFile,
     ErrorResponse,
     ImageBedType,
     ImageType,
@@ -49,8 +50,9 @@ class Imgtu(Base):
         auto_compress: bool = False,
         add_watermark: bool = False,
         ignore_cache: bool = False,
+        conf: Optional[ConfigFile] = None,
     ):
-        super().__init__(auto_compress, add_watermark, ignore_cache)
+        super().__init__(auto_compress, add_watermark, ignore_cache, conf)
 
         self.cookie: Optional[str] = None
         self.token: Optional[str] = None

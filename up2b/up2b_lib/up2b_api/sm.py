@@ -13,6 +13,7 @@ import requests
 from typing import BinaryIO, List, Optional, Dict, Any, Tuple, Union
 from pathlib import Path
 from up2b.up2b_lib.custom_types import (
+    ConfigFile,
     ErrorResponse,
     ImageBedType,
     ImagePath,
@@ -39,8 +40,9 @@ class SM(Base):
         auto_compress: bool = False,
         add_watermark: bool = False,
         ignore_cache: bool = False,
+        conf: Optional[ConfigFile] = None,
     ):
-        super().__init__(auto_compress, add_watermark, ignore_cache)
+        super().__init__(auto_compress, add_watermark, ignore_cache, conf)
 
         if self.auth_info:
             self.token: str = self.auth_info["token"]
@@ -57,7 +59,7 @@ class SM(Base):
             )
             return True
         except Exception as e:
-            logger.error(e)
+            logger.error(e.__str__())
             return False
 
     def _auto_login(self):

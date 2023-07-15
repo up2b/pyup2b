@@ -110,8 +110,9 @@ class Base(ImageBedAbstract):
         auto_compress: bool = False,
         add_watermark: bool = False,
         ignore_cache: bool = False,
+        conf: Optional[ConfigFile] = None,
     ):
-        self.conf = read_conf()
+        self.conf = conf if conf != None else read_conf()
 
         self.auth_info: Optional[AuthInfo] = self._read_auth_info()
         self.add_watermark: bool = add_watermark
@@ -356,8 +357,9 @@ class GitBase(Base):
         auto_compress: bool = False,
         add_watermark: bool = False,
         ignore_cache: bool = False,
+        conf: Optional[ConfigFile] = None,
     ):
-        super().__init__(auto_compress, add_watermark, ignore_cache)
+        super().__init__(auto_compress, add_watermark, ignore_cache, conf)
 
         if self.auth_info:
             self.token = self.auth_info["token"]
