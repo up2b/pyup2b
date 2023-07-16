@@ -13,7 +13,7 @@ import requests
 from base64 import b64encode
 from typing import Optional
 from up2b.up2b_lib.custom_types import (
-    ConfigFile,
+    Config,
     ImageBedType,
     ImagePath,
     ImageStream,
@@ -37,7 +37,7 @@ class Github(GitBase):
         auto_compress: bool = False,
         add_watermark: bool = False,
         ignore_cache: bool = False,
-        conf: Optional[ConfigFile] = None,
+        conf: Optional[Config] = None,
     ):
         super().__init__(auto_compress, add_watermark, ignore_cache, conf)
 
@@ -49,7 +49,7 @@ class Github(GitBase):
 
     def upload_image(self, image_path: ImagePath):
         basename = os.path.basename(image_path)
-        logger.debug("uploading: %s", basename)
+        logger.debug("uploading", name=basename)
         with open(image_path, "rb") as fb:
             data = {
                 "content": b64encode(fb.read()).decode("utf-8"),
@@ -58,7 +58,7 @@ class Github(GitBase):
         return self._upload(image_path, data)
 
     def upload_image_stream(self, image: ImageStream):
-        logger.debug("uploading: %s", image.filename)
+        logger.debug("uploading", name=image.filename)
         data = {
             "content": b64encode(image.stream).decode("utf-8"),
             "message": "up2b - " + image.filename,

@@ -1,14 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-# @Author:      thepoy
-# @Email:       thepoy@163.com
-# @File Name:   imgtg.py
-# @Created At:  2023-01-10 13:39:51
-# @Modified At: 2023-04-19 14:38:19
-# @Modified By: thepoy
 
 import os
-from pathlib import Path
 import re
 import time
 import json
@@ -17,8 +10,9 @@ import requests
 
 from urllib import parse
 from typing import List, Optional, Set, Tuple, Union
+from pathlib import Path
 from up2b.up2b_lib.custom_types import (
-    ConfigFile,
+    Config,
     ErrorResponse,
     ImageBedType,
     ImageType,
@@ -50,7 +44,7 @@ class Imgtg(Base):
         auto_compress: bool = False,
         add_watermark: bool = False,
         ignore_cache: bool = False,
-        conf: Optional[ConfigFile] = None,
+        conf: Optional[Config] = None,
     ):
         super().__init__(auto_compress, add_watermark, ignore_cache, conf)
 
@@ -153,6 +147,8 @@ class Imgtg(Base):
         if ok and not self.ignore_cache:
             return url
 
+        logger.debug("uploading", image_path=image)
+
         image = self._compress_image(image)
 
         if isinstance(image, Path):
@@ -207,7 +203,7 @@ class Imgtg(Base):
         try:
             uploaded_url: str = json_resp["image"]["image"]["url"]
             logger.info(
-                "uploaded url",
+                "uploaded",
                 target=image,
                 url=uploaded_url,
             )
@@ -240,8 +236,6 @@ class Imgtg(Base):
                 )
 
     def upload_image(self, image_path: ImagePath) -> Union[str, UploadErrorResponse]:
-        logger.debug("uploading", image_path=image_path)
-
         image_path = self._add_watermark(image_path)
 
         if self.auto_compress:

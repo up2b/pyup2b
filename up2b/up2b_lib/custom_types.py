@@ -8,9 +8,11 @@
 # @Modified By: thepoy
 
 from enum import IntEnum
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 from dataclasses import dataclass, asdict
 from pathlib import Path
+
+from up2b.up2b_lib.constants import ImageBedCode
 
 
 class ImageBedType(IntEnum):
@@ -36,6 +38,13 @@ ConfigFile = Dict[str, Union[int, AuthData, WaterMarkConfig]]
 DeletedResponse = Dict[str, Union[bool, str]]
 ImageType = Union[ImagePath, ImageStream]
 Images = List[ImageType]
+
+
+@dataclass
+class Config:
+    image_bed: Optional[ImageBedCode]
+    auth_data: Dict[ImageBedCode, Dict[str, str]]
+    watermark: WaterMarkConfig
 
 
 @dataclass

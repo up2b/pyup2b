@@ -18,7 +18,7 @@ import requests
 from urllib import parse
 from typing import Dict, List, Optional, Set, Tuple, Union
 from up2b.up2b_lib.custom_types import (
-    ConfigFile,
+    Config,
     ErrorResponse,
     ImageBedType,
     ImageType,
@@ -50,7 +50,7 @@ class Imgtu(Base):
         auto_compress: bool = False,
         add_watermark: bool = False,
         ignore_cache: bool = False,
-        conf: Optional[ConfigFile] = None,
+        conf: Optional[Config] = None,
     ):
         super().__init__(auto_compress, add_watermark, ignore_cache, conf)
 
@@ -158,6 +158,8 @@ class Imgtu(Base):
         if isinstance(image, Path):
             image = self._add_watermark(image)
 
+        logger.debug("uploading", image_path=image)
+
         url = self._url("json")
         filename_with_suffix = os.path.basename(str(image))
         filename_without_suffix, suffix = os.path.splitext(filename_with_suffix)
@@ -240,15 +242,11 @@ class Imgtu(Base):
                 )
 
     def upload_image(self, image_path: ImagePath) -> Union[str, UploadErrorResponse]:
-        logger.debug("uploading", image_path=image_path)
-
         return self.__upload(image_path)
 
     def upload_image_stream(
         self, image: ImageStream
     ) -> Union[str, UploadErrorResponse]:
-        logger.debug("uploading:", filename=image.filename)
-
         return self.__upload(image)
 
     def get_all_images(self) -> Union[List[ImgtuResponse], ErrorResponse]:

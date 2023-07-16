@@ -13,7 +13,6 @@ import click
 
 from typing import Any, Dict, Tuple, Type, Union
 from colort import display_style as ds
-from up2b.up2b_lib.custom_types import AuthData
 from up2b.up2b_lib.up2b_api import choose_image_bed
 from up2b.up2b_lib.up2b_api.sm import SM
 from up2b.up2b_lib.up2b_api.imgtu import Imgtu
@@ -260,7 +259,7 @@ def _read_image_bed(
 ) -> Union[SM, Imgtu, Imgtg, Github]:
     conf = read_conf()
 
-    selected_code = conf.get("image_bed")
+    selected_code = conf.image_bed
     if not selected_code:
         logger.fatal("当前图床为空，请先选择要使用的图床")
 
@@ -320,27 +319,26 @@ def _config_text_watermark(
 
 def print_list() -> int:
     conf = read_conf()
-    auth_data: AuthData = conf.get("auth_data", {})  # type: ignore
+    auth_data = conf.auth_data
+
+    assert isinstance(auth_data, dict)
 
     if not auth_data:
-        selected_code = conf.get("image_bed")
-        if selected_code is None:
+        if conf.image_bed is None:
             logger.warning(
                 "no image bed selected, "
                 + "you need to use `--choose-site` or `-c` to select the image bed first."
             )
 
-        if selected_code:
-            code = ImageBedCode(selected_code)
-
+        if conf.image_bed:
             logger.warning(
                 "no authentication information has been configured",
                 image_bed=ds.format_with_multiple_styles(
-                    IMAGE_BEDS[code](conf=conf).__str__(),
-                    ds.backgorud_color.dark_gray,
-                    ds.foreground_color.white,
+                    IMAGE_BEDS[conf.image_bed](conf=conf).__str__(),
+                    ds.bc.dark_gray,
+                    ds.fc.white,
                 ),
-                code=selected_code,
+                code=conf.image_bed,
             )
 
     def print_item(symbol, color, idx):
@@ -350,7 +348,7 @@ def print_list() -> int:
         )
 
     for i in ImageBedCode:
-        if auth_data.get(str(i)):
+        if auth_data.get(i):
             print_item(chr(10003), ds.fc.green, i)
         else:
             print_item(chr(10007), ds.fc.red, i)

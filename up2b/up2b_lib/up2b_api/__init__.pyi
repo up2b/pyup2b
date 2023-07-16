@@ -7,7 +7,7 @@ from typing import overload, Optional, List, Tuple, Dict, Union
 from up2b.up2b_lib.cache import Cache
 from up2b.up2b_lib.constants import ImageBedCode
 from up2b.up2b_lib.custom_types import (
-    ConfigFile,
+    Config,
     DownloadErrorResponse,
     ErrorResponse,
     GitGetAllImagesResponse,
@@ -69,7 +69,7 @@ class ImageBedAbstract(ABC):
 class Base:
     image_bed_code: ImageBedCode
     max_size: int
-    conf: ConfigFile
+    conf: Config
     image_bed_type: ImageBedType
     conf_file: str
     auth_info: Optional[AuthInfo]
@@ -84,7 +84,7 @@ class Base:
         auto_compress: bool = ...,
         add_watermark: bool = ...,
         ignore_cache: bool = ...,
-        conf: Optional[ConfigFile] = ...,
+        conf: Optional[Config] = ...,
     ) -> None: ...
     def check_login(self) -> None: ...
     def _read_auth_info(self) -> Optional[AuthInfo]: ...
@@ -117,7 +117,7 @@ class GitBase(Base, ImageBedAbstract):
         auto_compress: bool = ...,
         add_watermark: bool = ...,
         ignore_cache: bool = ...,
-        conf: Optional[ConfigFile] = ...,
+        conf: Optional[Config] = ...,
     ) -> None: ...
     def login(
         self, token: str, username: str, repo: str, folder: str = ...

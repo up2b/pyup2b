@@ -13,7 +13,7 @@ import requests
 from typing import BinaryIO, List, Optional, Dict, Any, Tuple, Union
 from pathlib import Path
 from up2b.up2b_lib.custom_types import (
-    ConfigFile,
+    Config,
     ErrorResponse,
     ImageBedType,
     ImagePath,
@@ -40,7 +40,7 @@ class SM(Base):
         auto_compress: bool = False,
         add_watermark: bool = False,
         ignore_cache: bool = False,
-        conf: Optional[ConfigFile] = None,
+        conf: Optional[Config] = None,
     ):
         super().__init__(auto_compress, add_watermark, ignore_cache, conf)
 

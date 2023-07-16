@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-# @Author:      thepoy
-# @Email:       thepoy@163.com
-# @File Name:   utils.py
-# @Created At:  2021-02-09 15:17:32
-# @Modified At: 2023-03-09 10:11:26
-# @Modified By: thepoy
 
 import json
 import os
@@ -17,17 +11,19 @@ from functools import wraps, partial
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse
+
 from up2b.up2b_lib.constants import (
     CONF_FILE,
     DEFAULT_TIMEOUT,
     IS_MACOS,
     PYTHON_VERSION,
     CACHE_PATH,
+    ImageBedCode,
 )
 from up2b.up2b_lib.custom_types import (
+    Config,
     DownloadErrorResponse,
     ImageType,
-    ConfigFile,
 )
 from up2b.up2b_lib.log import child_logger
 
@@ -52,11 +48,11 @@ def check_image_exists(images: Tuple[Union[ImageType, DownloadErrorResponse]]):
             raise FileNotFoundError(image)
 
 
-def read_conf() -> ConfigFile:
+def read_conf() -> Config:
     logger.trace("reading configuration file")
 
     if os.getenv("UP2B_TEST"):
-        return {}
+        return Config(None, {}, {})
 
     if not CONF_FILE.exists():
         logger.warning(
@@ -64,15 +60,21 @@ def read_conf() -> ConfigFile:
             + "you need to use `--choose-site` or `-c` to select the image bed first."
         )
 
-        return {}
+        return Config(None, {}, {})
 
     try:
         with CONF_FILE.open(encoding="utf-8") as f:
-            conf: ConfigFile = json.loads(f.read())
+            conf = json.loads(f.read())
     except Exception as e:
         logger.fatal("unkown error", err=e)
     else:
-        return conf
+        auth_data = {
+            ImageBedCode(int(k)): v for k, v in conf.get("auth_data", {}).items()
+        }
+
+        return Config(
+            ImageBedCode(conf.get("image_bed")), auth_data, conf.get("watermark", {})
+        )
 
 
 class Login:
@@ -159,10 +161,10 @@ def download_online_image(url: str):
 
 def check_path(path: Union[Path, str]):
     if not is_url(str(path)):
-        logger.debug("不是在线图片", path=path)
+        logger.debug("本地图片", path=path)
         return Path(path)
 
-    logger.info("是在线图片", path=path)
+    logger.info("在线图片", path=path)
 
     return download_online_image(str(path))
 

@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-# @Author:      thepoy
-# @Email:       thepoy@163.com
-# @File Name:   __init__.py
-# @Created At:  2021-02-13 09:02:21
-# @Modified At: 2023-04-19 14:41:12
-# @Modified By: thepoy
 
 import os
 import time
@@ -32,7 +26,7 @@ else:
     cached_property = property
 
 from up2b.up2b_lib.custom_types import (
-    ConfigFile,
+    Config,
     DownloadErrorResponse,
     ErrorResponse,
     GitGetAllImagesResponse,
@@ -100,7 +94,7 @@ class ImageBedAbstract(ABC):
 class Base(ImageBedAbstract):
     image_bed_code: ImageBedCode
     max_size: int
-    conf: ConfigFile
+    conf: Config
     image_bed_type: ImageBedType
     timeout = timeout()
     cache = Cache()
@@ -110,14 +104,14 @@ class Base(ImageBedAbstract):
         auto_compress: bool = False,
         add_watermark: bool = False,
         ignore_cache: bool = False,
-        conf: Optional[ConfigFile] = None,
+        conf: Optional[Config] = None,
     ):
         self.conf = conf if conf != None else read_conf()
 
         self.auth_info: Optional[AuthInfo] = self._read_auth_info()
         self.add_watermark: bool = add_watermark
         if self.add_watermark:
-            if not self.conf.get("watermark"):
+            if not self.conf.watermark:
                 logger.fatal(
                     "you have enabled the function of adding watermark, but the watermark is not configured, please configure the text watermark through `--config-text-watermark`"
                 )
@@ -133,13 +127,13 @@ class Base(ImageBedAbstract):
             )
 
     def _read_auth_info(self) -> Optional[AuthInfo]:
-        auth_data = self.conf.get("auth_data")
+        auth_data = self.conf.auth_data
         if not auth_data:
             return
 
         assert isinstance(auth_data, dict)
 
-        auth_info = auth_data.get(str(self.image_bed_code))
+        auth_info = auth_data.get(self.image_bed_code)
 
         assert auth_info is None or isinstance(auth_info, dict)
 
@@ -357,7 +351,7 @@ class GitBase(Base):
         auto_compress: bool = False,
         add_watermark: bool = False,
         ignore_cache: bool = False,
-        conf: Optional[ConfigFile] = None,
+        conf: Optional[Config] = None,
     ):
         super().__init__(auto_compress, add_watermark, ignore_cache, conf)
 

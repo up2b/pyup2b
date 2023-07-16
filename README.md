@@ -17,13 +17,13 @@
 支持以下图床自动上传:
 
 - sm.ms
-- imgse.com(原imgtu.com)
+- imgse.com(原 imgtu.com)
 - github.com
 - imgtg.com
 
-成功上传到`github`后会返回`jsdelivr`的CDN链接，加快在中国境内对图片的访问速度。
+成功上传到`github`后会返回`jsdelivr`的 CDN 链接，加快在中国境内对图片的访问速度。
 
-支持jpeg/jpg和png图片的自动压缩，但仅在测试阶段，可能有些小问题，如果你不想在使用此功能时出现错误或达不到预期则不建议使用。
+支持 jpeg/jpg 和 png 图片的自动压缩，但仅在测试阶段，可能有些小问题，如果你不想在使用此功能时出现错误或达不到预期则不建议使用。
 
 ## 怎么用
 
@@ -70,9 +70,8 @@ Commands:
 # 如果你想选择sm.ms
 up2b choose 0
 ```
+
 > 你可能也注意到了，图床的 code 不连续，这是因为最初写这个项目的时候没有考虑到一些图床挂掉的可能性，删掉一些挂掉的图床后，为了使配置文件不冲突，所以图床 code 无法连续。
->
-> 
 >
 > 在 1.0 版本中，将不会再使用数字作为图床的 code，这个问题将会解决，同时会启用全新的配置文件，与 0.X.X 版本的配置文件将不通用。
 
@@ -80,18 +79,19 @@ up2b choose 0
 
 #### **普通图床：**
 
-git仓库本身并不算是图床，所以git仓库之外的图床都是普通图床。
+git 仓库本身并不算是图床，所以 git 仓库之外的图床都是普通图床。
 
 使用普通图床时，用`login`命令进行认证信息的配置，如：
 
 ```shell
 up2b login username password
 ```
-#### **git仓库：**
 
-此包所指的git仓库包括`github`。
+#### **git 仓库：**
 
-使用git仓库作为图床，需要用或`login-git`命令进行认证信息的配置。
+此包所指的 git 仓库包括`github`。
+
+使用 git 仓库作为图床，需要用或`login-git`命令进行认证信息的配置。
 
 认证信息需要四个参数：
 
@@ -121,8 +121,6 @@ Options:
 	-ic, --ignore-cache   忽略数据库缓存，强制上传图片
 	-h, --help            Show this message and exit.
 ```
-
-
 
 将`up2b upload`命令填到`Typora`里，命令里有个参数`-ac`为可选参数，其作用为开启自动压缩功能，如果不加此参数，上传图片时不会自动压缩，超出图床限制大小就会报错。而添加此参数，则会自动将超限图片压缩到限制图片大小或以下，保证顺利上传。
 
@@ -165,7 +163,7 @@ up2b config-watermark -50 -50 50 'test watermark' '/path/of/font/font.ttf' 48
 > 如果你使用的环境管理工具为 pthon 内置的 venv，请自行创建环境，这里不多介绍。
 
 ```bash
-conda create -n up2b-temp python=3.10
+conda create -n up2b-temp python=3.11
 conda activate up2b-temp
 ```
 
@@ -198,7 +196,7 @@ pip install -U dist/up2b-*-py3-none-any.whl
   - [ ] 图床类型
     - [ ] git
     - [ ] api
-    - [ ] 非api
+    - [ ] 非 api
 
 - [ ] 图床可用性检测及无效标记
 
