@@ -7,6 +7,7 @@
 # @Modified At: 2023-04-19 14:45:15
 # @Modified By: thepoy
 
+from pathlib import Path
 import sys
 import json
 import click
@@ -22,6 +23,7 @@ from up2b.up2b_lib.constants import (
     CACHE_PATH,
     CONF_FILE,
     IMAGE_BEDS_HELP_MESSAGE,
+    IMAGE_BEDS_NAME,
     ImageBedCode,
 )
 from up2b.up2b_lib.utils import check_paths, read_conf
@@ -196,6 +198,19 @@ def upload(
     paths = check_paths(image_paths)
 
     ib.upload_images(*paths)
+
+
+@cli.command(
+    short_help="手动添加缓存", help="某些图床禁止上传重复图片，但在上传时又不返回旧图片地址，此时需要你手动获取原图片地址并执行此命令添加到缓存中。"
+)
+@click.argument(
+    "image_path",
+    type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path),
+)
+@click.argument("url", type=str)
+def add_cache(image_path: Path, url: str):
+    ib = _read_image_bed()
+    ib.cache.add(image_path, url, IMAGE_BEDS_NAME[ib.image_bed_code])
 
 
 @cli.command(

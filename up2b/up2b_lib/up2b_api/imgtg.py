@@ -190,10 +190,15 @@ class Imgtg(Base):
             "source": (filename, img_buffer, mime_type),
         }
 
+        logger.debug("请求头", header=self.headers)
+
         resp = requests.post(
             url, headers=self.headers, data=data, files=files, timeout=self.timeout  # type: ignore
         )
         resp.encoding = "utf-8"
+
+        logger.debug("实际请求头", header=resp.request.headers)
+        logger.trace("请求体", body=resp.request.body)
 
         try:
             json_resp = resp.json()
@@ -231,6 +236,8 @@ class Imgtg(Base):
 
                 return self.__upload(image, retries + 1)
             else:
+                logger.debug("上传出错", error=resp.json())
+                logger.error("imgtg 禁止上传重复图片，请检查你之前是否已上传过此图片", image=image)
                 return UploadErrorResponse(
                     resp.status_code, resp.json()["error"]["message"], str(image)
                 )

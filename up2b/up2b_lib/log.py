@@ -8,7 +8,7 @@
 # @Modified By: thepoy
 
 from colorful_logger import get_logger, child_logger as cl
-from colorful_logger.logger import is_debug
+from colorful_logger.logger import is_debug, get_level_from_env
 from up2b.up2b_lib.constants import CONFIG_FOLDER_PATH
 
 log_file_path = None
@@ -26,6 +26,7 @@ def child_logger(name: str):
 logger = get_logger(
     "up2b",
     show=show,
+    level=get_level_from_env(),
     file_path=log_file_path,
     add_file_path=False,
     disable_line_number_filter=True,

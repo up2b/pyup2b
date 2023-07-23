@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-# @Author:      thepoy
-# @Email:       thepoy@163.com
-# @File Name:   cache.py
-# @Created At:  2023-02-28 22:16:22
-# @Modified At: 2023-03-06 20:34:24
-# @Modified By: thepoy
 
 import sqlite3
 import hashlib
@@ -151,6 +145,20 @@ class Cache:
             """
 
             return self.execute(sql, url, md5, image_bed)
+
+    def add(self, image_path: Path, url: str, image_bed: str):
+        md5 = file_md5(image_path)
+        exists = self.is_exists(md5, image_bed)
+        if exists:
+            logger.warning("缓存中已有此图片，无需重复添加")
+            return
+
+        sql = """
+            INSERT INTO cache (url, hash, image_bed) VALUES (?, ?, ?);
+        """
+        self.execute(sql, url, md5, image_bed)
+
+        logger.info("已手动添加缓存", image=image_path, url=url, image_bed=image_bed)
 
     def execute(self, sql: str, *params: Any):
         c = self.conn.cursor()
