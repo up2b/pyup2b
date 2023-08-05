@@ -137,6 +137,13 @@ class Imgtg(Base):
         self.auth_info["token"] = self.token = auth_token
         self._save_auth_info(self.auth_info)
 
+    @staticmethod
+    def _is_in_maintenance(status_code: int, text: str, image: ImageType):
+        if "<h1>网站正在维护中</h1>" in text:
+            return UploadErrorResponse(500, "网站正在维护", str(image))
+
+        return UploadErrorResponse(status_code, text, str(image))
+
     def __upload(
         self, image: ImageType, retries: int = 0
     ) -> Union[str, UploadErrorResponse]:
@@ -203,7 +210,7 @@ class Imgtg(Base):
         try:
             json_resp = resp.json()
         except json.decoder.JSONDecodeError:
-            return UploadErrorResponse(resp.status_code, resp.text, str(image))
+            return self._is_in_maintenance(resp.status_code, resp.text, image)
 
         try:
             uploaded_url: str = json_resp["image"]["image"]["url"]

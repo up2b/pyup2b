@@ -291,7 +291,7 @@ class Base(ImageBedAbstract):
             shutil.rmtree(CACHE_PATH)
             os.mkdir(CACHE_PATH)
 
-            logger.info("cache folder has been cleared", cache_path=CACHE_PATH)
+            logger.debug("cache folder has been cleared", cache_path=CACHE_PATH)
 
     def _check_cache(self, image: Path) -> Tuple[str, str, bool]:
         url, md5, ok = self.cache.check_cache_of_image_bed(
@@ -306,7 +306,7 @@ class Base(ImageBedAbstract):
 
             return (url, md5, ok)
 
-        logger.debug("缓存中未找到此图片链接")
+        logger.info("缓存中未找到此图片链接，开始上传")
         return (url, md5, ok)
 
     def upload_images(
@@ -331,7 +331,10 @@ class Base(ImageBedAbstract):
 
         if to_console:
             for iu in image_urls:
-                print(iu)
+                if isinstance(iu, UploadErrorResponse):
+                    logger.error("上传出错", status_code=iu.status_code, error=iu.error)
+                else:
+                    print(iu)
 
         self._clear_cache()
         return image_urls
