@@ -1,5 +1,5 @@
 requests
 pytest
-colorful-logger>=0.1.11
+colorful-logger>=0.2.0b4
 requests_toolbelt
 click
