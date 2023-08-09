@@ -8,7 +8,6 @@
 # @Modified By: thepoy
 
 import os
-from pathlib import Path
 import re
 import time
 import json
@@ -16,6 +15,7 @@ import mimetypes
 import requests
 
 from urllib import parse
+from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Union
 from up2b.up2b_lib.custom_types import (
     Config,

@@ -13,7 +13,7 @@ import json
 import click
 
 from typing import Any, Dict, Tuple, Type, Union
-from colort import display_style as ds
+from colort import colorize, ForegroundColor, BackgroundColor
 from up2b.up2b_lib.up2b_api import choose_image_bed
 from up2b.up2b_lib.up2b_api.sm import SM
 from up2b.up2b_lib.up2b_api.imgtu import Imgtu
@@ -62,7 +62,7 @@ def cli():
 @cli.command(help="显示正在使用的图床")
 def current():
     click.echo(
-        f"""{ds.format_with_one_style(" " + chr(10003), ds.foreground_color.green)} {_read_image_bed(False, False)}""",
+        f"""{colorize(" " + chr(10004), ForegroundColor.GREEN)} {_read_image_bed(False, False)}""",
     )
 
 
@@ -85,7 +85,7 @@ def list():
 def choose(code: int):
     choose_image_bed(code)
     echo(
-        ds.format_with_one_style(" ==>", ds.foreground_color.cyan),
+        colorize(" ==>", ForegroundColor.CYAN),
         IMAGE_BEDS[ImageBedCode(code)](),
     )
 
@@ -348,25 +348,23 @@ def print_list() -> int:
         if conf.image_bed:
             logger.warning(
                 "no authentication information has been configured",
-                image_bed=ds.format_with_multiple_styles(
+                image_bed=colorize(
                     IMAGE_BEDS[conf.image_bed](conf=conf).__str__(),
-                    ds.bc.dark_gray,
-                    ds.fc.white,
+                    BackgroundColor.DARK_GRAY,
+                    ForegroundColor.WHITE,
                 ),
                 code=conf.image_bed,
             )
 
     def print_item(symbol, color, idx):
         ib = IMAGE_BEDS[ImageBedCode(idx)](conf=conf)
-        click.echo(
-            f"""{ds.format_with_one_style(" " + symbol, color)} {idx} {ib}: {ib.description}"""
-        )
+        click.echo(f"""{colorize(" " + symbol, color)} {idx} {ib}: {ib.description}""")
 
     for i in ImageBedCode:
         if auth_data.get(i):
-            print_item(chr(10003), ds.fc.green, i)
+            print_item(chr(10003), ForegroundColor.GREEN, i)
         else:
-            print_item(chr(10007), ds.fc.red, i)
+            print_item(chr(10007), ForegroundColor.RED, i)
 
     return 0
 
