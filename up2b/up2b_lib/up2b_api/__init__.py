@@ -160,7 +160,7 @@ class Base(ImageBedAbstract):
             logger.fatal("save auth configure failed", error=e)
 
     def _exceed_max_size(
-        self, images: Tuple[Union[ImageType, DownloadErrorResponse]]
+        self, images: Tuple[Union[ImageType, DownloadErrorResponse], ...]
     ) -> Tuple[bool, Optional[str]]:
         for img in images:
             if isinstance(img, DownloadErrorResponse):
@@ -173,7 +173,7 @@ class Base(ImageBedAbstract):
         return False, None
 
     def _check_images_valid(
-        self, images: Tuple[Union[ImageType, DownloadErrorResponse]]
+        self, images: Tuple[Union[ImageType, DownloadErrorResponse], ...]
     ):
         """
         Check if all images exceed the max size or can be compressed

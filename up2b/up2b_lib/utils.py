@@ -42,7 +42,7 @@ def timeout() -> float:
         return DEFAULT_TIMEOUT
 
 
-def check_image_exists(images: Tuple[Union[ImageType, DownloadErrorResponse]]):
+def check_image_exists(images: Tuple[Union[ImageType, DownloadErrorResponse], ...]):
     for image in images:
         if isinstance(image, Path) and not image.exists():
             raise FileNotFoundError(image)
