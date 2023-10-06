@@ -57,7 +57,7 @@ def read_conf() -> Config:
     if not CONF_FILE.exists():
         logger.warning(
             "the configuration file is not found, "
-            + "you need to use `--choose-site` or `-c` to select the image bed first."
+            + "you need to use `choose` command to select the image bed first."
         )
 
         return Config(None, {}, {})

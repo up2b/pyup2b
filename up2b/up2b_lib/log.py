@@ -1,21 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-# @Author:      thepoy
-# @Email:       thepoy@163.com
-# @File Name:   log.py
-# @Created At:  2023-02-07 12:13:41
-# @Modified At: 2023-04-03 20:55:06
-# @Modified By: thepoy
 
-from colorful_logger import get_logger, child_logger as cl
-from colorful_logger.logger import is_debug, get_level_from_env
+from colorful_logger import get_logger, child_logger as cl, INFO
+from colorful_logger.logger import get_level_from_env
 from up2b.up2b_lib.constants import CONFIG_FOLDER_PATH
 
-log_file_path = None
-show = True
+show = False
+log_file_path = CONFIG_FOLDER_PATH / "up2b.log"
 
-if is_debug():
-    log_file_path = CONFIG_FOLDER_PATH / "up2b.log"
+level = get_level_from_env()
+
+if level <= INFO:
     show = True
 
 

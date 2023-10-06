@@ -342,8 +342,8 @@ class Imgtg(Base):
         return self.base_url + path
 
     def __repr__(self):
-        return "imgtg.com"
+        return "img.tg"
 
     @property
     def description(self):
-        return "中国大陆使用响应较快"
+        return "国内 CDN 已收费，国内访问速度已无优势"
