@@ -5,7 +5,6 @@ import os
 import re
 import time
 import json
-import mimetypes
 import requests
 
 from urllib import parse
@@ -22,6 +21,8 @@ from up2b.up2b_lib.custom_types import (
     UploadErrorResponse,
 )
 from up2b.up2b_lib.errors import MissingAuth
+from up2b.up2b_lib.file import File
+from up2b.up2b_lib.http import upload_with_progress_bar
 from up2b.up2b_lib.up2b_api import Base
 from up2b.up2b_lib.log import child_logger
 from up2b.up2b_lib.constants import IMAGE_BEDS_NAME, ImageBedCode
@@ -46,8 +47,11 @@ class Imgtg(Base):
         ignore_cache: bool = False,
         conf: Optional[Config] = None,
         timeout: Optional[float] = None,
+        quiet: bool = False,
     ):
-        super().__init__(auto_compress, add_watermark, ignore_cache, conf, timeout)
+        super().__init__(
+            auto_compress, add_watermark, ignore_cache, conf, timeout, quiet
+        )
 
         self.cookie: Optional[str] = None
         self.token: Optional[str] = None
@@ -172,19 +176,9 @@ class Imgtg(Base):
         else:
             filename = filename_with_suffix + "." + image.mime_type
 
-        mime_type = (
-            mimetypes.guess_type(image)[0]
-            if isinstance(image, Path)
-            else image.mime_type
-        )
+        file = File("source", image, filename=filename)
 
         timestamp = int(time.time() * 1000)
-
-        if isinstance(image, Path):
-            with open(image, "rb") as fb:
-                img_buffer = fb.read()
-        else:
-            img_buffer = image.stream
 
         data = {
             "type": "file",
@@ -194,15 +188,24 @@ class Imgtg(Base):
             "nsfw": "0",
         }
 
-        files = {
-            "source": (filename, img_buffer, mime_type),
-        }
-
         logger.debug("请求头", header=self.headers)
 
-        resp = requests.post(
-            url, headers=self.headers, data=data, files=files, timeout=self.timeout  # type: ignore
-        )
+        try:
+            if not self.quiet:
+                resp = upload_with_progress_bar(
+                    url, file, self.timeout, data, self.headers
+                )
+            else:
+                resp = requests.post(
+                    url,
+                    headers=self.headers,
+                    data=data,
+                    files=file.to_dict(),
+                    timeout=self.timeout,
+                )
+        except requests.exceptions.ConnectionError as e:
+            return UploadErrorResponse(400, str(e), str(image))
+
         resp.encoding = "utf-8"
 
         logger.debug("实际请求头", header=resp.request.headers)

@@ -358,8 +358,12 @@ class GitBase(Base):
         add_watermark: bool = False,
         ignore_cache: bool = False,
         conf: Optional[Config] = None,
+        timeout: Optional[float] = None,
+        quiet: bool = False,
     ):
-        super().__init__(auto_compress, add_watermark, ignore_cache, conf)
+        super().__init__(
+            auto_compress, add_watermark, ignore_cache, conf, timeout, quiet
+        )
 
         if self.auth_info:
             self.token = self.auth_info["token"]

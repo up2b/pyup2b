@@ -103,7 +103,7 @@ def login(username: str, password: str):
             "you have chosen `github` as the image bed, please login with `-lg`"
         )
 
-    logger.info("current image bed", name=ib)
+    logger.info("current image bed", name=str(ib))
 
     echo("正在验证账号，请耐心等待...")
 
@@ -177,6 +177,14 @@ def login_git(access_token: str, username: str, repository: str, path: str):
     default=False,
     help="忽略数据库缓存，强制上传图片",
 )
+@click.option(
+    "-q",
+    "--quiet",
+    is_flag=True,
+    show_default=True,
+    default=False,
+    help="静默模式。开启后不显示上传进度",
+)
 @click.option("-t", "--timeout", type=float, help="上传图片的超时时间")
 def upload(
     image_paths: Tuple[str],
@@ -184,12 +192,14 @@ def upload(
     auto_compress: bool,
     ignore_cache: bool,
     timeout: float,
+    quiet: bool,
 ):
     ib = _read_image_bed(
         add_watermark=add_watermark,
         auto_compress=auto_compress,
         ignore_cache=ignore_cache,
         timeout=timeout,
+        quiet=quiet,
     )
 
     paths = check_paths(image_paths)
@@ -269,11 +279,12 @@ def _read_image_bed(
     add_watermark: bool = False,
     ignore_cache: bool = False,
     timeout: Optional[float] = None,
+    quiet: bool = False,
 ) -> Union[SM, Imgtu, Imgtg, Github]:
     conf = read_conf()
 
     selected_code = conf.image_bed
-    if not selected_code:
+    if selected_code == None:
         logger.fatal("当前图床为空，请先选择要使用的图床")
 
     assert isinstance(selected_code, int)
@@ -286,6 +297,7 @@ def _read_image_bed(
             add_watermark=add_watermark,
             ignore_cache=ignore_cache,
             timeout=timeout,
+            quiet=quiet,
         )
     except ValueError:
         IMAGE_BEDS[ImageBedCode.SM_MS](
@@ -293,6 +305,7 @@ def _read_image_bed(
             add_watermark=add_watermark,
             ignore_cache=ignore_cache,
             timeout=timeout,
+            quiet=quiet,
         )
         logger.fatal("未知的图床代码，可能因为清除无效的 gitee 配置，请重试", code=selected_code)
 

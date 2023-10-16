@@ -7,6 +7,7 @@ import requests_toolbelt
 
 from typing import Any, Dict, Optional
 from tqdm import tqdm
+from up2b.up2b_lib.file import File
 
 
 class ProgressBar(tqdm):
@@ -16,17 +17,21 @@ class ProgressBar(tqdm):
 
 def upload_with_progress_bar(
     url: str,
-    filename: str,
-    form: Dict[str, Any],
+    file: File,
+    timeout: float,
+    form: Optional[Dict[str, Any]] = None,
     headers: Optional[Dict[str, str]] = None,
 ):
-    encoder = requests_toolbelt.MultipartEncoder(form)
+    data = form or {}
+    data.update(file.to_dict())
+
+    encoder = requests_toolbelt.MultipartEncoder(data)
 
     headers = headers or {}
 
     with ProgressBar(
         total=encoder.len,
-        desc=filename,
+        desc=file.filename,
         unit="B",
         unit_scale=True,
         unit_divisor=1024,
@@ -39,6 +44,6 @@ def upload_with_progress_bar(
 
         headers.update({"Content-Type": monitor.content_type})
 
-        resp = requests.post(url, data=monitor, headers=headers)
+        resp = requests.post(url, data=monitor, headers=headers, timeout=timeout)
 
         return resp

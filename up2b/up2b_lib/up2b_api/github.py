@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-# @Author:      thepoy
-# @Email:       thepoy@163.com
-# @File Name:   github.py
-# @Created At:  2021-02-13 09:10:14
-# @Modified At: 2023-03-04 21:40:12
-# @Modified By: thepoy
 
 import os
 import requests
@@ -39,8 +33,11 @@ class Github(GitBase):
         ignore_cache: bool = False,
         conf: Optional[Config] = None,
         timeout: Optional[float] = None,
+        quiet: bool = False,
     ):
-        super().__init__(auto_compress, add_watermark, ignore_cache, conf, timeout)
+        super().__init__(
+            auto_compress, add_watermark, ignore_cache, conf, timeout, quiet
+        )
 
         if hasattr(self, "token"):
             self.headers = {

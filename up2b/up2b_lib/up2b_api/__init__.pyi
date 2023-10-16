@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from pathlib import Path
 import requests
 
@@ -89,6 +88,7 @@ class Base:
         ignore_cache: bool = ...,
         conf: Optional[Config] = ...,
         timeout: Optional[float] = ...,
+        quiet: bool = ...,
     ) -> None: ...
     def check_login(self) -> None: ...
     def _read_auth_info(self) -> Optional[AuthInfo]: ...
@@ -119,6 +119,7 @@ class GitBase(Base, ImageBedAbstract):
         ignore_cache: bool = ...,
         conf: Optional[Config] = ...,
         timeout: Optional[float] = None,
+        quiet: bool = ...,
     ) -> None: ...
     def login(
         self, token: str, username: str, repo: str, folder: str = ...

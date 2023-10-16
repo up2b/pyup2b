@@ -14,7 +14,7 @@ keywords = ["typora", "image bed", "upload"]
 dependencies = [
   "requests",
   "click",
-  "colorful-logger>=0.2.0b4",
+  "colorful-logger>=0.2.0b6",
   "typing_extensions; python_version<'3.8'",
   "tqdm",
   "requests-toolbelt",

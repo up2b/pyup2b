@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-# @Author:      thepoy
-# @Email:       thepoy@163.com
-# @File Name:   sm.py
-# @Created At:  2021-02-13 09:04:07
-# @Modified At: 2023-03-06 20:36:38
-# @Modified By: thepoy
 
 import re
 import requests
 
-from typing import BinaryIO, List, Optional, Dict, Any, Tuple, Union
+from typing import List, Optional, Dict, Any, Union
 from pathlib import Path
 from up2b.up2b_lib.custom_types import (
     Config,
@@ -22,9 +16,11 @@ from up2b.up2b_lib.custom_types import (
     SMMSResponse,
     UploadErrorResponse,
 )
+from up2b.up2b_lib.file import File
 from up2b.up2b_lib.up2b_api import Base
 from up2b.up2b_lib.constants import IMAGE_BEDS_NAME, ImageBedCode
 from up2b.up2b_lib.log import child_logger
+from up2b.up2b_lib.http import upload_with_progress_bar
 
 logger = child_logger(__name__)
 
@@ -42,8 +38,11 @@ class SM(Base):
         ignore_cache: bool = False,
         conf: Optional[Config] = None,
         timeout: Optional[float] = None,
+        quiet: bool = False,
     ):
-        super().__init__(auto_compress, add_watermark, ignore_cache, conf, timeout)
+        super().__init__(
+            auto_compress, add_watermark, ignore_cache, conf, timeout, quiet
+        )
 
         if self.auth_info:
             self.token: str = self.auth_info["token"]
@@ -108,16 +107,21 @@ class SM(Base):
 
         # sm.ms不管出不出错，返回的状态码都是200
         url = self._url("upload")
-        files: Dict[str, Union[Tuple[str, bytes, str], BinaryIO]] = (
-            {"smfile": open(image, "rb")}
-            if isinstance(image, Path)
-            else {"smfile": (image.filename, image.stream, image.mime_type)}
-        )
 
-        resp = requests.post(
-            url, headers=self.headers, files=files, timeout=self.timeout  # type: ignore
-        ).json()
-        if resp["success"]:
+        file = File("smfile", image)
+
+        if self.quiet:
+            res = requests.post(
+                url, headers=self.headers, files=file.to_dict(), timeout=self.timeout  # type: ignore
+            )
+        else:
+            res = upload_with_progress_bar(url, file, self.timeout, None, self.headers)
+
+        logger.debug("响应", status=res.status_code, body=res.text)
+
+        resp = res.json()
+
+        if resp["success"] or resp["code"] == "image_repeated":
             uploaded_url: str = resp["data"]["url"]
             logger.info(
                 "uploaded",
