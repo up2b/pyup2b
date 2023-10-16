@@ -28,6 +28,7 @@ from up2b.up2b_lib.custom_types import (
     UploadErrorResponse,
 )
 from up2b.up2b_lib.errors import MissingAuth
+from up2b.up2b_lib.http import upload_with_progress_bar
 from up2b.up2b_lib.up2b_api import Base
 from up2b.up2b_lib.constants import IMAGE_BEDS_NAME, ImageBedCode
 from up2b.up2b_lib.log import child_logger
@@ -51,8 +52,9 @@ class Imgtu(Base):
         add_watermark: bool = False,
         ignore_cache: bool = False,
         conf: Optional[Config] = None,
+        timeout: Optional[float] = None,
     ):
-        super().__init__(auto_compress, add_watermark, ignore_cache, conf)
+        super().__init__(auto_compress, add_watermark, ignore_cache, conf, timeout)
 
         self.cookie: Optional[str] = None
         self.token: Optional[str] = None
@@ -196,9 +198,18 @@ class Imgtu(Base):
             "source": (filename, img_buffer, mime_type),
         }
 
-        resp = requests.post(
-            url, headers=self.headers, data=data, files=files, timeout=self.timeout  # type: ignore
-        )
+        try:
+            if not self.quiet:
+                resp = upload_with_progress_bar(
+                    url, filename, dict(data, **files), self.headers
+                )
+            else:
+                resp = requests.post(
+                    url, headers=self.headers, data=data, files=files, timeout=self.timeout  # type: ignore
+                )
+        except requests.exceptions.ConnectionError as e:
+            return UploadErrorResponse(400, str(e), str(image))
+
         resp.encoding = "utf-8"
 
         try:

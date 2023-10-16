@@ -31,7 +31,7 @@ from up2b.up2b_lib.log import child_logger
 logger = child_logger(__name__)
 
 
-def timeout() -> float:
+def timeout_in_env() -> float:
     t = os.getenv("UP2B_TIMEOUT")
     if not t:
         return DEFAULT_TIMEOUT
@@ -177,7 +177,7 @@ def check_paths(paths: Union[Sequence[str], Sequence[Path]]):
     logger.info("使用线程池下载多张图片...")
     with ThreadPoolExecutor(4) as pool:
         futures = {
-            pool.submit(check_path, Path(paths[0])): i for i in range(len(paths))
+            pool.submit(check_path, Path(paths[i])): i for i in range(len(paths))
         }
 
         for future in as_completed(futures):

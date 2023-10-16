@@ -78,6 +78,7 @@ class Base:
     add_watermark: bool
     auto_compress: bool
     ignore_cache: bool
+    quiet: bool
     timeout: float
     cache: Cache
 
@@ -87,6 +88,7 @@ class Base:
         add_watermark: bool = ...,
         ignore_cache: bool = ...,
         conf: Optional[Config] = ...,
+        timeout: Optional[float] = ...,
     ) -> None: ...
     def check_login(self) -> None: ...
     def _read_auth_info(self) -> Optional[AuthInfo]: ...
@@ -116,6 +118,7 @@ class GitBase(Base, ImageBedAbstract):
         add_watermark: bool = ...,
         ignore_cache: bool = ...,
         conf: Optional[Config] = ...,
+        timeout: Optional[float] = None,
     ) -> None: ...
     def login(
         self, token: str, username: str, repo: str, folder: str = ...

@@ -1,18 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-# @Author:      thepoy
-# @Email:       thepoy@163.com
-# @File Name:   __init__.py
-# @Created At:  2021-02-08 15:43:32
-# @Modified At: 2023-04-19 14:45:15
-# @Modified By: thepoy
 
-from pathlib import Path
 import sys
 import json
 import click
 
-from typing import Any, Dict, Tuple, Type, Union
+from typing import Any, Dict, Optional, Tuple, Type, Union
+from pathlib import Path
 from colort import colorize, ForegroundColor, BackgroundColor
 from up2b.up2b_lib.up2b_api import choose_image_bed
 from up2b.up2b_lib.up2b_api.sm import SM
@@ -183,16 +177,19 @@ def login_git(access_token: str, username: str, repository: str, path: str):
     default=False,
     help="忽略数据库缓存，强制上传图片",
 )
+@click.option("-t", "--timeout", type=float, help="上传图片的超时时间")
 def upload(
     image_paths: Tuple[str],
     add_watermark: bool,
     auto_compress: bool,
     ignore_cache: bool,
+    timeout: float,
 ):
     ib = _read_image_bed(
         add_watermark=add_watermark,
         auto_compress=auto_compress,
         ignore_cache=ignore_cache,
+        timeout=timeout,
     )
 
     paths = check_paths(image_paths)
@@ -271,6 +268,7 @@ def _read_image_bed(
     auto_compress: bool = False,
     add_watermark: bool = False,
     ignore_cache: bool = False,
+    timeout: Optional[float] = None,
 ) -> Union[SM, Imgtu, Imgtg, Github]:
     conf = read_conf()
 
@@ -287,12 +285,14 @@ def _read_image_bed(
             auto_compress=auto_compress,
             add_watermark=add_watermark,
             ignore_cache=ignore_cache,
+            timeout=timeout,
         )
     except ValueError:
         IMAGE_BEDS[ImageBedCode.SM_MS](
             auto_compress=auto_compress,
             add_watermark=add_watermark,
             ignore_cache=ignore_cache,
+            timeout=timeout,
         )
         logger.fatal("未知的图床代码，可能因为清除无效的 gitee 配置，请重试", code=selected_code)
 

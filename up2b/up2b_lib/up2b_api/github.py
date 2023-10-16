@@ -38,8 +38,9 @@ class Github(GitBase):
         add_watermark: bool = False,
         ignore_cache: bool = False,
         conf: Optional[Config] = None,
+        timeout: Optional[float] = None,
     ):
-        super().__init__(auto_compress, add_watermark, ignore_cache, conf)
+        super().__init__(auto_compress, add_watermark, ignore_cache, conf, timeout)
 
         if hasattr(self, "token"):
             self.headers = {

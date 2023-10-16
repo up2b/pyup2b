@@ -39,7 +39,7 @@ from up2b.up2b_lib.custom_types import (
     WaterMarkConfig,
 )
 from up2b.up2b_lib.log import child_logger
-from up2b.up2b_lib.utils import check_image_exists, read_conf, timeout
+from up2b.up2b_lib.utils import check_image_exists, read_conf, timeout_in_env
 from up2b.up2b_lib.errors import UnsupportedType, OverSizeError
 
 logger = child_logger(__name__)
@@ -96,7 +96,6 @@ class Base(ImageBedAbstract):
     max_size: int
     conf: Config
     image_bed_type: ImageBedType
-    timeout = timeout()
     cache = Cache()
 
     def __init__(
@@ -105,7 +104,11 @@ class Base(ImageBedAbstract):
         add_watermark: bool = False,
         ignore_cache: bool = False,
         conf: Optional[Config] = None,
+        timeout: Optional[float] = None,
+        quiet: bool = False,
     ):
+        self.timeout = timeout_in_env() if timeout is None else timeout
+        self.quiet = quiet
         self.conf = conf if conf != None else read_conf()
 
         self.auth_info: Optional[AuthInfo] = self._read_auth_info()
