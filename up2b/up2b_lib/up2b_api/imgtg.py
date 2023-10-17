@@ -208,7 +208,6 @@ class Imgtg(Base):
 
         resp.encoding = "utf-8"
 
-        logger.debug("实际请求头", header=resp.request.headers)
         logger.trace("请求体", body=resp.request.body)
 
         try:
