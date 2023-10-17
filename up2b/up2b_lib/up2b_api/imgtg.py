@@ -34,7 +34,7 @@ class Imgtg(Base):
     image_bed_type = ImageBedType.common
     image_bed_code = ImageBedCode.IMGTG
     max_size = 5 * 1024 * 1024
-    base_url = "https://imgtg.com/"
+    base_url = "https://img.tg/"
     __headers = {
         "Accept": "application/json",
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0",

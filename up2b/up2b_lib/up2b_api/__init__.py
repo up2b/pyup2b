@@ -164,16 +164,16 @@ class Base(ImageBedAbstract):
 
     def _exceed_max_size(
         self, images: Tuple[Union[ImageType, DownloadErrorResponse], ...]
-    ) -> Tuple[bool, Optional[str]]:
+    ) -> Tuple[int, Optional[str]]:
         for img in images:
             if isinstance(img, DownloadErrorResponse):
                 continue
 
             size = os.path.getsize(img) if isinstance(img, Path) else len(img.stream)
             if size > self.max_size:
-                return True, str(img) if isinstance(img, Path) else img.filename
+                return size, str(img) if isinstance(img, Path) else img.filename
 
-        return False, None
+        return 0, None
 
     def _check_images_valid(
         self, images: Tuple[Union[ImageType, DownloadErrorResponse], ...]
@@ -182,9 +182,11 @@ class Base(ImageBedAbstract):
         Check if all images exceed the max size or can be compressed
         """
         if not self.auto_compress:
-            exceeded, img = self._exceed_max_size(images)
-            if exceeded:
-                raise OverSizeError(img)
+            size, img = self._exceed_max_size(images)
+            if size:
+                raise OverSizeError(
+                    f"{img}: {size /1024/1024:.2f}M > {self.max_size/1024/1024}M"
+                )
         else:
             for _img in images:
                 if isinstance(_img, DownloadErrorResponse):
