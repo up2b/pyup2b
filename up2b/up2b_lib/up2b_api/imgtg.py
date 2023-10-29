@@ -188,7 +188,7 @@ class Imgtg(Base):
             "nsfw": "0",
         }
 
-        logger.debug("请求头", header=self.headers)
+        logger.debug("请求头", header=dict(self.headers))
 
         try:
             if not self.quiet:
@@ -208,7 +208,7 @@ class Imgtg(Base):
 
         resp.encoding = "utf-8"
 
-        logger.trace("请求体", body=resp.request.body)
+        logger.debug("响应", header=dict(resp.headers), body=resp.text)
 
         try:
             json_resp = resp.json()
@@ -232,6 +232,7 @@ class Imgtg(Base):
 
             return uploaded_url
         except KeyError:
+            logger.debug("错误响应", body=resp.text)
             if json_resp["error"]["message"] == "请求被拒绝 (auth_token)":
                 if retries >= 3:
                     return UploadErrorResponse(

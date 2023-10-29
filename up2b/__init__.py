@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
+from dataclasses import asdict
 import sys
 import json
 import click
@@ -8,6 +9,7 @@ import click
 from typing import Any, Dict, Optional, Tuple, Type, Union
 from pathlib import Path
 from colort import colorize, ForegroundColor, BackgroundColor
+from up2b.up2b_lib.custom_types import WaterMarkConfig
 from up2b.up2b_lib.up2b_api import choose_image_bed
 from up2b.up2b_lib.up2b_api.sm import SM
 from up2b.up2b_lib.up2b_api.imgtu import Imgtu
@@ -261,7 +263,7 @@ def add_cache(image_path: Path, url: str):
 @click.argument(
     "font_path",
     nargs=1,
-    type=str,
+    type=click.Path(exists=True, dir_okay=False),
 )
 @click.argument(
     "size",
@@ -271,7 +273,8 @@ def add_cache(image_path: Path, url: str):
 def config_watermark(
     x: int, y: int, opacity: int, text: str, font_path: str, size: int
 ):
-    _config_text_watermark(x, y, opacity, text, font_path, size)
+    config = WaterMarkConfig(x, y, text, font_path, size, opacity)
+    _config_text_watermark(config)
 
 
 def _read_image_bed(
@@ -298,51 +301,23 @@ def _read_image_bed(
             ignore_cache=ignore_cache,
             timeout=timeout,
             quiet=quiet,
+            conf=conf,
         )
     except ValueError:
-        IMAGE_BEDS[ImageBedCode.SM_MS](
-            auto_compress=auto_compress,
-            add_watermark=add_watermark,
-            ignore_cache=ignore_cache,
-            timeout=timeout,
-            quiet=quiet,
-        )
         logger.fatal("未知的图床代码，可能因为清除无效的 gitee 配置，请重试", code=selected_code)
 
 
-def _config_text_watermark(
-    x: int, y: int, opacity: int, text: str, font: str, size: int
-):
+def _config_text_watermark(config: WaterMarkConfig):
     try:
         with open(CONF_FILE, "r+") as f:
             conf = json.loads(f.read())
             f.seek(0, 0)
-            conf["watermark"] = {
-                "x": x,
-                "y": y,
-                "opacity": opacity,
-                "text": text,
-                "font": font,
-                "size": size,
-            }
+            conf["watermark"] = asdict(config)
             f.write(json.dumps(conf))
             f.truncate()
     except FileNotFoundError:
         with open(CONF_FILE, "w") as f:
-            f.write(
-                json.dumps(
-                    {
-                        "watermark": {
-                            "x": x,
-                            "y": y,
-                            "opacity": opacity,
-                            "text": text,
-                            "font": font,
-                            "size": size,
-                        }
-                    }
-                )
-            )
+            f.write(json.dumps({"watermark": asdict(config)}))
 
 
 def print_list() -> int:

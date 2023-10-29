@@ -26,18 +26,40 @@ class ImageStream:
 ImagePath = Path
 AuthInfo = Dict[str, Any]
 AuthData = Dict[str, AuthInfo]
-WaterMarkConfig = Dict[str, int]
-ConfigFile = Dict[str, Union[int, AuthData, WaterMarkConfig]]
 DeletedResponse = Dict[str, Union[bool, str]]
 ImageType = Union[ImagePath, ImageStream]
 Images = List[ImageType]
 
 
 @dataclass
+class WaterMarkConfig:
+    x: int
+    y: int
+    text: str
+    font: str
+    size: int
+    opacity: Optional[int] = None
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> "WaterMarkConfig":
+        return WaterMarkConfig(
+            data["x"],
+            data["y"],
+            data["text"],
+            data["font"],
+            data["size"],
+            data["opacity"],
+        )
+
+
+ConfigFile = Dict[str, Union[int, AuthData, WaterMarkConfig]]
+
+
+@dataclass
 class Config:
     image_bed: Optional[ImageBedCode]
     auth_data: Dict[ImageBedCode, Dict[str, str]]
-    watermark: WaterMarkConfig
+    watermark: Optional[WaterMarkConfig] = None
 
 
 @dataclass

@@ -24,6 +24,7 @@ from up2b.up2b_lib.custom_types import (
     Config,
     DownloadErrorResponse,
     ImageType,
+    WaterMarkConfig,
 )
 from up2b.up2b_lib.log import child_logger
 
@@ -52,7 +53,7 @@ def read_conf() -> Config:
     logger.trace("reading configuration file")
 
     if os.getenv("UP2B_TEST"):
-        return Config(None, {}, {})
+        return Config(None, {})
 
     if not CONF_FILE.exists():
         logger.warning(
@@ -60,7 +61,7 @@ def read_conf() -> Config:
             + "you need to use `choose` command to select the image bed first."
         )
 
-        return Config(None, {}, {})
+        return Config(None, {})
 
     try:
         with CONF_FILE.open(encoding="utf-8") as f:
@@ -72,8 +73,12 @@ def read_conf() -> Config:
             ImageBedCode(int(k)): v for k, v in conf.get("auth_data", {}).items()
         }
 
+        watermark = conf.get("watermark")
+
         return Config(
-            ImageBedCode(conf.get("image_bed")), auth_data, conf.get("watermark", {})
+            ImageBedCode(conf.get("image_bed")),
+            auth_data,
+            WaterMarkConfig.from_dict(watermark) if watermark else None,
         )
 
 

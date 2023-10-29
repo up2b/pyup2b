@@ -9,7 +9,7 @@ import requests
 
 from io import BytesIO
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, List, Tuple, Dict, Union
+from typing import Any, Callable, Optional, List, Tuple, Dict, Union
 from pathlib import Path
 from up2b.up2b_lib.cache import Cache
 from up2b.up2b_lib.constants import (
@@ -116,7 +116,7 @@ class Base(ImageBedAbstract):
         if self.add_watermark:
             if not self.conf.watermark:
                 logger.fatal(
-                    "you have enabled the function of adding watermark, but the watermark is not configured, please configure the text watermark through `--config-text-watermark`"
+                    "you have enabled the function of adding watermark, but the watermark is not configured, please configure the text watermark through `config-watermark`"
                 )
         self.auto_compress: bool = auto_compress
         self.ignore_cache: bool = ignore_cache
@@ -234,7 +234,7 @@ class Base(ImageBedAbstract):
                     img.save(img_io, "jpeg")
                 elif format == "JPEG":
                     img = img.resize(
-                        (int(width * scale), int(height * scale)), Image.ANTIALIAS
+                        (int(width * scale), int(height * scale)), Image.LANCZOS
                     )
                     img.format = "JPEG"  # type: ignore
                     img.save(img_io, "jpeg")
@@ -281,14 +281,23 @@ class Base(ImageBedAbstract):
 
         from up2b.up2b_lib.watermark import AddWatermark, TypeFont
 
-        conf: WaterMarkConfig = self.conf["watermark"]  # type: ignore
+        assert self.conf.watermark != None
 
-        assert isinstance(conf, dict)
-
-        aw = AddWatermark(conf["x"], conf["y"], conf["opacity"])
+        aw = AddWatermark(
+            self.conf.watermark.x,
+            self.conf.watermark.y,
+            self.conf.watermark.opacity or 50,
+        )
         return aw.add_text_watermark(
             image_path,
-            [TypeFont(conf["text"], conf["size"], conf["font"], (0, 0, 0))],
+            [
+                TypeFont(
+                    self.conf.watermark.text,
+                    self.conf.watermark.size,
+                    self.conf.watermark.font,
+                    (0, 0, 0),
+                )
+            ],
         )
 
     def _clear_cache(self):
