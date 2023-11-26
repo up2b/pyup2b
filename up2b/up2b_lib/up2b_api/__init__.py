@@ -9,9 +9,10 @@ import requests
 
 from io import BytesIO
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Optional, List, Tuple, Dict, Union
+from typing import Callable, Optional, List, Tuple, Dict, Union
 from pathlib import Path
 from up2b.up2b_lib.cache import Cache
+from up2b.up2b_lib.compress import Compressor
 from up2b.up2b_lib.constants import (
     CONF_FILE,
     CACHE_PATH,
@@ -96,6 +97,7 @@ class Base(ImageBedAbstract):
     max_size: int
     conf: Config
     image_bed_type: ImageBedType
+
     cache = Cache()
 
     def __init__(
@@ -118,7 +120,12 @@ class Base(ImageBedAbstract):
                 logger.fatal(
                     "you have enabled the function of adding watermark, but the watermark is not configured, please configure the text watermark through `config-watermark`"
                 )
-        self.auto_compress: bool = auto_compress
+
+        if auto_compress:
+            self.compressor = Compressor(self.max_size)
+        else:
+            self.compressor = None
+
         self.ignore_cache: bool = ignore_cache
 
     def check_login(self):
@@ -181,7 +188,7 @@ class Base(ImageBedAbstract):
         """
         Check if all images exceed the max size or can be compressed
         """
-        if not self.auto_compress:
+        if self.compressor == None:
             size, img = self._exceed_max_size(images)
             if size:
                 raise OverSizeError(
@@ -202,78 +209,12 @@ class Base(ImageBedAbstract):
                     )
 
     def _compress_image(self, image: ImageType) -> ImageType:
-        if not self.auto_compress:
+        if self.compressor == None:
             return image
 
         logger.debug("compressing image", image=image)
 
-        try:
-            from PIL import Image
-        except ModuleNotFoundError:
-            logger.fatal(
-                "you have enabled the automatic image compression feature, but [ pillow ] is not installed, please execute `pip install pillow` before enabling this feature"
-            )
-
-        raw_size = (
-            os.path.getsize(image) if isinstance(image, Path) else len(image.stream)
-        )
-        if raw_size > self.max_size:
-            filename = os.path.basename(str(image)).split(".")[0]
-
-            scale = self.max_size / raw_size
-            img = Image.open(image if isinstance(image, Path) else image.stream)
-
-            def compress(img: Image.Image, scale: float) -> BytesIO:
-                format = img.format
-                width, height = img.size
-                img_io = BytesIO()
-
-                if format == "PNG":
-                    img = img.convert("RGB")
-                    img.format = "JPEG"  # type: ignore
-                    img.save(img_io, "jpeg")
-                elif format == "JPEG":
-                    img = img.resize(
-                        (int(width * scale), int(height * scale)), Image.LANCZOS
-                    )
-                    img.format = "JPEG"  # type: ignore
-                    img.save(img_io, "jpeg")
-                else:
-                    raise UnsupportedType(
-                        "currently does not support compression of this type of image: %s"
-                        % format
-                    )
-
-                if img_io.tell() > self.max_size:
-                    scale = self.max_size / img_io.tell()
-                    return compress(img, scale)
-                return img_io
-
-            if img.format == "PNG":
-                filename += ".jpeg"
-            else:
-                filename += "." + img.format.lower()  # type: ignore
-            img_io = compress(img, scale)
-
-            if not os.path.exists(CACHE_PATH):
-                os.mkdir(CACHE_PATH)
-
-            compressed_size = img_io.tell()
-
-            img_cache_path = CACHE_PATH / filename
-            with img_cache_path.open("wb") as f:
-                f.write(img_io.getbuffer())
-
-            logger.info(
-                "image compression complete",
-                image=img_cache_path,
-                raw_size=f"{raw_size / 1024}b",
-                compressed_size=f"{compressed_size / 1024}k",
-            )
-
-            return img_cache_path
-
-        return image
+        return self.compressor(image)
 
     def _add_watermark(self, image_path: ImagePath) -> ImagePath:
         if not self.add_watermark:
