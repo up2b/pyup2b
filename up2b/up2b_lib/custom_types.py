@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from enum import IntEnum
+from enum import Enum, IntEnum
 from typing import Any, Dict, List, Optional, Union
 from dataclasses import dataclass, asdict
 from pathlib import Path
@@ -112,3 +112,8 @@ class ImgtuResponse(BaseResponse):
     display_url: str
     width: int
     height: int
+
+
+class CompressedFormat(Enum):
+    WEBP = "webp"
+    JPEG = "jpeg"

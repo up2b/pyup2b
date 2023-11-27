@@ -7,12 +7,10 @@ import json
 import shutil
 import requests
 
-from io import BytesIO
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, List, Tuple, Dict, Union
+from typing import Callable, Optional, List, Tuple, Dict, Union, Literal
 from pathlib import Path
 from up2b.up2b_lib.cache import Cache
-from up2b.up2b_lib.compress import Compressor
 from up2b.up2b_lib.constants import (
     CONF_FILE,
     CACHE_PATH,
@@ -38,6 +36,7 @@ from up2b.up2b_lib.custom_types import (
     AuthInfo,
     UploadErrorResponse,
     WaterMarkConfig,
+    CompressedFormat,
 )
 from up2b.up2b_lib.log import child_logger
 from up2b.up2b_lib.utils import check_image_exists, read_conf, timeout_in_env
@@ -100,6 +99,8 @@ class Base(ImageBedAbstract):
 
     cache = Cache()
 
+    compressed_format: CompressedFormat = CompressedFormat.WEBP
+
     def __init__(
         self,
         auto_compress: bool = False,
@@ -122,7 +123,9 @@ class Base(ImageBedAbstract):
                 )
 
         if auto_compress:
-            self.compressor = Compressor(self.max_size)
+            from up2b.up2b_lib.compress import Compressor
+
+            self.compressor = Compressor(self.max_size, self.compressed_format)
         else:
             self.compressor = None
 
@@ -200,8 +203,13 @@ class Base(ImageBedAbstract):
                     continue
 
                 mime_type = (
-                    _img.suffix.lower() if isinstance(_img, Path) else _img.mime_type
+                    _img.suffix.lower()[1:]  # 删除扩展名前的"."
+                    if isinstance(_img, Path)
+                    else _img.mime_type
                 )
+
+                logger.trace("image mime type", image=_img, type=mime_type)
+
                 if mime_type not in ["jpg", "png", "jpeg"]:
                     raise UnsupportedType(
                         "currently does not support compression of this type of image: %s"

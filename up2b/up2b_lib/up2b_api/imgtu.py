@@ -19,6 +19,7 @@ from up2b.up2b_lib.custom_types import (
     ImagePath,
     ImgtuResponse,
     UploadErrorResponse,
+    CompressedFormat,
 )
 from up2b.up2b_lib.errors import MissingAuth
 from up2b.up2b_lib.file import File
@@ -39,6 +40,8 @@ class Imgtu(Base):
         "Accept": "application/json",
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0",
     }
+
+    compressed_format: CompressedFormat = CompressedFormat.JPEG
 
     def __init__(
         self,

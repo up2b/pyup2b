@@ -144,7 +144,11 @@ class Cache:
                 INSERT INTO cache (url, hash, image_bed) VALUES (?, ?, ?);
             """
 
-            return self.execute(sql, url, md5, image_bed)
+            self.execute(sql, url, md5, image_bed)
+
+            logger.info("cached", md5=md5, url=url)
+
+            return
 
     def add(self, image_path: Path, url: str, image_bed: str):
         md5 = file_md5(image_path)
