@@ -19,6 +19,7 @@ from up2b.up2b_lib.custom_types import (
     SMMSResponse,
     UploadErrorResponse,
 )
+from up2b.up2b_lib.compress import Compressor
 
 def choose_image_bed(image_bed_code: int) -> None: ...
 
@@ -75,7 +76,7 @@ class Base:
     conf_file: str
     auth_info: Optional[AuthInfo]
     add_watermark: bool
-    auto_compress: bool
+    compressor: Compressor | None
     ignore_cache: bool
     quiet: bool
     timeout: float

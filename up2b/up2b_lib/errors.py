@@ -26,3 +26,7 @@ class UnsupportedType(TypeError):
 
 class MissingAuth(ValueError):
     pass
+
+
+class Timeout(Exception):
+    pass

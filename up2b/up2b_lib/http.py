@@ -7,6 +7,7 @@ import requests_toolbelt
 
 from typing import Any, Dict, Optional
 from tqdm import tqdm
+from up2b.up2b_lib.errors import Timeout
 from up2b.up2b_lib.file import File
 
 
@@ -44,6 +45,9 @@ def upload_with_progress_bar(
 
         headers.update({"Content-Type": monitor.content_type})
 
-        resp = requests.post(url, data=monitor, headers=headers, timeout=timeout)
+        try:
+            resp = requests.post(url, data=monitor, headers=headers, timeout=timeout)
+        except requests.exceptions.ReadTimeout:
+            raise Timeout("网络连接超时，默认超时时间为 10s，可通过设置环境变量 UP2B_TIMEOUT 修改超时时间")
 
         return resp

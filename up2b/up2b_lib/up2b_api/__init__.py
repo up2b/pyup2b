@@ -8,7 +8,7 @@ import shutil
 import requests
 
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, List, Tuple, Dict, Union, Literal
+from typing import Callable, Optional, List, Tuple, Dict, Union
 from pathlib import Path
 from up2b.up2b_lib.cache import Cache
 from up2b.up2b_lib.constants import (
@@ -35,7 +35,6 @@ from up2b.up2b_lib.custom_types import (
     ImageType,
     AuthInfo,
     UploadErrorResponse,
-    WaterMarkConfig,
     CompressedFormat,
 )
 from up2b.up2b_lib.log import child_logger

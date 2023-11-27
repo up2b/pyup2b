@@ -256,7 +256,7 @@ class Imgtg(Base):
     def upload_image(self, image_path: ImagePath) -> Union[str, UploadErrorResponse]:
         image_path = self._add_watermark(image_path)
 
-        if self.auto_compress:
+        if self.compressor:
             # 输入的是路径，返回的也必然是路径，忽略 pyright 的错误提示
             image_path = self._compress_image(image_path)  # type: ignore
 
@@ -267,7 +267,7 @@ class Imgtg(Base):
     ) -> Union[str, UploadErrorResponse]:
         logger.debug("uploading", filename=image.filename)
 
-        if self.auto_compress:
+        if self.compressor:
             new_image = self._compress_image(image)
         else:
             new_image = image
