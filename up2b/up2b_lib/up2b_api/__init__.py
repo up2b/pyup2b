@@ -49,6 +49,7 @@ def choose_image_bed(image_bed_code: int):
         raise TypeError(
             "image bed code must be an integer, not %s" % str(type(image_bed_code))
         )
+
     try:
         with open(CONF_FILE, "r+") as f:
             conf = json.loads(f.read())

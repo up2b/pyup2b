@@ -61,5 +61,9 @@ if not CONFIG_FOLDER_PATH.exists():
     os.makedirs(CONFIG_FOLDER_PATH / "conf", 0o755)
 
 CONF_FILE = CONFIG_FOLDER_PATH / "conf" / "conf.up2b.json"
+
+if not CONF_FILE.parent.exists():
+    CONF_FILE.parent.mkdir(parents=True)
+
 CACHE_PATH = Path(gettempdir()) / "up2b"
 CACHE_DATABASE = CONFIG_FOLDER_PATH / "cache.db"

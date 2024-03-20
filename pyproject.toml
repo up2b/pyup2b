@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3"
 license = { file = "LICENSE" }
 classifiers = ["Programming Language :: Python :: 3"]
-keywords = ["typora", "image bed", "upload"]
+keywords = ["typora", "image bed", "upload", "picture bed", "图床"]
 dependencies = [
   "requests",
   "click",
@@ -45,9 +45,9 @@ write_to = "up2b/version.py"
 
 [tool.black]
 line-length = 88
-target-version = ['py36', 'py37', 'py38', 'py39', 'py310', 'py311']
+target-version = ['py36', 'py37', 'py38', 'py39', 'py310', 'py311', "py312"]
 include = '\.pyi?$'
 
 [tool.pyright]
-pythonVersion = '3.11'
+pythonVersion = '3.12'
 venv = 'dev'
