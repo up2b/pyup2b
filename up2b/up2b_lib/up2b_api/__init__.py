@@ -167,7 +167,7 @@ class Base(ImageBedAbstract):
                 f.truncate()
         except FileNotFoundError:
             logger.fatal(
-                "auth configure file is not found, please choose image bed with `--choose-site` or `-c` first."
+                "auth configure file is not found, please choose image bed with `choose` command first."
             )
         except Exception as e:
             logger.fatal("save auth configure failed", error=e)
