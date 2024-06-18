@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-# @Author:      thepoy
-# @Email:       thepoy@163.com
-# @File Name:   constants.py
-# @Created At:  2021-02-13 09:17:07
-# @Modified At: 2023-04-19 14:42:31
-# @Modified By: thepoy
 
 import sys
 import os
@@ -38,7 +32,7 @@ IMAGE_BEDS_CODE = {
     "sm.ms":      ImageBedCode.SM_MS,
     "imgse.com":  ImageBedCode.IMGTU,
     "github.com": ImageBedCode.GITHUB,
-    "imgtg.com": ImageBedCode.IMGTG,
+    "imgtg.com":  ImageBedCode.IMGTG,
 }
 # fmt: on
 
@@ -51,19 +45,21 @@ IMAGE_BEDS_HELP_MESSAGE = "\n\n".join([f"{v}: {k}" for k, v in IMAGE_BEDS_CODE.i
 IS_WINDOWS = sys.platform == "win32"
 IS_MACOS = sys.platform == "darwin"
 
-CONFIG_FOLDER_PATH = (
+UP2B_CONFIG_ROOT_DIR = (
     Path(os.environ["APPDATA"]) / "up2b"
     if IS_WINDOWS
     else Path(os.environ["HOME"]) / ".config" / "up2b"
 )
 
-if not CONFIG_FOLDER_PATH.exists():
-    os.makedirs(CONFIG_FOLDER_PATH / "conf", 0o755)
+UP2B_CONFIG_DIR = UP2B_CONFIG_ROOT_DIR / "conf"
 
-CONF_FILE = CONFIG_FOLDER_PATH / "conf" / "conf.up2b.json"
+if not UP2B_CONFIG_ROOT_DIR.exists():
+    os.makedirs(UP2B_CONFIG_DIR, 0o755)
 
-if not CONF_FILE.parent.exists():
-    CONF_FILE.parent.mkdir(parents=True)
+CONFIG_FILE = UP2B_CONFIG_DIR / "conf.up2b.json"
+
+if not CONFIG_FILE.parent.exists():
+    CONFIG_FILE.parent.mkdir(parents=True)
 
 CACHE_PATH = Path(gettempdir()) / "up2b"
-CACHE_DATABASE = CONFIG_FOLDER_PATH / "cache.db"
+CACHE_DATABASE = UP2B_CONFIG_ROOT_DIR / "cache.db"

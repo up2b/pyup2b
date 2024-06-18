@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+
 import mimetypes
 
 from typing import Optional, Tuple, BinaryIO, Union
@@ -29,9 +32,11 @@ class File:
     def to_tuple(self) -> Tuple[str, Union[BinaryIO, bytes], str]:
         return (
             self.filename,
-            self.image.open("rb")
-            if isinstance(self.image, Path)
-            else self.image.stream,
+            (
+                self.image.open("rb")
+                if isinstance(self.image, Path)
+                else self.image.stream
+            ),
             self.mime_type,  # type: ignore
         )
 

@@ -5,3 +5,4 @@ colort>=1.0.1
 requests_toolbelt
 click
 pillow
+tqdm

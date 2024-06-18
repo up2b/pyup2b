@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse
 
 from up2b.up2b_lib.constants import (
-    CONF_FILE,
+    CONFIG_FILE,
     DEFAULT_TIMEOUT,
     IS_MACOS,
     PYTHON_VERSION,
@@ -55,7 +55,7 @@ def read_conf() -> Config:
     if os.getenv("UP2B_TEST"):
         return Config(None, {})
 
-    if not CONF_FILE.exists():
+    if not CONFIG_FILE.exists():
         logger.warning(
             "the configuration file is not found, "
             + "you need to use `choose` command to select the image bed first."
@@ -64,7 +64,7 @@ def read_conf() -> Config:
         return Config(None, {})
 
     try:
-        with CONF_FILE.open(encoding="utf-8") as f:
+        with CONFIG_FILE.open(encoding="utf-8") as f:
             conf = json.loads(f.read())
     except Exception as e:
         logger.fatal("unkown error", err=e)

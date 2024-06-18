@@ -8,11 +8,11 @@ import shutil
 import requests
 
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, List, Tuple, Dict, Union
+from typing import Callable, Optional, List, Tuple, Dict, Union, Any
 from pathlib import Path
 from up2b.up2b_lib.cache import Cache
 from up2b.up2b_lib.constants import (
-    CONF_FILE,
+    CONFIG_FILE,
     CACHE_PATH,
     IMAGE_BEDS_NAME,
     PYTHON_VERSION,
@@ -51,20 +51,20 @@ def choose_image_bed(image_bed_code: int):
         )
 
     try:
-        with open(CONF_FILE, "r+") as f:
+        with open(CONFIG_FILE, "r+") as f:
             conf = json.loads(f.read())
             f.seek(0, 0)
             conf["image_bed"] = image_bed_code
             f.write(json.dumps(conf))
             f.truncate()
     except FileNotFoundError:
-        with open(CONF_FILE, "w") as f:
+        with open(CONFIG_FILE, "w") as f:
             f.write(json.dumps({"image_bed": image_bed_code}))
 
 
 class ImageBedAbstract(ABC):
     @abstractmethod
-    def get_all_images(self):
+    def get_all_images(self) -> Any:
         pass
 
     @abstractmethod
@@ -155,7 +155,7 @@ class Base(ImageBedAbstract):
     def _save_auth_info(self, auth_info: Dict[str, str]):
         logger.debug("current image bed code", code=self.image_bed_code)
         try:
-            with open(CONF_FILE, "r+") as f:
+            with open(CONFIG_FILE, "r+") as f:
                 conf = json.loads(f.read())
                 try:
                     conf["auth_data"][str(self.image_bed_code.value)] = auth_info

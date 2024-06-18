@@ -33,6 +33,7 @@ class ImageBedAbstract(ABC):
     @abstractmethod
     def upload_image(self, image_path: ImagePath) -> Union[str, UploadErrorResponse]:
         pass
+
     @abstractmethod
     def upload_image_stream(
         self, image: ImageStream

@@ -1,23 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-# @Author:      thepoy
-# @Email:       thepoy@163.com
-# @File Name:   i18n.py
-# @Created At:  2022-01-09 11:17:23
-# @Modified At: 2023-04-19 14:43:52
-# @Modified By: thepoy
 
 import json
 import os
 
 from typing import Dict
-from up2b.up2b_lib.constants import CONFIG_FOLDER_PATH
+from up2b.up2b_lib.constants import UP2B_CONFIG_ROOT_DIR
 from up2b.up2b_lib.utils import get_default_language
 from up2b.up2b_lib.log import child_logger
 
 logger = child_logger(__name__)
 
-_i18n_folder = CONFIG_FOLDER_PATH / "i18n"
+_i18n_folder = UP2B_CONFIG_ROOT_DIR / "i18n"
 
 LangType = str
 English = str

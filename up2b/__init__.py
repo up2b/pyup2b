@@ -17,7 +17,7 @@ from up2b.up2b_lib.up2b_api.github import Github
 from up2b.up2b_lib.up2b_api.imgtg import Imgtg
 from up2b.up2b_lib.constants import (
     CACHE_PATH,
-    CONF_FILE,
+    CONFIG_FILE,
     IMAGE_BEDS_HELP_MESSAGE,
     IMAGE_BEDS_NAME,
     ImageBedCode,
@@ -210,7 +210,8 @@ def upload(
 
 
 @cli.command(
-    short_help="手动添加缓存", help="某些图床禁止上传重复图片，但在上传时又不返回旧图片地址，此时需要你手动获取原图片地址并执行此命令添加到缓存中。"
+    short_help="手动添加缓存",
+    help="某些图床禁止上传重复图片，但在上传时又不返回旧图片地址，此时需要你手动获取原图片地址并执行此命令添加到缓存中。",
 )
 @click.argument(
     "image_path",
@@ -304,19 +305,21 @@ def _read_image_bed(
             conf=conf,
         )
     except ValueError:
-        logger.fatal("未知的图床代码，可能因为清除无效的 gitee 配置，请重试", code=selected_code)
+        logger.fatal(
+            "未知的图床代码，可能因为清除无效的 gitee 配置，请重试", code=selected_code
+        )
 
 
 def _config_text_watermark(config: WaterMarkConfig):
     try:
-        with open(CONF_FILE, "r+") as f:
+        with open(CONFIG_FILE, "r+") as f:
             conf = json.loads(f.read())
             f.seek(0, 0)
             conf["watermark"] = asdict(config)
             f.write(json.dumps(conf))
             f.truncate()
     except FileNotFoundError:
-        with open(CONF_FILE, "w") as f:
+        with open(CONFIG_FILE, "w") as f:
             f.write(json.dumps({"watermark": asdict(config)}))
 
 

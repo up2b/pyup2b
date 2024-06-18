@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding:utf-8 -*-
 
 from enum import Enum, IntEnum
 from typing import Any, Dict, List, Optional, Union
